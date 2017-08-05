@@ -13,9 +13,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var forms_1 = require("@angular/forms");
 var router_1 = require("@angular/router");
+var login_service_1 = require("./login.service");
 var LoginComponent = (function () {
-    function LoginComponent(router) {
+    function LoginComponent(loginService, router) {
+        this.loginService = loginService;
         this.router = router;
+        this.responseMessage = "";
     }
     LoginComponent.prototype.ngOnInit = function () {
         this.email = new forms_1.FormControl("", forms_1.Validators.required);
@@ -26,7 +29,17 @@ var LoginComponent = (function () {
         });
     };
     LoginComponent.prototype.login = function (values) {
-        console.log(values);
+        var _this = this;
+        this.loginService.login(values).subscribe(function (response) {
+            if (response.success) {
+                //this.router.navigate([""]);
+                console.log(response);
+            }
+            else {
+                _this.loginForm.reset();
+                _this.responseMessage = response.message;
+            }
+        });
     };
     return LoginComponent;
 }());
@@ -35,7 +48,8 @@ LoginComponent = __decorate([
         styleUrls: ["app/login/login.component.css"],
         templateUrl: "app/login/login.component.html"
     }),
-    __metadata("design:paramtypes", [router_1.Router])
+    __metadata("design:paramtypes", [login_service_1.LoginService,
+        router_1.Router])
 ], LoginComponent);
 exports.LoginComponent = LoginComponent;
 //# sourceMappingURL=login.component.js.map

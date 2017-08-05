@@ -1,7 +1,7 @@
 {
-  "name": "angular-quickstart",
+  "name": "sjednica",
   "version": "1.0.0",
-  "description": "QuickStart package.json from the documentation, supplemented with testing support",
+  "description": "",
   "scripts": {
     "build": "tsc -p src/",
     "build:watch": "tsc -p src/ -w",
@@ -22,7 +22,7 @@
     "lint": "tslint ./src/**/*.ts -t verbose"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ivan Milicic",
   "license": "MIT",
   "dependencies": {
     "@angular/common": "~4.0.0",
@@ -37,6 +37,8 @@
     "body-parser": "^1.17.2",
     "core-js": "^2.4.1",
     "express": "^4.15.3",
+    "jsonwebtoken": "^7.4.2",
+    "mysql": "^2.14.1",
     "rxjs": "5.0.1",
     "systemjs": "0.19.40",
     "zone.js": "^0.8.4"
@@ -59,5 +61,8 @@
     "@types/node": "^6.0.46",
     "@types/jasmine": "2.5.36"
   },
-  "repository": {}
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imilicic/sjednica"
+  }
 }

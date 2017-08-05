@@ -9,9 +9,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var platform_browser_1 = require("@angular/platform-browser");
 var forms_1 = require("@angular/forms");
+var http_1 = require("@angular/http");
 var router_1 = require("@angular/router");
 var app_component_1 = require("./app.component");
 var login_component_1 = require("./login/login.component");
+var login_service_1 = require("./login/login.service");
 var navbar_component_1 = require("./navbar/navbar.component");
 var routes_1 = require("./routes");
 var AppModule = (function () {
@@ -24,6 +26,7 @@ AppModule = __decorate([
         imports: [
             platform_browser_1.BrowserModule,
             forms_1.FormsModule,
+            http_1.HttpModule,
             forms_1.ReactiveFormsModule,
             router_1.RouterModule.forRoot(routes_1.appRoutes)
         ],
@@ -32,7 +35,10 @@ AppModule = __decorate([
             login_component_1.LoginComponent,
             navbar_component_1.NavbarComponent
         ],
-        bootstrap: [app_component_1.AppComponent]
+        bootstrap: [app_component_1.AppComponent],
+        providers: [
+            login_service_1.LoginService
+        ]
     })
 ], AppModule);
 exports.AppModule = AppModule;
