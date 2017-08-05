@@ -1,11 +1,13 @@
 <form [formGroup]="loginForm" (ngSubmit)="login(loginForm.value)" class="col-md-offset-2 col-md-4" novalidate>
-  <div class="form-group">
-    <label for="email">Email adresa</label>
+  <div class="form-group" [ngClass]="{'has-error': email.touched && email.invalid, 'has-success': email.touched && email.valid}">
+    <label for="email" class="control-label">E-mail adresa</label>
+    <span class="error help-block" *ngIf="email.touched && email.invalid">Required!</span>
     <input type="email" class="form-control" id="email" formControlName="email" name="email" placeholder="Email" required>
   </div>
-  <div class="form-group">
-    <label for="password">Lozinka</label>
+  <div class="form-group" [ngClass]="{'has-error': password.touched && password.invalid, 'has-success': password.touched && password.valid}">
+    <label for="password" class="control-label">Lozinka</label>
+    <span class="error help-block" *ngIf="password.touched && password.invalid">Required!</span>
     <input type="password" class="form-control" id="password" formControlName="password" name="password" placeholder="Lozinka" required>
   </div>
-  <button type="submit" class="btn btn-default" [disabled]="loginForm.touched && loginForm.invalid">Prijavi se</button>
+  <button type="submit" class="btn btn-default" [disabled]="loginForm.invalid">Prijavi se</button>
 </form>

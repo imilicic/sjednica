@@ -32,6 +32,7 @@ var LoginComponent = (function () {
 }());
 LoginComponent = __decorate([
     core_1.Component({
+        styleUrls: ["app/login/login.component.css"],
         templateUrl: "app/login/login.component.html"
     }),
     __metadata("design:paramtypes", [router_1.Router])
