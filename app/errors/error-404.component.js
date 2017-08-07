@@ -1,5 +1,4 @@
 "use strict";
-// app.component.ts
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -8,16 +7,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
-var AppComponent = (function () {
-    function AppComponent() {
+var Error404Component = (function () {
+    function Error404Component() {
     }
-    return AppComponent;
+    return Error404Component;
 }());
-AppComponent = __decorate([
+Error404Component = __decorate([
     core_1.Component({
-        selector: "council-meeting",
-        template: "<navbar></navbar><router-outlet></router-outlet>"
+        templateUrl: "app/errors/error-404.component.html"
     })
-], AppComponent);
-exports.AppComponent = AppComponent;
-//# sourceMappingURL=app.component.js.map
+], Error404Component);
+exports.Error404Component = Error404Component;
+//# sourceMappingURL=error-404.component.js.map

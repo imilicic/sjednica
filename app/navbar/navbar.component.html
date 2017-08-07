@@ -13,15 +13,22 @@
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
+      <ul class="nav navbar-nav navbar-center" *ngIf="loginService.isAuthenticated()">
         <li><a [routerLink]="['users']" routerLinkActive="active">Korisnici</a></li>
-        <li><a href="#">Sjednice</a></li>
+        <li><a [routerLink]="['meetings']" routerLinkActive="active">Sjednice</a></li>
       </ul>
 
       <ul class="nav navbar-nav navbar-right">
         <li *ngIf="!loginService.isAuthenticated()"><a [routerLink]="['login']" routerLinkActive="active">Prijavi se</a></li>
-        <li *ngIf="loginService.isAuthenticated()"><a [routerLink]="['login']" routerLinkActive="active">Prijavljeni ste kao {{loginService.user?.FirstName}} {{loginService.user?.LastName}}</a></li>
-        <li *ngIf="loginService.isAuthenticated()"><a [routerLink]="" (click)="logout()">Odjavi se</a></li>
+        <li class="dropdown" *ngIf="loginService.isAuthenticated()">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            {{loginService.user?.FirstName}} {{loginService.user?.LastName}} <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a [routerLink]="['login']" routerLinkActive="active">Profil</a></li>
+            <li><a [routerLink]="" (click)="logout()">Odjavi se</a></li>
+          </ul>
+        </li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

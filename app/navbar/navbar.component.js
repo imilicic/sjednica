@@ -27,6 +27,7 @@ var NavbarComponent = (function () {
 NavbarComponent = __decorate([
     core_1.Component({
         selector: "navbar",
+        styleUrls: ["app/navbar/navbar.component.css"],
         templateUrl: "app/navbar/navbar.component.html"
     }),
     __metadata("design:paramtypes", [login_service_1.LoginService,

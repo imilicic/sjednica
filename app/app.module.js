@@ -1,4 +1,5 @@
 "use strict";
+// app.module.ts
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -12,7 +13,9 @@ var forms_1 = require("@angular/forms");
 var http_1 = require("@angular/http");
 var router_1 = require("@angular/router");
 var app_component_1 = require("./app.component");
+var error_404_component_1 = require("./errors/error-404.component");
 var login_component_1 = require("./login/login.component");
+var meetings_component_1 = require("./meetings/meetings.component");
 var navbar_component_1 = require("./navbar/navbar.component");
 var login_route_activator_service_1 = require("./shared/login-route-activator.service");
 var login_service_1 = require("./shared/providers/login.service");
@@ -34,7 +37,9 @@ AppModule = __decorate([
         ],
         declarations: [
             app_component_1.AppComponent,
+            error_404_component_1.Error404Component,
             login_component_1.LoginComponent,
+            meetings_component_1.MeetingsComponent,
             navbar_component_1.NavbarComponent,
             users_component_1.UsersComponent
         ],

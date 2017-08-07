@@ -7,6 +7,7 @@ import { LoginService } from "../shared/providers/login.service";
 
 @Component({
     selector: "navbar",
+    styleUrls: ["app/navbar/navbar.component.css"],
     templateUrl: "app/navbar/navbar.component.html"
 })
 export class NavbarComponent {
