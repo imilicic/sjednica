@@ -12,10 +12,26 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var http_1 = require("@angular/http");
-var Rx_1 = require("rxjs/Rx");
+var Observable_1 = require("rxjs/Observable");
+require("rxjs/add/operator/map");
+require("rxjs/add/operator/catch");
 var LoginService = (function () {
     function LoginService(http) {
+        var _this = this;
         this.http = http;
+        var authToken = localStorage.getItem("auth_token");
+        this.loggedIn = !!authToken;
+        if (this.loggedIn && this.user == undefined) {
+            var headers = new http_1.Headers({
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + authToken
+            });
+            var options = new http_1.RequestOptions({ headers: headers });
+            this.http.get("api/get/users/current", options)
+                .map(function (response) {
+                _this.user = response.json();
+            }).subscribe();
+        }
     }
     LoginService.prototype.isAuthenticated = function () {
         return this.loggedIn;
@@ -30,6 +46,7 @@ var LoginService = (function () {
             if (responseJson.success) {
                 localStorage.setItem("auth_token", responseJson.token);
                 _this.loggedIn = true;
+                _this.user = responseJson.user;
             }
             return responseJson;
         })
@@ -38,12 +55,10 @@ var LoginService = (function () {
     LoginService.prototype.logout = function () {
         localStorage.removeItem("auth_token");
         this.loggedIn = false;
-    };
-    LoginService.prototype.ngOnInit = function () {
-        this.loggedIn = !!localStorage.getItem("auth_token");
+        this.user = undefined;
     };
     LoginService.prototype.handleError = function (error) {
-        return Rx_1.Observable.throw(error.statusText);
+        return Observable_1.Observable.throw(error.statusText);
     };
     return LoginService;
 }());

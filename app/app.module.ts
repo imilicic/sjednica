@@ -6,9 +6,12 @@ import { RouterModule } from "@angular/router";
 
 import { AppComponent } from "./app.component";
 import { LoginComponent } from "./login/login.component";
-import { LoginService } from "./login/login.service";
 import { NavbarComponent } from "./navbar/navbar.component";
-import { appRoutes } from "./routes";
+import { LoginRouteActivatorService } from "./shared/login-route-activator.service";
+import { LoginService } from "./shared/providers/login.service";
+import { UsersComponent } from "./users/users.component";
+
+import { appRoutes } from "./app-routes";
 
 @NgModule({
   imports: [
@@ -21,10 +24,12 @@ import { appRoutes } from "./routes";
   declarations: [
     AppComponent,
     LoginComponent,
-    NavbarComponent
+    NavbarComponent,
+    UsersComponent
   ],
   bootstrap: [ AppComponent ],
   providers: [
+    LoginRouteActivatorService,
     LoginService
   ]
 })

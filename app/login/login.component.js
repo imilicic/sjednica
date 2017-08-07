@@ -13,7 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var forms_1 = require("@angular/forms");
 var router_1 = require("@angular/router");
-var login_service_1 = require("./login.service");
+var login_service_1 = require("../shared/providers/login.service");
 var LoginComponent = (function () {
     function LoginComponent(loginService, router) {
         this.loginService = loginService;
@@ -21,6 +21,9 @@ var LoginComponent = (function () {
         this.responseMessage = "";
     }
     LoginComponent.prototype.ngOnInit = function () {
+        if (this.loginService.isAuthenticated()) {
+            this.router.navigate(["users"]);
+        }
         this.email = new forms_1.FormControl("", forms_1.Validators.required);
         this.password = new forms_1.FormControl("", forms_1.Validators.required);
         this.loginForm = new forms_1.FormGroup({
@@ -32,8 +35,7 @@ var LoginComponent = (function () {
         var _this = this;
         this.loginService.login(values).subscribe(function (response) {
             if (response.success) {
-                //this.router.navigate([""]);
-                console.log(response);
+                _this.router.navigate(["users"]);
             }
             else {
                 _this.loginForm.reset();

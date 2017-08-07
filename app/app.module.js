@@ -13,9 +13,11 @@ var http_1 = require("@angular/http");
 var router_1 = require("@angular/router");
 var app_component_1 = require("./app.component");
 var login_component_1 = require("./login/login.component");
-var login_service_1 = require("./login/login.service");
 var navbar_component_1 = require("./navbar/navbar.component");
-var routes_1 = require("./routes");
+var login_route_activator_service_1 = require("./shared/login-route-activator.service");
+var login_service_1 = require("./shared/providers/login.service");
+var users_component_1 = require("./users/users.component");
+var app_routes_1 = require("./app-routes");
 var AppModule = (function () {
     function AppModule() {
     }
@@ -28,15 +30,17 @@ AppModule = __decorate([
             forms_1.FormsModule,
             http_1.HttpModule,
             forms_1.ReactiveFormsModule,
-            router_1.RouterModule.forRoot(routes_1.appRoutes)
+            router_1.RouterModule.forRoot(app_routes_1.appRoutes)
         ],
         declarations: [
             app_component_1.AppComponent,
             login_component_1.LoginComponent,
-            navbar_component_1.NavbarComponent
+            navbar_component_1.NavbarComponent,
+            users_component_1.UsersComponent
         ],
         bootstrap: [app_component_1.AppComponent],
         providers: [
+            login_route_activator_service_1.LoginRouteActivatorService,
             login_service_1.LoginService
         ]
     })

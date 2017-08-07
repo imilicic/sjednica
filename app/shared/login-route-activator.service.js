@@ -1,5 +1,5 @@
 "use strict";
-// navbar.component.ts
+// login-route-activator.service.ts
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -11,26 +11,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
-var router_1 = require("@angular/router");
-var login_service_1 = require("../shared/providers/login.service");
-var NavbarComponent = (function () {
-    function NavbarComponent(loginService, router) {
+var login_service_1 = require("./providers/login.service");
+var LoginRouteActivatorService = (function () {
+    function LoginRouteActivatorService(loginService) {
         this.loginService = loginService;
-        this.router = router;
     }
-    NavbarComponent.prototype.logout = function () {
-        this.loginService.logout();
-        this.router.navigate(["login"]);
+    LoginRouteActivatorService.prototype.canActivate = function () {
+        return this.loginService.isAuthenticated();
     };
-    return NavbarComponent;
+    return LoginRouteActivatorService;
 }());
-NavbarComponent = __decorate([
-    core_1.Component({
-        selector: "navbar",
-        templateUrl: "app/navbar/navbar.component.html"
-    }),
-    __metadata("design:paramtypes", [login_service_1.LoginService,
-        router_1.Router])
-], NavbarComponent);
-exports.NavbarComponent = NavbarComponent;
-//# sourceMappingURL=navbar.component.js.map
+LoginRouteActivatorService = __decorate([
+    core_1.Injectable(),
+    __metadata("design:paramtypes", [login_service_1.LoginService])
+], LoginRouteActivatorService);
+exports.LoginRouteActivatorService = LoginRouteActivatorService;
+//# sourceMappingURL=login-route-activator.service.js.map

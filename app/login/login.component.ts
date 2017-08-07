@@ -4,7 +4,7 @@ import { Component, OnInit } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 
-import { LoginService } from "./login.service";
+import { LoginService } from "../shared/providers/login.service";
 import { User } from "../shared/models/user.model";
 
 @Component({
@@ -24,6 +24,10 @@ export class LoginComponent implements OnInit{
     ) {}
 
     ngOnInit() {
+        if (this.loginService.isAuthenticated()) {
+            this.router.navigate(["users"]);
+        }
+
         this.email = new FormControl("", Validators.required);
         this.password = new FormControl("", Validators.required);
 
@@ -36,8 +40,7 @@ export class LoginComponent implements OnInit{
     login(values: any) {
         this.loginService.login(values).subscribe((response: any) => {
             if (response.success) {
-                //this.router.navigate([""]);
-                console.log(response);
+                this.router.navigate(["users"]);
             } else {
                 this.loginForm.reset();
                 this.responseMessage = response.message;
