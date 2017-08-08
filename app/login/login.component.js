@@ -13,15 +13,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var forms_1 = require("@angular/forms");
 var router_1 = require("@angular/router");
-var login_service_1 = require("../shared/providers/login.service");
+var response_messages_service_1 = require("../shared/providers/response-messages.service");
+var user_service_1 = require("../shared/providers/user.service");
 var LoginComponent = (function () {
-    function LoginComponent(loginService, router) {
-        this.loginService = loginService;
+    function LoginComponent(responseMessagesService, router, userService) {
+        this.responseMessagesService = responseMessagesService;
         this.router = router;
-        this.responseMessage = "";
+        this.userService = userService;
     }
     LoginComponent.prototype.ngOnInit = function () {
-        if (this.loginService.isAuthenticated()) {
+        if (this.userService.isAuthenticated()) {
             this.router.navigate(["users"]);
         }
         this.email = new forms_1.FormControl("", forms_1.Validators.required);
@@ -33,14 +34,23 @@ var LoginComponent = (function () {
     };
     LoginComponent.prototype.login = function (values) {
         var _this = this;
-        this.loginService.login(values).subscribe(function (response) {
+        this.userService.login(values).subscribe(function (response) {
+            _this.responseMessagesService.setResponseMessage({
+                location: "login",
+                code: response.message
+            });
             if (response.success) {
                 _this.router.navigate(["users"]);
             }
             else {
                 _this.loginForm.reset();
-                _this.responseMessage = response.message;
             }
+        });
+    };
+    LoginComponent.prototype.getWarningMessage = function (code) {
+        return this.responseMessagesService.getMessage({
+            location: "login",
+            code: code
         });
     };
     return LoginComponent;
@@ -50,8 +60,9 @@ LoginComponent = __decorate([
         styleUrls: ["app/login/login.component.css"],
         templateUrl: "app/login/login.component.html"
     }),
-    __metadata("design:paramtypes", [login_service_1.LoginService,
-        router_1.Router])
+    __metadata("design:paramtypes", [response_messages_service_1.ResponseMessagesService,
+        router_1.Router,
+        user_service_1.UserService])
 ], LoginComponent);
 exports.LoginComponent = LoginComponent;
 //# sourceMappingURL=login.component.js.map

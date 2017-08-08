@@ -3,7 +3,7 @@
 import { Component } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { LoginService } from "../shared/providers/login.service";
+import { UserService } from "../shared/providers/user.service";
 
 @Component({
     selector: "navbar",
@@ -12,12 +12,12 @@ import { LoginService } from "../shared/providers/login.service";
 })
 export class NavbarComponent {
     constructor(
-        private loginService: LoginService,
+        private userService: UserService,
         private router: Router
     ) {}
 
     logout() {
-        this.loginService.logout();
+        this.userService.logout();
         this.router.navigate(["login"]);
     }
 }

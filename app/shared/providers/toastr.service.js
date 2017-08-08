@@ -7,15 +7,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
-var UsersComponent = (function () {
-    function UsersComponent() {
+var ToastrService = (function () {
+    function ToastrService() {
     }
-    return UsersComponent;
+    ToastrService.prototype.success = function (message, title) {
+        toastr.success(message, title);
+    };
+    ToastrService.prototype.info = function (message, title) {
+        toastr.info(message, title);
+    };
+    ToastrService.prototype.warning = function (message, title) {
+        toastr.warning(message, title);
+    };
+    ToastrService.prototype.error = function (message, title) {
+        toastr.error(message, title);
+    };
+    return ToastrService;
 }());
-UsersComponent = __decorate([
-    core_1.Component({
-        templateUrl: "app/users/users.component.html"
-    })
-], UsersComponent);
-exports.UsersComponent = UsersComponent;
-//# sourceMappingURL=user.component.js.map
+ToastrService = __decorate([
+    core_1.Injectable()
+], ToastrService);
+exports.ToastrService = ToastrService;
+//# sourceMappingURL=toastr.service.js.map

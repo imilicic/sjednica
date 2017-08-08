@@ -1,0 +1,52 @@
+<h1 *ngIf="!changePasswordMode">Vaši korisnički podaci</h1>
+<h1 *ngIf="changePasswordMode">Izmjena lozinke</h1>
+<div class="row">
+    <div class="col-md-8">
+        <table class="table table-bordered" *ngIf="!changePasswordMode">
+            <tr>
+                <td>Ime</td>
+                <td>{{userService.user?.FirstName}}</td>
+            </tr>
+            <tr>
+                <td>Prezime</td>
+                <td>{{userService.user?.LastName}}</td>
+            </tr>
+            <tr>
+                <td>E-mail</td>
+                <td>{{userService.user?.Email}}</td>
+            </tr>
+            <tr>
+                <td>Telefonski broj</td>
+                <td>{{userService.user?.PhoneNumber}}</td>
+            </tr>
+            <tr>
+                <td>Lozinka (<button class="btn-link" (click)="changePasswordMode=true">promijeni</button>)</td>
+                <td>**********</td>
+            </tr>
+        </table>
+        <!--<h3 *ngIf="responseMessagesService.getResponseMessage()" class="text-danger">{{responseMessagesService.getResponseMessage()}}</h3>-->
+        <form [formGroup]="passwordForm" (ngSubmit)="changePassword(passwordForm.value)" autocomplete="off" *ngIf="changePasswordMode" novalidate>
+            <div class="form-group" [ngClass]="{'has-error': oldPassword.touched && oldPassword.invalid, 'has-success': oldPassword.touched && oldPassword.valid}">
+                <label class="control-label" for="oldPassword">Stara lozinka</label>
+                <span class="error help-block" *ngIf="oldPassword.touched && oldPassword.invalid">{{getWarningMessage("required")}}</span>
+                <input class="form-control" formControlName="oldPassword" id="oldPassword" type="password" required>
+            </div>
+            <div class="form-group" [ngClass]="{'has-error': newPassword.touched && newPassword.invalid, 'has-success': newPassword.touched && newPassword.valid}">
+                <label class="control-label" for="newPassword">Nova lozinka (<input id="generate" type="checkbox" (change)="setPassword()"> <label for="generate">generiraj novu lozinku</label>)</label>
+                <span class="error help-block" *ngIf="newPassword.touched && newPassword.hasError('required')">{{getWarningMessage("required")}} &nbsp;</span>
+                <span class="error help-block" *ngIf="newPassword.touched && newPassword.hasError('minlength')">{{getWarningMessage("new-password-minlength")}} &nbsp;</span>
+                <span class="error help-block" *ngIf="newPassword.touched && newPassword.hasError('pattern')">{{getWarningMessage("new-password-pattern")}} &nbsp;</span>
+                <input class="form-control" formControlName="newPassword" id="newPassword" type="password" required *ngIf="!generatedPassword">
+                <input class="form-control" formControlName="newPassword" id="newPassword" type="text" readonly required *ngIf="generatedPassword">
+            </div>
+            <div class="form-group" [ngClass]="{'has-error': newPassword2.touched && (newPassword2.invalid || passwordForm.hasError('newPasswordsAreNotEqual')), 'has-success': newPassword2.touched && newPassword2.valid}">
+                <label class="control-label" for="newPassword2">Ponovno upišite novu lozinku</label>
+                <span class="error help-block" *ngIf="newPassword2.touched && newPassword2.invalid">{{getWarningMessage("required")}} &nbsp;</span>
+                <span class="error help-block" *ngIf="newPassword2.touched && passwordForm.hasError('newPasswordsAreNotEqual')">{{getWarningMessage("new-passwords-not-equal")}} &nbsp;</span>
+                <input class="form-control" formControlName="newPassword2" id="newPassword2" type="password" required *ngIf="!generatedPassword">
+                <input class="form-control" formControlName="newPassword2" id="newPassword2" type="password" readonly required *ngIf="generatedPassword">
+            </div>
+            <button class="btn btn-default" type="submit" [disabled]="passwordForm.invalid">Spremi</button>
+        </form>
+    </div>
+</div>

@@ -12,14 +12,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var router_1 = require("@angular/router");
-var login_service_1 = require("../shared/providers/login.service");
+var user_service_1 = require("../shared/providers/user.service");
 var NavbarComponent = (function () {
-    function NavbarComponent(loginService, router) {
-        this.loginService = loginService;
+    function NavbarComponent(userService, router) {
+        this.userService = userService;
         this.router = router;
     }
     NavbarComponent.prototype.logout = function () {
-        this.loginService.logout();
+        this.userService.logout();
         this.router.navigate(["login"]);
     };
     return NavbarComponent;
@@ -30,7 +30,7 @@ NavbarComponent = __decorate([
         styleUrls: ["app/navbar/navbar.component.css"],
         templateUrl: "app/navbar/navbar.component.html"
     }),
-    __metadata("design:paramtypes", [login_service_1.LoginService,
+    __metadata("design:paramtypes", [user_service_1.UserService,
         router_1.Router])
 ], NavbarComponent);
 exports.NavbarComponent = NavbarComponent;

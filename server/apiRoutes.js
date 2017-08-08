@@ -1,9 +1,15 @@
-// routes.js
+// apiRoutes.js
 
 var config = require("./config");
 var connection = require("./connection");
 var jsonWebToken = require("jsonwebtoken");
+var passwordHash = require("./passwordHash");
 
+/**
+ * returns jwt token from HTTP request
+ * @function
+ * @param {HTTP Request Object} request - HTTP Request
+ */
 var getToken = function (request) {
     if (request.headers.authorization) {
         var parts = request.headers.authorization.split(" ");
@@ -20,11 +26,10 @@ var getToken = function (request) {
 
 module.exports = function (apiRoutes) {
     apiRoutes.post("/login", function (request, response) {
-        var data = request.body;
-        var email = data["email"];
-        var password = data["password"];
+        var email = request.body["email"];
+        var password = request.body["password"];
 
-        queryString = "SELECT * FROM Person WHERE Email = ?";
+        var queryString = "SELECT * FROM Person WHERE Email = ?";
         connection.query(queryString, [email], function (error, result) {
             if (error) {
                 throw error;
@@ -33,24 +38,29 @@ module.exports = function (apiRoutes) {
             if (result.length == 0) {
                 response.json({
                     success: false,
-                    message: "Login failed. User not found."
-                });
-            } else if (result[0].Password !== password) {
-                response.json({
-                    success: false,
-                    message: "Login failed. Wrong password."
+                    message: "user-not-found"
                 });
             } else {
-                var token = jsonWebToken.sign(result[0], config.secret, {
-                    expiresIn: "1d"
-                });
+                var salt = result[0].Salt;
+                var passwordData = passwordHash.sha512(password, salt);
 
-                response.json({
-                    success: true,
-                    message: "Login correct!",
-                    token: token,
-                    user: result[0]
-                });
+                if (result[0].Password !== passwordData.passwordHash) {
+                    response.json({
+                        success: false,
+                        message: "wrong-password"
+                    });
+                } else {
+                    var token = jsonWebToken.sign(result[0], config.secret, {
+                        expiresIn: "1d"
+                    });
+
+                    response.json({
+                        success: true,
+                        message: "successful",
+                        token: token,
+                        user: result[0]
+                    });
+                }
             }
         });
     });
@@ -61,7 +71,7 @@ module.exports = function (apiRoutes) {
         if (token) {
             jsonWebToken.verify(token, config.secret, function(error, decoded) {
                 if (error) {
-                    return response.json({
+                    response.json({
                         success: false,
                         message: "Failed to authenticate token."
                     });
@@ -71,7 +81,7 @@ module.exports = function (apiRoutes) {
                 }
             });
         } else {
-            return response.status(403).send({
+            response.json({
                 success: false,
                 message: "No token provided."
             });
@@ -89,6 +99,62 @@ module.exports = function (apiRoutes) {
             PhoneNumber: decoded.PhoneNumber,
             RoleId: decoded.RoleId
         });
+    });
+
+    apiRoutes.put("/put/users/password", function (request, response) {
+        var personId = request.body["personId"]
+        var newPassword = request.body["newPassword"];
+        var oldPassword = request.body["oldPassword"];
+        var user = request.decoded;
+
+        var salt = user.Salt;
+        var password = user.Password;
+        var passwordData = passwordHash.sha512(oldPassword, salt);
+
+        if (passwordData.passwordHash != password) {
+            response.json({
+                success: false,
+                message: "wrong-old-password"
+            });
+        } else {
+            salt = passwordHash.generateRandomString(16);
+            passwordData = passwordHash.sha512(newPassword, salt);
+
+            var newUser = {
+                PersonId: user.PersonId,
+                FirstName: user.FirstName,
+                LastName: user.LastName,
+                Email: user.Email,
+                PhoneNumber: user.PhoneNumber,
+                Password: passwordData.passwordHash,
+                Salt: passwordData.salt,
+                RoleId: user.RoleId
+            };
+
+            queryString = "UPDATE Person SET Password = ?, Salt = ? WHERE PersonId = ?";
+            connection.query(queryString, [newUser.Password, newUser.Salt, newUser.PersonId], function (error, result) {
+                if (error) {
+                    throw error;
+                }
+
+                if(result.changedRows == 1) {
+                    var token = jsonWebToken.sign(newUser, config.secret, {
+                        expiresIn: "1d"
+                    });
+
+                    response.json({
+                        success: true,
+                        message: "successful",
+                        token: token
+                    });
+                } else {
+                    response.json({
+                        success: false,
+                        message: "unsuccessful"
+                    });
+                }
+            });
+        }
     });
 
     return apiRoutes;

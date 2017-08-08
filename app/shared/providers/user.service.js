@@ -1,5 +1,5 @@
 "use strict";
-// login.service.ts
+// user.service.ts
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -13,10 +13,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var http_1 = require("@angular/http");
 var Observable_1 = require("rxjs/Observable");
-require("rxjs/add/operator/map");
+require("rxjs/add/observable/throw");
 require("rxjs/add/operator/catch");
-var LoginService = (function () {
-    function LoginService(http) {
+require("rxjs/add/operator/map");
+var UserService = (function () {
+    function UserService(http) {
         var _this = this;
         this.http = http;
         var authToken = localStorage.getItem("auth_token");
@@ -27,16 +28,32 @@ var LoginService = (function () {
                 "Authorization": "Bearer " + authToken
             });
             var options = new http_1.RequestOptions({ headers: headers });
-            this.http.get("api/get/users/current", options)
+            this.http.get("/api/get/users/current", options)
                 .map(function (response) {
                 _this.user = response.json();
             }).subscribe();
         }
     }
-    LoginService.prototype.isAuthenticated = function () {
+    UserService.prototype.changePassword = function (formValues) {
+        var headers = new http_1.Headers({
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("auth_token")
+        });
+        var options = new http_1.RequestOptions({ headers: headers });
+        return this.http.put("/api/put/users/password", formValues, options)
+            .map(function (response) {
+            var responseJson = response.json();
+            if (responseJson.success) {
+                localStorage.setItem("auth_token", responseJson.token);
+            }
+            return responseJson;
+        })
+            .catch(this.handleError);
+    };
+    UserService.prototype.isAuthenticated = function () {
         return this.loggedIn;
     };
-    LoginService.prototype.login = function (values) {
+    UserService.prototype.login = function (values) {
         var _this = this;
         var headers = new http_1.Headers({ "Content-Type": "application/json" });
         var options = new http_1.RequestOptions({ headers: headers });
@@ -52,19 +69,19 @@ var LoginService = (function () {
         })
             .catch(this.handleError);
     };
-    LoginService.prototype.logout = function () {
+    UserService.prototype.logout = function () {
         localStorage.removeItem("auth_token");
         this.loggedIn = false;
         this.user = undefined;
     };
-    LoginService.prototype.handleError = function (error) {
+    UserService.prototype.handleError = function (error) {
         return Observable_1.Observable.throw(error.statusText);
     };
-    return LoginService;
+    return UserService;
 }());
-LoginService = __decorate([
+UserService = __decorate([
     core_1.Injectable(),
     __metadata("design:paramtypes", [http_1.Http])
-], LoginService);
-exports.LoginService = LoginService;
-//# sourceMappingURL=login.service.js.map
+], UserService);
+exports.UserService = UserService;
+//# sourceMappingURL=user.service.js.map

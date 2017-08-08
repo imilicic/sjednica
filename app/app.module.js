@@ -17,8 +17,11 @@ var error_404_component_1 = require("./errors/error-404.component");
 var login_component_1 = require("./login/login.component");
 var meetings_component_1 = require("./meetings/meetings.component");
 var navbar_component_1 = require("./navbar/navbar.component");
-var login_route_activator_service_1 = require("./shared/login-route-activator.service");
-var login_service_1 = require("./shared/providers/login.service");
+var user_route_activator_service_1 = require("./shared/user-route-activator.service");
+var response_messages_service_1 = require("./shared/providers/response-messages.service");
+var toastr_service_1 = require("./shared/providers/toastr.service");
+var user_service_1 = require("./shared/providers/user.service");
+var user_profile_component_1 = require("./users/profile/user-profile.component");
 var users_component_1 = require("./users/users.component");
 var app_routes_1 = require("./app-routes");
 var AppModule = (function () {
@@ -41,12 +44,15 @@ AppModule = __decorate([
             login_component_1.LoginComponent,
             meetings_component_1.MeetingsComponent,
             navbar_component_1.NavbarComponent,
+            user_profile_component_1.UserProfileComponent,
             users_component_1.UsersComponent
         ],
         bootstrap: [app_component_1.AppComponent],
         providers: [
-            login_route_activator_service_1.LoginRouteActivatorService,
-            login_service_1.LoginService
+            response_messages_service_1.ResponseMessagesService,
+            toastr_service_1.ToastrService,
+            user_route_activator_service_1.UserRouteActivatorService,
+            user_service_1.UserService
         ]
     })
 ], AppModule);

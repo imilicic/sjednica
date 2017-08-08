@@ -41,6 +41,7 @@
     "mysql": "^2.14.1",
     "rxjs": "5.0.1",
     "systemjs": "0.19.40",
+    "toastr": "^2.1.2",
     "zone.js": "^0.8.4"
   },
   "devDependencies": {

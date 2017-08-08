@@ -4,6 +4,11 @@ import { Component } from "@angular/core";
 
 @Component({
   selector: "council-meeting",
-  template: "<navbar></navbar><router-outlet></router-outlet>"
+  template: `
+    <navbar></navbar>
+    <div class="container">
+      <router-outlet></router-outlet>
+    </div>
+  `
 })
 export class AppComponent  { }

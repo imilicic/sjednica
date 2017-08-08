@@ -1,14 +1,14 @@
 <div class="col-md-offset-2 col-md-4">
-  <h3 *ngIf="responseMessage" class="text-danger">{{responseMessage}}</h3>
+  <h3 *ngIf="responseMessagesService.getResponseMessage()" class="text-danger">{{responseMessagesService.getResponseMessage()}}</h3>
   <form [formGroup]="loginForm" (ngSubmit)="login(loginForm.value)" novalidate>
-    <div class="form-group" [ngClass]="{'has-error': responseMessage || (email.touched && email.invalid), 'has-success': email.touched && email.valid}">
+    <div class="form-group" [ngClass]="{'has-error': email.touched && email.invalid, 'has-success': email.touched && email.valid}">
       <label for="email" class="control-label">E-mail adresa</label>
-      <span class="error help-block" *ngIf="email.touched && email.invalid">Required!</span>
+      <span class="error help-block" *ngIf="email.touched && email.invalid">{{getWarningMessage("required")}}</span>
       <input type="email" class="form-control" id="email" formControlName="email" name="email" placeholder="Email" required>
     </div>
-    <div class="form-group" [ngClass]="{'has-error': responseMessage || (password.touched && password.invalid), 'has-success': password.touched && password.valid}">
+    <div class="form-group" [ngClass]="{'has-error': password.touched && password.invalid, 'has-success': password.touched && password.valid}">
       <label for="password" class="control-label">Lozinka</label>
-      <span class="error help-block" *ngIf="password.touched && password.invalid">Required!</span>
+      <span class="error help-block" *ngIf="password.touched && password.invalid">{{getWarningMessage("required")}}</span>
       <input type="password" class="form-control" id="password" formControlName="password" name="password" placeholder="Lozinka" required>
     </div>
     <button type="submit" class="btn btn-default" [disabled]="loginForm.invalid">Prijavi se</button>

@@ -12,24 +12,24 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var core_1 = require("@angular/core");
 var router_1 = require("@angular/router");
-var login_service_1 = require("./providers/login.service");
-var LoginRouteActivatorService = (function () {
-    function LoginRouteActivatorService(loginService, router) {
-        this.loginService = loginService;
+var user_service_1 = require("./providers/user.service");
+var UserRouteActivatorService = (function () {
+    function UserRouteActivatorService(userService, router) {
+        this.userService = userService;
         this.router = router;
     }
-    LoginRouteActivatorService.prototype.canActivate = function () {
-        if (!this.loginService.isAuthenticated()) {
+    UserRouteActivatorService.prototype.canActivate = function () {
+        if (!this.userService.isAuthenticated()) {
             this.router.navigate(["login"]);
         }
         return true;
     };
-    return LoginRouteActivatorService;
+    return UserRouteActivatorService;
 }());
-LoginRouteActivatorService = __decorate([
+UserRouteActivatorService = __decorate([
     core_1.Injectable(),
-    __metadata("design:paramtypes", [login_service_1.LoginService,
+    __metadata("design:paramtypes", [user_service_1.UserService,
         router_1.Router])
-], LoginRouteActivatorService);
-exports.LoginRouteActivatorService = LoginRouteActivatorService;
-//# sourceMappingURL=login-route-activator.service.js.map
+], UserRouteActivatorService);
+exports.UserRouteActivatorService = UserRouteActivatorService;
+//# sourceMappingURL=user-route-activator.service.js.map

@@ -4,7 +4,8 @@ import { Component, OnInit } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 
-import { LoginService } from "../shared/providers/login.service";
+import { ResponseMessagesService } from "../shared/providers/response-messages.service";
+import { UserService } from "../shared/providers/user.service";
 import { User } from "../shared/models/user.model";
 
 @Component({
@@ -12,19 +13,18 @@ import { User } from "../shared/models/user.model";
     templateUrl: "app/login/login.component.html"
 })
 export class LoginComponent implements OnInit{
-    responseMessage: string = "";
-
     email: FormControl;
     password: FormControl;
     loginForm: FormGroup;
 
     constructor (
-        private loginService: LoginService,
-        private router: Router
+        private responseMessagesService: ResponseMessagesService,
+        private router: Router,
+        private userService: UserService
     ) {}
 
     ngOnInit() {
-        if (this.loginService.isAuthenticated()) {
+        if (this.userService.isAuthenticated()) {
             this.router.navigate(["users"]);
         }
 
@@ -38,13 +38,24 @@ export class LoginComponent implements OnInit{
     }
 
     login(values: any) {
-        this.loginService.login(values).subscribe((response: any) => {
+        this.userService.login(values).subscribe((response: any) => {
+            this.responseMessagesService.setResponseMessage({
+                location: "login",
+                code: response.message
+            });
+            
             if (response.success) {
                 this.router.navigate(["users"]);
             } else {
                 this.loginForm.reset();
-                this.responseMessage = response.message;
             }
+        });
+    }
+
+    getWarningMessage(code: string) {
+        return this.responseMessagesService.getMessage({
+            location: "login",
+            code: code
         });
     }
 }
