@@ -24,7 +24,6 @@
                 <td>**********</td>
             </tr>
         </table>
-        <!--<h3 *ngIf="responseMessagesService.getResponseMessage()" class="text-danger">{{responseMessagesService.getResponseMessage()}}</h3>-->
         <form [formGroup]="passwordForm" (ngSubmit)="changePassword(passwordForm.value)" autocomplete="off" *ngIf="changePasswordMode" novalidate>
             <div class="form-group" [ngClass]="{'has-error': oldPassword.touched && oldPassword.invalid, 'has-success': oldPassword.touched && oldPassword.valid}">
                 <label class="control-label" for="oldPassword">Stara lozinka</label>

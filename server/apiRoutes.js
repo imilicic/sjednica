@@ -29,7 +29,7 @@ module.exports = function (apiRoutes) {
         var email = request.body["email"];
         var password = request.body["password"];
 
-        var queryString = "SELECT * FROM Person WHERE Email = ?";
+        var queryString = "SELECT PersonId, FirstName, LastName, Email, PhoneNumber, Password, Salt, RoleName FROM Person INNER JOIN Role USING(RoleId) WHERE Email = ?";
         connection.query(queryString, [email], function (error, result) {
             if (error) {
                 throw error;
@@ -54,11 +54,20 @@ module.exports = function (apiRoutes) {
                         expiresIn: "1d"
                     });
 
+                    var user = {
+                        PersonId: result[0].PersonId,
+                        FirstName: result[0].FirstName,
+                        LastName: result[0].LastName,
+                        Email: result[0].Email,
+                        PhoneNumber: result[0].PhoneNumber,
+                        RoleName: result[0].RoleName
+                    };
+
                     response.json({
                         success: true,
                         message: "successful",
                         token: token,
-                        user: result[0]
+                        user: user
                     });
                 }
             }
@@ -97,8 +106,30 @@ module.exports = function (apiRoutes) {
             LastName: decoded.LastName,
             Email: decoded.Email,
             PhoneNumber: decoded.PhoneNumber,
-            RoleId: decoded.RoleId
+            RoleName: decoded.RoleName
         });
+    });
+
+    apiRoutes.get("/get/users", function(request, response) {
+        if (request.decoded.RoleName == "admin") {
+            var queryString = "SELECT PersonId, FirstName, LastName, Email, PhoneNumber, RoleName FROM Person INNER JOIN Role USING(RoleId)";
+            connection.query(queryString, function(error, result) {
+                if (error) {
+                    throw error;
+                }
+
+                response.json({
+                    success: true,
+                    message: "founded",
+                    users: result
+                })
+            });
+        } else {
+            response.json({
+                success: false,
+                message: "not-admin"
+            });
+        }
     });
 
     apiRoutes.put("/put/users/password", function (request, response) {

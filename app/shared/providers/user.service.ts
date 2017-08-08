@@ -53,10 +53,33 @@ export class UserService {
             }).subscribe();
         }
     }
-    
+
+    isAdmin() {
+        if (this.user) {
+            return this.user.RoleName == "admin";
+        }
+
+        return false;
+    }
+
     isAuthenticated() {
         return this.loggedIn;
     } 
+
+    getUsers(): Observable<User[]> {
+        let headers = new Headers({
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + localStorage.getItem("auth_token")
+        });
+        let options = new RequestOptions({headers: headers});
+
+        return this.http.get("/api/get/users", options)
+        .map((response: Response) => {
+            let responseJson = response.json();
+            return <User[]>responseJson.users;
+        })
+        .catch(this.handleError);
+    }
 
     login(values: any): Observable<any> {
         let headers = new Headers({"Content-Type": "application/json"});

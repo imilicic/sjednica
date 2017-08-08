@@ -1,1 +1,17 @@
-<h1>Users component</h1>
+<h1>Popis svih korisnika</h1>
+<table class="table table-bordered" *ngIf="users">
+    <tr>
+       <th>Ime</th>
+       <th>Prezime</th>
+       <th>Email</th>
+       <th>Telefonski broj</th>
+       <th>Uloga</th>
+    </tr>
+    <tr *ngFor="let user of users">
+        <td>{{user?.FirstName}}</td>
+        <td>{{user?.LastName}}</td>
+        <td>{{user?.Email}}</td>
+        <td>{{user?.PhoneNumber}}</td>
+        <td>{{user?.RoleName}}</td>
+    </tr>
+</table>

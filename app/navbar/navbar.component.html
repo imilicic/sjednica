@@ -14,7 +14,15 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav navbar-center" *ngIf="userService.isAuthenticated()">
-        <li><a [routerLink]="['users']" routerLinkActive="active">Korisnici</a></li>
+        <li class="dropdown" *ngIf="userService.isAdmin()">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            Korisnici <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a [routerLink]="['users/new']" routerLinkActive="active">Dodaj novog</a></li>
+            <li><a [routerLink]="['users']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Pregled svih</a></li>
+          </ul>
+        </li>
         <li><a [routerLink]="['meetings']" routerLinkActive="active">Sjednice</a></li>
       </ul>
 
