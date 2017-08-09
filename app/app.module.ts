@@ -3,8 +3,9 @@
 import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { HttpModule } from "@angular/http";
+import { HttpModule, Http, RequestOptions } from "@angular/http";
 import { RouterModule } from "@angular/router";
+import { AuthHttp, AuthConfig } from "angular2-jwt";
 
 import { AppComponent } from "./app.component";
 import { Error404Component } from "./errors/error-404.component";
@@ -19,6 +20,14 @@ import { UserProfileComponent } from "./users/profile/user-profile.component";
 import { UsersComponent } from "./users/users.component";
 
 import { appRoutes } from "./app-routes";
+
+export function authHttpServiceFactory(http: Http, options: RequestOptions) {
+  return new AuthHttp(new AuthConfig({
+    tokenName: 'auth_token',
+		tokenGetter: (() => localStorage.getItem('auth_token')),
+		globalHeaders: [{'Content-Type':'application/json'}],
+	}), http, options);
+}
 
 @NgModule({
   imports: [
@@ -39,6 +48,11 @@ import { appRoutes } from "./app-routes";
   ],
   bootstrap: [ AppComponent ],
   providers: [
+    {
+      provide: AuthHttp,
+      useFactory: authHttpServiceFactory,
+      deps: [Http, RequestOptions]
+    },
     ResponseMessagesService,
     ToastrService,
     UserRouteActivatorService,

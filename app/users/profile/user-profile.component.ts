@@ -28,25 +28,15 @@ export class UserProfileComponent implements OnInit{
 
     changePassword(formValues: any) {
         this.userService.changePassword({ 
-            personId: this.userService.user.PersonId,
             newPassword: formValues.newPassword,
             oldPassword: formValues.oldPassword
-        }).subscribe(response => {
-            if(response.success) {
-                this.toastrService.success(this.responseMessagesService.getMessage({
-                        location: "users/me",
-                        code: "password-changed"
-                    })
-                );
-                this.changePasswordMode = false;
-                this.passwordForm.reset();
-            } else {
-                this.toastrService.error(this.responseMessagesService.setResponseMessage({
-                        location: "users/me",
-                        code: response.message
-                    })
-                );
-            }
+        }).subscribe((response: string) => {
+            this.toastrService.success(response);
+            this.passwordForm.reset();
+            this.changePasswordMode = false;
+        }, (error: any) => {
+            this.toastrService.error(error);
+            this.passwordForm.reset();
         });
     }
 

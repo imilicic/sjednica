@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
 
 import { User } from "../shared/models/user.model";
+import { ToastrService } from "../shared/providers/toastr.service";
 import { UserService } from "../shared/providers/user.service";
 
 @Component({
@@ -12,6 +13,7 @@ export class UsersComponent implements OnInit {
 
     constructor(
         private router: Router,
+        private toastrService: ToastrService,
         private userService: UserService
     ) {}
 
@@ -22,6 +24,8 @@ export class UsersComponent implements OnInit {
 
         this.userService.getUsers().subscribe((users: User[]) => {
             this.users = users;
-        })
+        }, (error: string) => {
+            this.toastrService.error(error);
+        });
     }
 }

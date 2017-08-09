@@ -5,19 +5,19 @@
         <table class="table table-bordered" *ngIf="!changePasswordMode">
             <tr>
                 <td>Ime</td>
-                <td>{{userService.user?.FirstName}}</td>
+                <td>{{userService.user.FirstName}}</td>
             </tr>
             <tr>
                 <td>Prezime</td>
-                <td>{{userService.user?.LastName}}</td>
+                <td>{{userService.user.LastName}}</td>
             </tr>
             <tr>
                 <td>E-mail</td>
-                <td>{{userService.user?.Email}}</td>
+                <td>{{userService.user.Email}}</td>
             </tr>
             <tr>
                 <td>Telefonski broj</td>
-                <td>{{userService.user?.PhoneNumber}}</td>
+                <td>{{userService.user.PhoneNumber}}</td>
             </tr>
             <tr>
                 <td>Lozinka (<button class="btn-link" (click)="changePasswordMode=true">promijeni</button>)</td>

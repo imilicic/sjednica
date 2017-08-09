@@ -2,6 +2,8 @@
 
 import { Injectable } from "@angular/core";
 import { Headers, Http, RequestOptions, Response } from "@angular/http";
+
+import { AuthHttp, JwtHelper } from "angular2-jwt";
 import { Observable } from "rxjs/Observable";
 import "rxjs/add/observable/throw";
 import "rxjs/add/operator/catch";
@@ -11,50 +13,21 @@ import { User } from "../models/user.model";
 
 @Injectable()
 export class UserService {
+    jwtHelper: JwtHelper = new JwtHelper();
     user: User;
 
-    private loggedIn: boolean;
-
-    changePassword(formValues: any): Observable<any> {
-        let headers = new Headers({
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + localStorage.getItem("auth_token")
-        });
-        let options = new RequestOptions({ headers: headers });
-
-        return this.http.put("/api/put/users/password", formValues, options)
-        .map((response: Response) => {
-            let responseJson = response.json();
-
-            if(responseJson.success) {
-                localStorage.setItem("auth_token", responseJson.token);
-            }
-
-            return responseJson;
-        })
+    changePassword(formValues: any): Observable<string> {
+        return this.authHttp.put("/api/put/users/password", formValues)
+        .map((response: Response) => response.text())
         .catch(this.handleError);
     }
 
-    constructor (private http: Http) {
-        let authToken = localStorage.getItem("auth_token");
-        this.loggedIn = !!authToken;
-        
-        if (this.loggedIn && this.user == undefined) {
-            let headers = new Headers({
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + authToken
-            });
+    constructor (
+        private authHttp: AuthHttp,
+        private http: Http
+    ) {}
 
-            let options = new RequestOptions({ headers: headers });
-
-            this.http.get("/api/get/users/current", options)
-            .map((response: Response) => {
-                this.user = <User>response.json();
-            }).subscribe();
-        }
-    }
-
-    isAdmin() {
+    isAdmin(): boolean {
         if (this.user) {
             return this.user.RoleName == "admin";
         }
@@ -62,22 +35,23 @@ export class UserService {
         return false;
     }
 
-    isAuthenticated() {
-        return this.loggedIn;
+    isAuthenticated(): boolean {
+        let auth_token = localStorage.getItem("auth_token");
+
+        if (auth_token) {
+            if (!this.user) {
+                this.user = this.jwtHelper.decodeToken(auth_token);
+            }
+
+            return !this.jwtHelper.isTokenExpired(auth_token);
+        }
+
+        return false;
     } 
 
     getUsers(): Observable<User[]> {
-        let headers = new Headers({
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + localStorage.getItem("auth_token")
-        });
-        let options = new RequestOptions({headers: headers});
-
-        return this.http.get("/api/get/users", options)
-        .map((response: Response) => {
-            let responseJson = response.json();
-            return <User[]>responseJson.users;
-        })
+        return this.authHttp.get("/api/get/users")
+        .map((response: Response) => <User[]>response.json().users)
         .catch(this.handleError);
     }
 
@@ -89,24 +63,20 @@ export class UserService {
         .map((response: Response) => {
             let responseJson = response.json();
 
-            if (responseJson.success) {
-                localStorage.setItem("auth_token", responseJson.token);
-                this.loggedIn = true;
-                this.user = <User>responseJson.user;
-            }
+            localStorage.setItem("auth_token", responseJson.auth_token);
+            this.user = this.jwtHelper.decodeToken(responseJson.auth_token);
 
             return responseJson;
         })
         .catch(this.handleError);
     }
 
-    logout() {
+    logout(): void {
         localStorage.removeItem("auth_token");
-        this.loggedIn = false;
         this.user = undefined;
     }
 
     private handleError (error: Response) {
-        return Observable.throw(error.statusText);
+        return Observable.throw(error.text());
     }
 }

@@ -26,48 +26,37 @@ var getToken = function (request) {
 
 module.exports = function (apiRoutes) {
     apiRoutes.post("/login", function (request, response) {
-        var email = request.body["email"];
-        var password = request.body["password"];
+        if(!request.body.email || !request.body.password) {
+            return response.status(400).send("Morate unijeti i e-mail i lozinku!");
+        }
+
+        var email = request.body.email;
+        var password = request.body.password;
 
         var queryString = "SELECT PersonId, FirstName, LastName, Email, PhoneNumber, Password, Salt, RoleName FROM Person INNER JOIN Role USING(RoleId) WHERE Email = ?";
-        connection.query(queryString, [email], function (error, result) {
+        connection.query(queryString, [email], function (error, userArray) {
             if (error) {
                 throw error;
             }
 
-            if (result.length == 0) {
-                response.json({
-                    success: false,
-                    message: "user-not-found"
-                });
+            if (userArray.length == 0) {
+                return response.status(401).send("Korisnik ne postoji!");
             } else {
-                var salt = result[0].Salt;
-                var passwordData = passwordHash.sha512(password, salt);
+                var user = userArray[0];
+                var passwordData = passwordHash.sha512(password, user.Salt);
 
-                if (result[0].Password !== passwordData.passwordHash) {
-                    response.json({
-                        success: false,
-                        message: "wrong-password"
-                    });
+                if (user.Password !== passwordData.passwordHash) {
+                    return response.status(401).send("Kriva lozinka!");
                 } else {
-                    var token = jsonWebToken.sign(result[0], config.secret, {
+                    delete user.Password;
+                    delete user.Salt;
+
+                    var token = jsonWebToken.sign(user, config.secret, {
                         expiresIn: "1d"
                     });
 
-                    var user = {
-                        PersonId: result[0].PersonId,
-                        FirstName: result[0].FirstName,
-                        LastName: result[0].LastName,
-                        Email: result[0].Email,
-                        PhoneNumber: result[0].PhoneNumber,
-                        RoleName: result[0].RoleName
-                    };
-
-                    response.json({
-                        success: true,
-                        message: "successful",
-                        token: token,
-                        user: user
+                    return response.status(201).send({
+                        auth_token: token
                     });
                 }
             }
@@ -80,112 +69,75 @@ module.exports = function (apiRoutes) {
         if (token) {
             jsonWebToken.verify(token, config.secret, function(error, decoded) {
                 if (error) {
-                    response.json({
-                        success: false,
-                        message: "Failed to authenticate token."
-                    });
+                    return response.status(401).send("Prijava nije valjana!");
                 } else {
                     request.decoded = decoded;
                     next();
                 }
             });
         } else {
-            response.json({
-                success: false,
-                message: "No token provided."
-            });
+            return response.status(401).send("Niste prijavljeni!");
         }
-    });
-
-    apiRoutes.get("/get/users/current", function (request, response) {
-        var decoded = request.decoded;
-        
-        response.json({
-            PersonId: decoded.PersonId,
-            FirstName: decoded.FirstName,
-            LastName: decoded.LastName,
-            Email: decoded.Email,
-            PhoneNumber: decoded.PhoneNumber,
-            RoleName: decoded.RoleName
-        });
     });
 
     apiRoutes.get("/get/users", function(request, response) {
         if (request.decoded.RoleName == "admin") {
             var queryString = "SELECT PersonId, FirstName, LastName, Email, PhoneNumber, RoleName FROM Person INNER JOIN Role USING(RoleId)";
+            
             connection.query(queryString, function(error, result) {
                 if (error) {
                     throw error;
                 }
 
-                response.json({
-                    success: true,
-                    message: "founded",
+                return response.status(201).send({
                     users: result
-                })
+                });
             });
         } else {
-            response.json({
-                success: false,
-                message: "not-admin"
-            });
+            return response.status(401).send("You are not admin!");
         }
     });
 
     apiRoutes.put("/put/users/password", function (request, response) {
-        var personId = request.body["personId"]
-        var newPassword = request.body["newPassword"];
-        var oldPassword = request.body["oldPassword"];
+        if (!request.body.newPassword || !request.body.oldPassword) {
+            return response.status(400).send("Nevaljan zahtjev!");
+        }
+
+        var newPassword = request.body.newPassword;
+        var oldPassword = request.body.oldPassword;
         var user = request.decoded;
 
-        var salt = user.Salt;
-        var password = user.Password;
-        var passwordData = passwordHash.sha512(oldPassword, salt);
+        var queryString = "SELECT Password, Salt FROM Person WHERE PersonId = ?";
+        connection.query(queryString, [user.PersonId], function(error, passwordData) {
+            if (error) {
+                throw error;
+            }
 
-        if (passwordData.passwordHash != password) {
-            response.json({
-                success: false,
-                message: "wrong-old-password"
-            });
-        } else {
-            salt = passwordHash.generateRandomString(16);
-            passwordData = passwordHash.sha512(newPassword, salt);
+            var salt = passwordData[0].Salt;
+            var password = passwordData[0].Password;
 
-            var newUser = {
-                PersonId: user.PersonId,
-                FirstName: user.FirstName,
-                LastName: user.LastName,
-                Email: user.Email,
-                PhoneNumber: user.PhoneNumber,
-                Password: passwordData.passwordHash,
-                Salt: passwordData.salt,
-                RoleId: user.RoleId
-            };
+            passwordData = passwordHash.sha512(oldPassword, salt);
 
-            queryString = "UPDATE Person SET Password = ?, Salt = ? WHERE PersonId = ?";
-            connection.query(queryString, [newUser.Password, newUser.Salt, newUser.PersonId], function (error, result) {
-                if (error) {
-                    throw error;
-                }
+            if (passwordData.passwordHash != password) {
+                return response.status(401).send("Stara lozinka je kriva!");
+            } else {
+                salt = passwordHash.generateRandomString(16);
+                passwordData = passwordHash.sha512(newPassword, salt);
 
-                if(result.changedRows == 1) {
-                    var token = jsonWebToken.sign(newUser, config.secret, {
-                        expiresIn: "1d"
-                    });
+                queryString = "UPDATE Person SET Password = ?, Salt = ? WHERE PersonId = ?";
+                connection.query(queryString, [passwordData.passwordHash, salt, user.PersonId], function (error, result) {
+                    if (error) {
+                        throw error;
+                    }
 
-                    response.json({
-                        success: true,
-                        message: "successful",
-                        token: token
-                    });
-                } else {
-                    response.json({
-                        success: false,
-                        message: "unsuccessful"
-                    });
-                }
-            });
-        }
+                    if(result.changedRows == 1) {
+                        return response.status(201).send("Lozinka je uspješno promijenjena!");
+                    } else {
+                        return response.status(500).send("Lozinka nije promijenjena!");
+                    }
+                });
+            }
+        });
     });
 
     return apiRoutes;

@@ -7,25 +7,20 @@ export class ResponseMessagesService {
         "required": "Polje je obavezno!"
     }
     private responseMessages = {
+        "authenticate": {
+            "token-verification-failed": "Dogodila se greška! Ponovno se logirajte!",
+            "no-token": "Ponovno se logirajte!",
+            "successful": ""
+        },
         "login": {
-            "user-not-found": "Korisnik ne postoji!",
-            "wrong-password": "Kriva lozinka!",
-            "successful": "",
-
             "required": this.generalMessages.required
         },
         "users/me": {
-            "wrong-old-password": "Stara lozinka je kriva!",
-            "unsuccessful": "Lozinka nije promijenjena!",
-            "successful": "",
-
             "required": this.generalMessages.required,
             "new-password-minlength": "Barem 8 znakova!",
             "new-password-pattern": "Barem jedno slovo i jedan broj!",
             "new-password2-required": "Polje je obavezno!",
             "new-passwords-not-equal": "Lozinke nisu jednake!",
-
-            "password-changed": "Vaša lozinka je uspješno promijenjena!"
         }
     };
 

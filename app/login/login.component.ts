@@ -5,6 +5,7 @@ import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 
 import { ResponseMessagesService } from "../shared/providers/response-messages.service";
+import { ToastrService } from "../shared/providers/toastr.service";
 import { UserService } from "../shared/providers/user.service";
 import { User } from "../shared/models/user.model";
 
@@ -20,6 +21,7 @@ export class LoginComponent implements OnInit{
     constructor (
         private responseMessagesService: ResponseMessagesService,
         private router: Router,
+        private toastrService: ToastrService,
         private userService: UserService
     ) {}
 
@@ -39,16 +41,11 @@ export class LoginComponent implements OnInit{
 
     login(values: any) {
         this.userService.login(values).subscribe((response: any) => {
-            this.responseMessagesService.setResponseMessage({
-                location: "login",
-                code: response.message
-            });
-            
-            if (response.success) {
-                this.router.navigate(["users"]);
-            } else {
-                this.loginForm.reset();
-            }
+            this.router.navigate(["users"]);
+        },
+        error => {
+            this.toastrService.error(error);
+            this.loginForm.reset();
         });
     }
 

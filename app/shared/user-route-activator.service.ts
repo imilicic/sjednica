@@ -8,15 +8,16 @@ import { UserService } from "./providers/user.service";
 @Injectable()
 export class UserRouteActivatorService implements CanActivate {
     constructor(
-        private userService: UserService,
-        private router: Router
+        private router: Router,
+        private userService: UserService
     ) {}
 
     canActivate() {
-        if(!this.userService.isAuthenticated()) {
-            this.router.navigate(["login"]);
+        if(this.userService.isAuthenticated()) {
+            return true; 
         }
 
-        return true;
+        this.router.navigate(["login"]);
+        return false;
     }
 }
