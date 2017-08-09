@@ -16,6 +16,7 @@ import { UserRouteActivatorService } from "./shared/user-route-activator.service
 import { ResponseMessagesService } from "./shared/providers/response-messages.service";
 import { ToastrService } from "./shared/providers/toastr.service";
 import { UserService } from "./shared/providers/user.service";
+import { UsersCreateComponent } from "./users/create/users-create.component";
 import { UserProfileComponent } from "./users/profile/user-profile.component";
 import { UsersComponent } from "./users/users.component";
 
@@ -43,6 +44,7 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
     LoginComponent,
     MeetingsComponent,
     NavbarComponent,
+    UsersCreateComponent,
     UserProfileComponent,
     UsersComponent
   ],
