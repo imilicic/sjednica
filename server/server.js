@@ -10,6 +10,7 @@ var app = express();
 var apiRoutes = express.Router();
 apiRoutes = require("./apiRoutes")(apiRoutes);
 
+app.set('port', (process.env.PORT || 3000));
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
@@ -28,6 +29,6 @@ app.get("*", function(request, response) {
     });
 });
 
-app.listen(3000, function(){
-    console.log("Listening on port 3000... ");
+app.listen(app.get('port'), function(){
+    console.log("Listening on port", app.get('port'));
 });
