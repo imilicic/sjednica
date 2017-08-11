@@ -98,7 +98,7 @@ module.exports = function (apiRoutes) {
         }
     });
 
-    apiRoutes.put("/put/users/password", function (request, response) {
+    apiRoutes.put("/change/user/password", function (request, response) {
         if (!request.body.newPassword || !request.body.oldPassword) {
             return response.status(400).send("Nevaljan zahtjev!");
         }
@@ -141,8 +141,11 @@ module.exports = function (apiRoutes) {
     });
 
     apiRoutes.post("/create/user", function(request, response) {
-        if (!request.body.FirstName || !request.body.LastName || !request.body.Email || 
-            !request.body.Password || !request.body.Councilperson || !request.body.StartDate || !request.body.EndDate) {
+        if (!request.body.FirstName || !request.body.LastName || 
+            !request.body.Email || 
+            !request.body.Password || !request.body.hasOwnProperty("Councilperson") ||
+            !request.body.hasOwnProperty("EndDate") || !request.body.hasOwnProperty("StartDate")
+        ) {
             return response.status(400).send("Nevaljan zahtjev!");
         }
 

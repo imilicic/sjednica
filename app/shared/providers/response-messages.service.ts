@@ -2,7 +2,6 @@ import { Injectable } from "@angular/core";
 
 @Injectable()
 export class ResponseMessagesService {
-    private responseMessage: string = "";
     private generalMessages = {
         "required": "Polje je obavezno!"
     }
@@ -32,16 +31,7 @@ export class ResponseMessagesService {
         }
     };
 
-    setResponseMessage(responseCode: { location: string, code: string }) {
-        this.responseMessage = this.responseMessages[responseCode.location][responseCode.code];
-        return this.responseMessage;
-    }
-
-    getResponseMessage() {
-        return this.responseMessage;
-    }
-
-    getMessage(responseCode: { location: string, code: string }) {
+    getMessage(responseCode: { location: string, code: string }): string {
         return this.responseMessages[responseCode.location][responseCode.code];
     }
 }

@@ -4,19 +4,18 @@ import { Component, OnInit } from "@angular/core";
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 
-import { ResponseMessagesService } from "../shared/providers/response-messages.service";
-import { ToastrService } from "../shared/providers/toastr.service";
+import { ResponseMessagesService } from "../../shared/providers/response-messages.service";
+import { ToastrService } from "../../shared/providers/toastr.service";
 import { UserService } from "../shared/providers/user.service";
-import { User } from "../shared/models/user.model";
 
 @Component({
-    styleUrls: ["app/login/login.component.css"],
-    templateUrl: "app/login/login.component.html"
+    styleUrls: ["app/user/user-login/user-login.component.css"],
+    templateUrl: "app/user/user-login/user-login.component.html"
 })
-export class LoginComponent implements OnInit{
+export class UserLoginComponent implements OnInit{
     email: FormControl;
-    password: FormControl;
     loginForm: FormGroup;
+    password: FormControl;
 
     constructor (
         private responseMessagesService: ResponseMessagesService,
@@ -27,7 +26,7 @@ export class LoginComponent implements OnInit{
 
     ngOnInit() {
         if (this.userService.isAuthenticated()) {
-            this.router.navigate(["users"]);
+            this.router.navigate(["user"]);
         }
 
         this.email = new FormControl("", Validators.required);
@@ -39,17 +38,17 @@ export class LoginComponent implements OnInit{
         });
     }
 
-    login(values: any) {
-        this.userService.login(values).subscribe((response: any) => {
-            this.router.navigate(["users"]);
+    login(): void {
+        this.userService.login(this.loginForm.value).subscribe((response: {auth_token: string}) => {
+            this.router.navigate(["user"]);
         },
-        error => {
+        (error: string) => {
             this.toastrService.error(error);
             this.loginForm.reset();
         });
     }
 
-    getWarningMessage(code: string) {
+    getWarningMessage(code: string): string {
         return this.responseMessagesService.getMessage({
             location: "login",
             code: code

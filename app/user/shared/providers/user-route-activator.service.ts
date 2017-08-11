@@ -3,7 +3,7 @@
 import { Injectable } from "@angular/core";
 import { CanActivate, Router } from "@angular/router";
 
-import { UserService } from "./providers/user.service";
+import { UserService } from "./user.service";
 
 @Injectable()
 export class UserRouteActivatorService implements CanActivate {
@@ -17,7 +17,7 @@ export class UserRouteActivatorService implements CanActivate {
             return true; 
         }
 
-        this.router.navigate(["login"]);
+        this.router.navigate(["user/login"]);
         return false;
     }
 }

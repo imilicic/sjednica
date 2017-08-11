@@ -1,13 +1,15 @@
 <h1>Popis svih korisnika</h1>
 <table class="table table-bordered" *ngIf="users">
     <tr>
-       <th>Ime</th>
-       <th>Prezime</th>
-       <th>Email</th>
-       <th>Telefonski broj</th>
-       <th>Uloga</th>
+        <th></th>
+        <th>Ime</th>
+        <th>Prezime</th>
+        <th>Email</th>
+        <th>Telefonski broj</th>
+        <th>Uloga</th>
     </tr>
     <tr *ngFor="let user of users">
+        <td><a [routerLink]="user.PersonId"><span aria-hidden="true" class="glyphicon glyphicon-edit"></span></a></td>
         <td>{{user?.FirstName}}</td>
         <td>{{user?.LastName}}</td>
         <td>{{user?.Email}}</td>

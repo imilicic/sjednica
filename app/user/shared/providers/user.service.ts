@@ -17,7 +17,7 @@ export class UserService {
     user: User;
 
     changePassword(formValues: any): Observable<string> {
-        return this.authHttp.put("/api/put/users/password", formValues)
+        return this.authHttp.put("/api/change/user/password", formValues)
         .map((response: Response) => response.text())
         .catch(this.handleError);
     }
@@ -61,7 +61,7 @@ export class UserService {
         .catch(this.handleError);
     }
 
-    login(values: any): Observable<any> {
+    login(values: any): Observable<{auth_token: string}> {
         let headers = new Headers({"Content-Type": "application/json"});
         let options = new RequestOptions({headers: headers});
 

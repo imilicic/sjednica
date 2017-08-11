@@ -2,22 +2,17 @@ import { Component, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 
-import { User } from "../../shared/models/user.model";
+import { User } from "../shared/models/user.model";
 import { PasswordService } from "../../shared/providers/password.service";
 import { ResponseMessagesService } from "../../shared/providers/response-messages.service";
 import { ToastrService } from "../../shared/providers/toastr.service";
-import { UserService } from "../../shared/providers/user.service";
+import { UserService } from "../shared/providers/user.service";
 
 @Component({
-    templateUrl: "app/users/create/users-create.component.html",
-    styles: [`
-        .error {
-            float: right;
-            margin: 0px;
-        }
-    `]
+    styleUrls: ["app/user/user-create/user-create.component.ts"],
+    templateUrl: "app/user/user-create/user-create.component.html"
 })
-export class UsersCreateComponent implements OnInit {
+export class UserCreateComponent implements OnInit {
     councilperson: FormControl;
     email: FormControl;
     firstName: FormControl;
@@ -78,16 +73,16 @@ export class UsersCreateComponent implements OnInit {
     ) {}
 
     create() {
-        let endDate;
-        let startDate;
+        let endDate = null;
+        let startDate = null;
 
         if (this.councilperson.value) {
             endDate = new Date(Date.UTC(this.endYear.value, this.endMonth.value - 1, this.endDay.value));
             startDate = new Date(Date.UTC(this.startYear.value, this.startMonth.value - 1, this.startDay.value));
-        }
 
-        if (this.permanentMember.value) {
-            endDate = new Date(Date.UTC(9999, 11, 31));
+            if (this.permanentMember.value) {
+                endDate = new Date(Date.UTC(9999, 11, 31));
+            }
         }
 
         let newUser: User = {
@@ -106,7 +101,7 @@ export class UsersCreateComponent implements OnInit {
         this.userService.createUser(newUser)
         .subscribe((response: string) => {
             this.toastrService.success(response);
-            this.router.navigate(["users"]);
+            this.router.navigate(["user"]);
         },
         (error: string) => this.toastrService.error(error));
     }
@@ -130,7 +125,7 @@ export class UsersCreateComponent implements OnInit {
         this.email = new FormControl("", [Validators.required, Validators.pattern(/^[A-Za-z][A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,}$/)]);
         this.firstName = new FormControl("", Validators.required);
         this.lastName = new FormControl("", Validators.required);
-        this.phoneNumber = new FormControl(null, Validators.pattern(/^[0-9]{3} [0-9]{6,10}$/));
+        this.phoneNumber = new FormControl(undefined, Validators.pattern(/^[0-9]{3} [0-9]{6,10}$/));
 
         this.userForm = new FormGroup({
             councilperson: this.councilperson,

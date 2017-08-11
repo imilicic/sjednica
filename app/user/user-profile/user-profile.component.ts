@@ -5,11 +5,11 @@ import { Router } from "@angular/router";
 import { PasswordService } from "../../shared/providers/password.service";
 import { ResponseMessagesService } from "../../shared/providers/response-messages.service";
 import { ToastrService } from "../../shared/providers/toastr.service";
-import { UserService } from "../../shared/providers/user.service";
+import { UserService } from "../shared/providers/user.service";
 
 @Component({
-    styleUrls: ["app/users/profile/user-profile.component.css"],
-    templateUrl: "app/users/profile/user-profile.component.html"
+    styleUrls: ["app/user/user-profile/user-profile.component.css"],
+    templateUrl: "app/user/user-profile/user-profile.component.html"
 })
 export class UserProfileComponent implements OnInit{
     changePasswordMode: boolean = false;
@@ -36,6 +36,7 @@ export class UserProfileComponent implements OnInit{
             this.toastrService.success(response);
             this.passwordForm.reset();
             this.changePasswordMode = false;
+            this.generatedPassword = false;
         }, (error: any) => {
             this.toastrService.error(error);
             this.passwordForm.reset();
