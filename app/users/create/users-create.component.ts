@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
+import { Router } from "@angular/router";
 
 import { User } from "../../shared/models/user.model";
 import { PasswordService } from "../../shared/providers/password.service";
@@ -66,6 +67,7 @@ export class UsersCreateComponent implements OnInit {
     constructor(
         private passwordService: PasswordService,
         private responseMessagesService: ResponseMessagesService,
+        private router: Router,
         private toastrService: ToastrService,
         private userService: UserService
     ) {}
@@ -91,10 +93,13 @@ export class UsersCreateComponent implements OnInit {
             RoleName: undefined,
             StartDate: startDate
         };
-        console.log(newUser);
-        // this.userService.createUser(newUser)
-        // .subscribe((response: string) => this.toastrService.success(response),
-        // (error: string) => this.toastrService.error(error));
+        
+        this.userService.createUser(newUser)
+        .subscribe((response: string) => {
+            this.toastrService.success(response);
+            this.router.navigate(["users"]);
+        },
+        (error: string) => this.toastrService.error(error));
     }
 
     ngOnInit() {

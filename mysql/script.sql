@@ -30,3 +30,16 @@ CREATE TABLE Person (
 INSERT INTO Person (FirstName, LastName, Email, PhoneNumber, Password, Salt, RoleId)
 VALUES ("Ivan","Miličić","imilicic@mathos.hr",NULL,"af3d7cb43b6bfdf23561d8b6fcbc9b4ff2932d7e88ef776807bd5870163f84495ca90f3ffd05b99148c5c936f36e1c38e49e84379cfa5899495db2e72bd8df04", "980b5986e28191a1",1);
 -- password: proba
+
+CREATE TABLE Council (
+	CouncilId INT AUTO_INCREMENT,
+	PersonId INT NOT NULL,
+	StartDate DATE NOT NULL,
+	EndDate DATE NOT NULL,
+	PRIMARY KEY (CouncilId),
+	FOREIGN KEY (PersonId)
+		REFERENCES Person(PersonId)
+);
+
+INSERT INTO Council (PersonId, StartDate, EndDate)
+VALUES (2, "2016-10-01", "2017-10-01");

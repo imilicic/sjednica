@@ -141,7 +141,8 @@ module.exports = function (apiRoutes) {
     });
 
     apiRoutes.post("/create/user", function(request, response) {
-        if (!request.body.FirstName || !request.body.LastName || !request.body.Email || !request.body.Password || !request.body.Councilperson) {
+        if (!request.body.FirstName || !request.body.LastName || !request.body.Email || 
+            !request.body.Password || !request.body.Councilperson || !request.body.StartDate || !request.body.EndDate) {
             return response.status(400).send("Nevaljan zahtjev!");
         }
 
@@ -149,42 +150,76 @@ module.exports = function (apiRoutes) {
             return response.status(401).send("Nisi admin!");
         }
 
+        var councilperson = request.body.Councilperson;
         var email = request.body.Email;
+        var endDate;
         var firstName = request.body.FirstName;
         var lastName = request.body.LastName;
         var password = request.body.Password;
-        var councilperson = request.body.Councilperson;
-        var roleId = 3;
         var phoneNumber;
+        var roleId = 3;
+        var startDate;
 
-        if (councilperson) {
-            roleId = 2;
-        }
-
-        var salt = passwordHash.generateRandomString(16);
-        var passwordData = passwordHash.sha512(password, salt);
-
-        var queryString;
-        var values;
-
-        if (request.body.PhoneNumber) {
-            phoneNumber = request.body.PhoneNumber;
-            queryString = "INSERT INTO Person (FirstName, LastName, Email, Password, Salt, PhoneNumber, RoleId) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            values = [firstName, lastName, email, passwordData.passwordHash, passwordData.salt, phoneNumber, roleId];
-        } else {
-            queryString = "INSERT INTO Person (FirstName, LastName, Email, Password, Salt, RoleId) VALUES (?, ?, ?, ?, ?, ?)";
-            values = [firstName, lastName, email, passwordData.passwordHash, passwordData.salt, roleId];
-        }
-
-        connection.query(queryString, values, function (error, result) {
+        var queryString = "SELECT * FROM Person WHERE Email = ?"
+        connection.query(queryString, [email], function (error, result) {
             if (error) {
                 throw error;
             }
 
-            if (result.serverStatus == 2) {
-                return response.status(201).send("Korisnik je izrađen.");
+            if (result.length > 0) {
+                return response.status(400).send("Korisnik s ovim emailom već postoji!");
             } else {
-                return response.status(500).send("Korisnik nije izrađen.");
+                if (councilperson) {
+                    if(isNaN(Date.parse(request.body.EndDate)) || isNaN(Date.parse(request.body.StartDate))) {
+                        return response.status(400).send("Nevaljan datum!");
+                    }
+
+                    roleId = 2;
+                    endDate = request.body.EndDate.split("T")[0];
+                    startDate = request.body.StartDate.split("T")[0];
+                }
+
+                var salt = passwordHash.generateRandomString(16);
+                var passwordData = passwordHash.sha512(password, salt);
+
+                var queryString;
+                var values;
+
+                if (request.body.PhoneNumber) {
+                    phoneNumber = request.body.PhoneNumber;
+                    queryString = "INSERT INTO Person (FirstName, LastName, Email, Password, Salt, PhoneNumber, RoleId) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    values = [firstName, lastName, email, passwordData.passwordHash, passwordData.salt, phoneNumber, roleId];
+                } else {
+                    queryString = "INSERT INTO Person (FirstName, LastName, Email, Password, Salt, RoleId) VALUES (?, ?, ?, ?, ?, ?)";
+                    values = [firstName, lastName, email, passwordData.passwordHash, passwordData.salt, roleId];
+                }
+
+                connection.query(queryString, values, function (error, result) {
+                    if (error) {
+                        throw error;
+                    }
+
+                    if (result.serverStatus == 2) {
+                        if (councilperson) {
+                            var queryString2 = "INSERT INTO Council (PersonId, StartDate, EndDate) VALUES (?, ?, ?)";
+                            connection.query(queryString2, [result.insertId, startDate, endDate], function(error2, result2) {
+                                if (error2) {
+                                    throw error2;
+                                }
+
+                                if (result2.serverStatus == 2) {
+                                    return response.status(201).send("Korisnik je izrađen.");
+                                } else {
+                                    return response.status(201).send("Korisnik je izrađen, ali nije dodan u vijeće!");
+                                }
+                            });
+                        } else {
+                            return response.status(201).send("Korisnik je izrađen.");
+                        }
+                    } else {
+                        return response.status(500).send("Korisnik nije izrađen.");
+                    }
+                });
             }
         });
     });
