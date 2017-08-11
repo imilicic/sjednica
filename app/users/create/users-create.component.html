@@ -80,6 +80,8 @@
                     <input class="form-control" formControlName="endYear" id="endYear" type="number">
                 </div>
             </fieldset>
+            <label for="permanentMember">Stalan član vijeća</label>
+            <input id="permanentMember" formControlName="permanentMember" type="checkbox">
         </div>
         <button class="btn btn-default" type="submit" [disabled]="userForm.invalid">Izradi</button>
     </form>

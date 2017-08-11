@@ -23,6 +23,7 @@ export class UsersCreateComponent implements OnInit {
     firstName: FormControl;
     lastName: FormControl;
     password: string;
+    permanentMember: FormControl;
     phoneNumber: FormControl;
     userForm: FormGroup;
 
@@ -50,6 +51,8 @@ export class UsersCreateComponent implements OnInit {
             this.userForm.addControl("endMonth", this.endMonth);
             this.userForm.addControl("endYear", this.endYear);
 
+            this.userForm.addControl("permanentMember", this.permanentMember);
+
             this.userForm.setValidators(dateValidator());
         } else {
             this.userForm.clearValidators();
@@ -61,6 +64,8 @@ export class UsersCreateComponent implements OnInit {
             this.userForm.removeControl("endDay");
             this.userForm.removeControl("endMonth");
             this.userForm.removeControl("endYear");
+
+            this.userForm.removeControl("permanentMember");
         }
     }
 
@@ -77,8 +82,12 @@ export class UsersCreateComponent implements OnInit {
         let startDate;
 
         if (this.councilperson.value) {
-            endDate = new Date(this.endYear.value, this.endMonth.value - 1, this.endDay.value);
-            startDate = new Date(this.startYear.value, this.startMonth.value - 1, this.startDay.value);
+            endDate = new Date(Date.UTC(this.endYear.value, this.endMonth.value - 1, this.endDay.value));
+            startDate = new Date(Date.UTC(this.startYear.value, this.startMonth.value - 1, this.startDay.value));
+        }
+
+        if (this.permanentMember.value) {
+            endDate = new Date(Date.UTC(9999, 11, 31));
         }
 
         let newUser: User = {
@@ -108,6 +117,7 @@ export class UsersCreateComponent implements OnInit {
         this.startMonth = new FormControl(currentDate.getMonth()+1, Validators.required);
         this.startYear = new FormControl(currentDate.getFullYear(), [Validators.required, Validators.min(1900), Validators.max(9999)]);
 
+        this.permanentMember = new FormControl(false);
         let dateNextYear = new Date(currentDate.getFullYear()+1, currentDate.getMonth(), currentDate.getDate());
         this.endDay = new FormControl(dateNextYear.getDate(), Validators.required);
         this.endMonth = new FormControl(dateNextYear.getMonth()+1, Validators.required);
