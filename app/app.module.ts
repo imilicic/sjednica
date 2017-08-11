@@ -13,6 +13,7 @@ import { LoginComponent } from "./login/login.component";
 import { MeetingsComponent } from "./meetings/meetings.component";
 import { NavbarComponent } from "./navbar/navbar.component";
 import { UserRouteActivatorService } from "./shared/user-route-activator.service";
+import { PasswordService } from "./shared/providers/password.service";
 import { ResponseMessagesService } from "./shared/providers/response-messages.service";
 import { ToastrService } from "./shared/providers/toastr.service";
 import { UserService } from "./shared/providers/user.service";
@@ -55,6 +56,7 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
       useFactory: authHttpServiceFactory,
       deps: [Http, RequestOptions]
     },
+    PasswordService,
     ResponseMessagesService,
     ToastrService,
     UserRouteActivatorService,

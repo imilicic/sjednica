@@ -1,8 +1,12 @@
 export class User {
-    PersonId: number
+    Councilperson?: boolean
+    Email: string
+    EndDate: Date
     FirstName: string
     LastName: string
-    Email: string
+    Password?: string
+    PersonId: number
     PhoneNumber?: string
     RoleName: string
+    StartDate: Date
 }

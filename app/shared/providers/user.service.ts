@@ -27,6 +27,12 @@ export class UserService {
         private http: Http
     ) {}
 
+    createUser(userValues: any): Observable<string> {
+        return this.authHttp.post("/api/create/user", userValues)
+        .map((response: Response) => response.text())
+        .catch(this.handleError);
+    }
+
     isAdmin(): boolean {
         if (this.user) {
             return this.user.RoleName == "admin";

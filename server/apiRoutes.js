@@ -94,7 +94,7 @@ module.exports = function (apiRoutes) {
                 });
             });
         } else {
-            return response.status(401).send("You are not admin!");
+            return response.status(401).send("Nisi admin!");
         }
     });
 
@@ -136,6 +136,55 @@ module.exports = function (apiRoutes) {
                         return response.status(500).send("Lozinka nije promijenjena!");
                     }
                 });
+            }
+        });
+    });
+
+    apiRoutes.post("/create/user", function(request, response) {
+        if (!request.body.FirstName || !request.body.LastName || !request.body.Email || !request.body.Password || !request.body.Councilperson) {
+            return response.status(400).send("Nevaljan zahtjev!");
+        }
+
+        if(request.decoded.RoleName != "admin") {
+            return response.status(401).send("Nisi admin!");
+        }
+
+        var email = request.body.Email;
+        var firstName = request.body.FirstName;
+        var lastName = request.body.LastName;
+        var password = request.body.Password;
+        var councilperson = request.body.Councilperson;
+        var roleId = 3;
+        var phoneNumber;
+
+        if (councilperson) {
+            roleId = 2;
+        }
+
+        var salt = passwordHash.generateRandomString(16);
+        var passwordData = passwordHash.sha512(password, salt);
+
+        var queryString;
+        var values;
+
+        if (request.body.PhoneNumber) {
+            phoneNumber = request.body.PhoneNumber;
+            queryString = "INSERT INTO Person (FirstName, LastName, Email, Password, Salt, PhoneNumber, RoleId) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            values = [firstName, lastName, email, passwordData.passwordHash, passwordData.salt, phoneNumber, roleId];
+        } else {
+            queryString = "INSERT INTO Person (FirstName, LastName, Email, Password, Salt, RoleId) VALUES (?, ?, ?, ?, ?, ?)";
+            values = [firstName, lastName, email, passwordData.passwordHash, passwordData.salt, roleId];
+        }
+
+        connection.query(queryString, values, function (error, result) {
+            if (error) {
+                throw error;
+            }
+
+            if (result.serverStatus == 2) {
+                return response.status(201).send("Korisnik je izrađen.");
+            } else {
+                return response.status(500).send("Korisnik nije izrađen.");
             }
         });
     });

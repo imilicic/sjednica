@@ -8,10 +8,10 @@ INSERT INTO Role (RoleId)
 VALUES ("admin");
 
 INSERT INTO Role (RoleId)
-VALUES ("clan vijeca");
+VALUES ("councilperson");
 
 INSERT INTO Role (RoleId)
-VALUES ("korisnik");
+VALUES ("user");
 
 CREATE TABLE Person (
 	PersonId INT AUTO_INCREMENT,

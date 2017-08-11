@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { Router } from "@angular/router";
 
+import { PasswordService } from "../../shared/providers/password.service";
 import { ResponseMessagesService } from "../../shared/providers/response-messages.service";
 import { ToastrService } from "../../shared/providers/toastr.service";
 import { UserService } from "../../shared/providers/user.service";
@@ -20,6 +21,7 @@ export class UserProfileComponent implements OnInit{
     passwordForm: FormGroup;
 
     constructor(
+        private passwordService: PasswordService,
         private responseMessagesService: ResponseMessagesService,
         private router: Router,
         private toastrService: ToastrService,
@@ -57,7 +59,7 @@ export class UserProfileComponent implements OnInit{
         this.generatedPassword = !this.generatedPassword;
 
         if(this.generatedPassword) {
-            let password = this.generatePassword(8, 4, 2);
+            let password = this.passwordService.generatePassword(8, 4, 2);
 
             this.newPassword.setValue(password);
             this.newPassword2.setValue(password);
@@ -74,79 +76,6 @@ export class UserProfileComponent implements OnInit{
             location: "users/me",
             code: code
         });
-    }
-
-    /**
-     * generates a password of given length
-     * @function
-     * @param length length of password
-     * @param minLetters minimum number of letters in password (case insensitive)
-     * @param minNumbers minimum number of numbers in password
-     */
-    private generatePassword(length: number, minLetters: number, minNumbers: number) {
-        let letters = "abcdefghijklmnpqrstuvwxyz";
-        let numbers = "123456789";
-        let characters;
-
-        let password = [];
-        let chosen = "";
-
-        // fill password with letters
-        for(let i = 0; i < minLetters; i++) {
-            chosen = letters[Math.floor(Math.random()*(letters.length-1))];
-            letters = letters.split(chosen).join(""); // deletes chosen letter
-
-            if ((Math.random() < 0.5 || chosen == "i" || chosen == "o") && chosen != "l") {
-                password.push(chosen);
-            } else {
-                password.push(chosen.toLocaleUpperCase());
-            }
-        }
-
-        // fill password with numbers
-        for(let i = 0; i < minNumbers; i++) {
-            chosen = numbers[Math.floor(Math.random()*(numbers.length-1))];
-            numbers = numbers.split(chosen).join(""); // deletes chosen number
-
-            password.push(chosen);
-        }
-    
-        // fill the rest of password with any characters
-        characters = letters + numbers;
-        for(let i = password.length; i < length; i++) {
-            chosen = characters[Math.floor(Math.random()*(characters.length-1))]
-            characters = characters.split(chosen).join(""); // deletes chosen number
-
-            if ((Math.random() < 0.5 || chosen == "i" || chosen == "o") && chosen != "l") {
-                password.push(chosen);
-            } else {
-                password.push(chosen.toLocaleUpperCase());
-            }
-        }
-
-        return this.shuffleArray(password).join("");        
-    }
-
-    /**
-     * returns a random permutation of a given array
-     * @function
-     * @param array array of things to be shuffled
-     */
-    private shuffleArray(array: any[]) {
-        let currentIndex = array.length;
-        let temporaryValue;
-        let randomIndex;
-
-        while (currentIndex != 0) {
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex -= 1;
-
-            temporaryValue = array[currentIndex];
-            array[currentIndex] = array[randomIndex];
-            array[randomIndex] = temporaryValue;
-        }
-
-        return array;
     }
 }
 
