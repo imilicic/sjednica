@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable } from '@angular/core';
 
 @Injectable()
 export class PasswordService {
@@ -10,19 +10,19 @@ export class PasswordService {
      * @param minNumbers minimum number of numbers in password
      */
     generatePassword(length: number, minLetters: number, minNumbers: number) {
-        let letters = "abcdefghijklmnpqrstuvwxyz";
-        let numbers = "123456789";
+        let letters = 'abcdefghijklmnpqrstuvwxyz';
+        let numbers = '123456789';
         let characters;
 
         let password = [];
-        let chosen = "";
+        let chosen = '';
 
         // fill password with letters
-        for(let i = 0; i < minLetters; i++) {
-            chosen = letters[Math.floor(Math.random()*(letters.length-1))];
-            letters = letters.split(chosen).join(""); // deletes chosen letter
+        for (let i = 0; i < minLetters; i++) {
+            chosen = letters[Math.floor(Math.random() * (letters.length - 1))];
+            letters = letters.split(chosen).join(''); // deletes chosen letter
 
-            if ((Math.random() < 0.5 || chosen == "i" || chosen == "o") && chosen != "l") {
+            if ((Math.random() < 0.5 || chosen === 'i' || chosen === 'o') && chosen !== 'l') {
                 password.push(chosen);
             } else {
                 password.push(chosen.toLocaleUpperCase());
@@ -30,27 +30,27 @@ export class PasswordService {
         }
 
         // fill password with numbers
-        for(let i = 0; i < minNumbers; i++) {
-            chosen = numbers[Math.floor(Math.random()*(numbers.length-1))];
-            numbers = numbers.split(chosen).join(""); // deletes chosen number
+        for (let i = 0; i < minNumbers; i++) {
+            chosen = numbers[Math.floor(Math.random() * (numbers.length - 1))];
+            numbers = numbers.split(chosen).join(''); // deletes chosen number
 
             password.push(chosen);
         }
-    
+
         // fill the rest of password with any characters
         characters = letters + numbers;
-        for(let i = password.length; i < length; i++) {
-            chosen = characters[Math.floor(Math.random()*(characters.length-1))]
-            characters = characters.split(chosen).join(""); // deletes chosen number
+        for (let i = password.length; i < length; i++) {
+            chosen = characters[Math.floor(Math.random() * (characters.length - 1))]
+            characters = characters.split(chosen).join(''); // deletes chosen number
 
-            if ((Math.random() < 0.5 || chosen == "i" || chosen == "o") && chosen != "l") {
+            if ((Math.random() < 0.5 || chosen === 'i' || chosen === 'o') && chosen !== 'l') {
                 password.push(chosen);
             } else {
                 password.push(chosen.toLocaleUpperCase());
             }
         }
 
-        return this.shuffleArray(password).join("");        
+        return this.shuffleArray(password).join('');
     }
 
     /**
@@ -63,7 +63,7 @@ export class PasswordService {
         let temporaryValue;
         let randomIndex;
 
-        while (currentIndex != 0) {
+        while (currentIndex !== 0) {
             randomIndex = Math.floor(Math.random() * currentIndex);
             currentIndex -= 1;
 

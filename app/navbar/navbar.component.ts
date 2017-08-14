@@ -1,23 +1,23 @@
 // navbar.component.ts
 
-import { Component } from "@angular/core";
-import { Router } from "@angular/router";
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
-import { UserService } from "../user/shared/providers/user.service";
+import { AuthenticationService } from '../shared/services/authentication.service';
 
 @Component({
-    selector: "navbar",
-    styleUrls: ["app/navbar/navbar.component.css"],
-    templateUrl: "app/navbar/navbar.component.html"
+    selector: 'navbar',
+    styleUrls: ['app/navbar/navbar.component.css'],
+    templateUrl: 'app/navbar/navbar.component.html'
 })
 export class NavbarComponent {
     constructor(
         private router: Router,
-        private userService: UserService
+        private authenticationService: AuthenticationService
     ) {}
 
-    logout() {
-        this.userService.logout();
-        this.router.navigate(["user/login"]);
+    logoutUser() {
+        this.authenticationService.logoutUser();
+        this.router.navigate(['login']);
     }
 }

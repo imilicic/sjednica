@@ -1,9 +1,9 @@
 // app.component.ts
 
-import { Component } from "@angular/core";
+import { Component } from '@angular/core';
 
 @Component({
-  selector: "council-meeting",
+  selector: 'council-meeting',
   template: `
     <navbar></navbar>
     <div class="container">

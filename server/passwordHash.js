@@ -11,6 +11,14 @@ var generateRandomString = function(length){
             .slice(0,length);   /** return required number of characters */
 };
 
+var hashPassword = function(password, salt = null) {
+    if (!salt) {
+        salt = generateRandomString(16);
+    }
+
+    return sha512(password, salt);
+}
+
 /**
  * hash password with sha512.
  * @function
@@ -22,10 +30,10 @@ var sha512 = function(password, salt){
     hash.update(password);
     var value = hash.digest('hex');
     return {
-        salt:salt,
-        passwordHash:value
+        salt: salt,
+        passwordHash: value
     };
 };
 
-module.exports.sha512 = sha512;
+module.exports.hashPassword = hashPassword;
 module.exports.generateRandomString = generateRandomString;

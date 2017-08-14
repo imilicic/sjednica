@@ -3,23 +3,33 @@
     <form [formGroup]="userForm" (ngSubmit)="create()" autocomplete="off">
         <div class="form-group" [ngClass]="{'has-error': firstName.touched && firstName.invalid, 'has-success': firstName.touched && firstName.valid}">
             <label class="control-label" for="firstName">Ime</label>
-            <span class="help-block error" *ngIf="firstName.touched && firstName.invalid">{{getWarningMessage("required")}}</span>
+            <span class="help-block error" *ngIf="firstName.touched && firstName.invalid">
+                {{getWarningMessage("required")}}
+            </span>
             <input class="form-control" formControlName="firstName" id="firstName" type="text">
         </div>
         <div class="form-group" [ngClass]="{'has-error': lastName.touched && lastName.invalid, 'has-success': lastName.touched && lastName.valid}">
             <label class="control-label" for="lastName">Prezime</label>
-            <span class="help-block error" *ngIf="lastName.touched && lastName.invalid">{{getWarningMessage("required")}}</span>
+            <span class="help-block error" *ngIf="lastName.touched && lastName.invalid">
+                {{getWarningMessage("required")}}
+            </span>
             <input class="form-control" formControlName="lastName" id="lastName" type="text">
         </div>
         <div class="form-group" [ngClass]="{'has-error': email.touched && email.invalid, 'has-success': email.touched && email.valid}">
             <label class="control-label" for="email">E-mail</label>
-            <span class="help-block error" *ngIf="email.touched && email.hasError('required')">{{getWarningMessage("required")}} &nbsp;</span>
-            <span class="help-block error" *ngIf="email.touched && email.hasError('pattern')">{{getWarningMessage("invalid-email")}} &nbsp;</span>
+            <span class="help-block error" *ngIf="email.touched && email.hasError('required')">
+                {{getWarningMessage("required")}} &nbsp;
+            </span>
+            <span class="help-block error" *ngIf="email.touched && email.hasError('pattern')">
+                {{getWarningMessage("invalid-email")}} &nbsp;
+            </span>
             <input class="form-control" formControlName="email" id="email" type="email">
         </div>
         <div class="form-group" [ngClass]="{'has-error': phoneNumber.touched && phoneNumber.invalid, 'has-success': phoneNumber.touched && phoneNumber.valid}">
             <label class="control-label" for="phoneNumber">Telefonski broj</label>
-            <span class="help-block error" *ngIf="phoneNumber.touched && phoneNumber.hasError('pattern')">{{getWarningMessage("invalid-phone-number")}}</span>
+            <span class="help-block error" *ngIf="phoneNumber.touched && phoneNumber.hasError('pattern')">
+                {{getWarningMessage("invalid-phone-number")}}
+            </span>
             <input class="form-control" formControlName="phoneNumber" id="phoneNumber" type="text">
         </div>
         <div class="form-group">
@@ -27,15 +37,19 @@
             <span>********</span>
         </div>
         <div class="form-group">
-            <label for="councilperson">Član vijeća</label>
-            <input formControlName="councilperson" id="councilperson" type="checkbox" (change)="appendDateForm()">
+            <label for="councilMember">Član vijeća</label>
+            <input formControlName="councilMember" id="councilMember" type="checkbox" (change)="appendDateForm()">
         </div>
-        <div class="form-group" [ngClass]="{'has-error': startYear.invalid || userForm.hasError('startDateInvalid'), 'has-success': startYear.valid && !userForm.hasError('startDateInvalid')}" *ngIf="councilperson.value">
+        <div class="form-group" [ngClass]="{'has-error': startYear.invalid || userForm.hasError('startDateInvalid'), 'has-success': startYear.valid && !userForm.hasError('startDateInvalid')}" *ngIf="councilMember.value">
             <fieldset>
                 <legend>
                     Od
-                    <span class="error help-block" *ngIf="startYear.hasError('min') || startYear.hasError('max')">{{getWarningMessage("invalid-year")}}</span>
-                    <span class="error help-block" *ngIf="userForm.hasError('startDateInvalid')">{{getWarningMessage("invalid-date")}}</span>
+                    <span class="error help-block" *ngIf="startYear.hasError('min') || startYear.hasError('max')">
+                        {{getWarningMessage("invalid-year")}}
+                    </span>
+                    <span class="error help-block" *ngIf="userForm.hasError('startDateInvalid')">
+                        {{getWarningMessage("invalid-date")}}
+                    </span>
                 </legend>
                 <label class="control-label col-md-1" for="startDay">Dan</label>
                 <div class="col-md-3">
@@ -55,13 +69,19 @@
                 </div>
             </fieldset>
         </div>
-        <div class="form-group" [ngClass]="{'has-error': endYear.invalid || userForm.hasError('endDateInvalid') || userForm.hasError('startDateAfterEndDate'), 'has-success': endYear.valid && !userForm.hasError('endDateInvalid') && !userForm.hasError('startDateAfterEndDate')}" *ngIf="councilperson.value">
+        <div class="form-group" [ngClass]="{'has-error': endYear.invalid || userForm.hasError('endDateInvalid') || userForm.hasError('startDateAfterEndDate'), 'has-success': endYear.valid && !userForm.hasError('endDateInvalid') && !userForm.hasError('startDateAfterEndDate')}" *ngIf="councilMember.value">
             <fieldset>
                 <legend>
                     Do
-                    <span class="error help-block" *ngIf="endYear.hasError('min') || endYear.hasError('max')">{{getWarningMessage("invalid-year")}}</span>
-                    <span class="error help-block" *ngIf="userForm.hasError('endDateInvalid')">{{getWarningMessage("invalid-date")}}</span>
-                    <span class="error help-block" *ngIf="userForm.hasError('startDateAfterEndDate')">{{getWarningMessage("start-date-before-end-date")}}</span>
+                    <span class="error help-block" *ngIf="endYear.hasError('min') || endYear.hasError('max')">
+                        {{getWarningMessage("invalid-year")}}
+                    </span>
+                    <span class="error help-block" *ngIf="userForm.hasError('endDateInvalid')">
+                        {{getWarningMessage("invalid-date")}}
+                    </span>
+                    <span class="error help-block" *ngIf="userForm.hasError('startDateAfterEndDate')">
+                        {{getWarningMessage("start-date-before-end-date")}}
+                    </span>
                 </legend>
                 <label class="control-label col-md-1" for="endDay">Dan</label>
                 <div class="col-md-3">

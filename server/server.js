@@ -2,21 +2,22 @@
 
 'use strict'
 
-var express = require('express');
 var bodyParser = require('body-parser');
+var express = require('express');
 var path = require("path");
 
 var app = express();
-var apiRoutes = express.Router();
-apiRoutes = require("./apiRoutes")(apiRoutes);
+
+var loginRouter = require("./routes/login");
+var userRouter = require("./routes/user");
 
 app.set('port', (process.env.PORT || 3000));
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
-
 app.use(express.static('./'));
 
-app.use("/api", apiRoutes);
+app.use("/authentication", loginRouter);
+app.use("/api/users", userRouter);
 
 app.get("*", function(request, response) {
     response.sendFile(path.join(__dirname, "../index.html"));

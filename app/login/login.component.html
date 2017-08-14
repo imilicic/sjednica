@@ -1,5 +1,5 @@
 <div class="col-md-offset-2 col-md-4">
-  <form [formGroup]="loginForm" (ngSubmit)="login()" >
+  <form [formGroup]="loginForm" (ngSubmit)="loginUser()" >
     <div class="form-group" [ngClass]="{'has-error': email.touched && email.invalid, 'has-success': email.touched && email.valid}">
       <label for="email" class="control-label">E-mail adresa</label>
       <span class="error help-block" *ngIf="email.touched && email.invalid">{{getWarningMessage("required")}}</span>

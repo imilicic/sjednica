@@ -2,7 +2,13 @@
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+      <button
+        type="button"
+        class="navbar-toggle collapsed"
+        data-toggle="collapse"
+        data-target="#bs-example-navbar-collapse-1"
+        aria-expanded="false"
+      >
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
@@ -13,27 +19,54 @@
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav navbar-center" *ngIf="userService.isAuthenticated()">
-        <li class="dropdown" *ngIf="userService.isAdmin()">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+      <ul class="nav navbar-nav navbar-center" *ngIf="authenticationService.isAuthenticated()">
+        <li class="dropdown" *ngIf="authenticationService.isAdmin()">
+          <a
+            href="#"
+            class="dropdown-toggle"
+            data-toggle="dropdown"
+            role="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
             Korisnici <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
-            <li><a [routerLink]="['user/create']" routerLinkActive="active">Dodaj novog</a></li>
-            <li><a [routerLink]="['user']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Pregled svih</a></li>
+            <li><a [routerLink]="['users/create']" routerLinkActive="active">Dodaj novog</a></li>
+            <li>
+              <a
+                [routerLink]="['users']"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{exact: true}"
+              >
+                Pregled svih
+              </a>
+            </li>
           </ul>
         </li>
         <li><a [routerLink]="['meetings']" routerLinkActive="active">Sjednice</a></li>
       </ul>
 
       <ul class="nav navbar-nav navbar-right">
-        <li *ngIf="!userService.isAuthenticated()"><a [routerLink]="['user/login']" routerLinkActive="active">Prijavi se</a></li>
-        <li class="dropdown" *ngIf="userService.isAuthenticated()">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-            {{userService.user?.FirstName}} {{userService.user?.LastName}} <span class="caret"></span>
+        <li *ngIf="!authenticationService.isAuthenticated()">
+          <a [routerLink]="['login']" routerLinkActive="active">
+            Prijavi se
+          </a>
+        </li>
+        <li class="dropdown" *ngIf="authenticationService.isAuthenticated()">
+          <a
+            href="#"
+            class="dropdown-toggle"
+            data-toggle="dropdown"
+            role="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            {{authenticationService.user.FirstName}} {{authenticationService.user.LastName}}
+            <span class="caret"></span>
           </a>
           <ul class="dropdown-menu">
-            <li><a [routerLink]="['user/me']" routerLinkActive="active">Profil</a></li>
+            <li><a [routerLink]="['users/me']" routerLinkActive="active">Profil</a></li>
             <li><a [routerLink]="" (click)="logout()">Odjavi se</a></li>
           </ul>
         </li>

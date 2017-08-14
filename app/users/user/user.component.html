@@ -1,0 +1,102 @@
+<h1>Vaši korisnički podaci</h1>
+<div class="row">
+    <div class="col-md-8">
+        <table class="table table-bordered">
+            <tr>
+                <td>Ime</td>
+                <td>{{user.FirstName}}</td>
+            </tr>
+            <tr>
+                <td>Prezime</td>
+                <td>{{user.LastName}}</td>
+            </tr>
+            <tr>
+                <td>E-mail</td>
+                <td>{{user.Email}}</td>
+            </tr>
+            <tr>
+                <td>Telefonski broj</td>
+                <td>{{user.PhoneNumber}}</td>
+            </tr>
+            <tr>
+                <td>Lozinka <!--(<button class="btn-link" (click)="changePasswordMode=true">promijeni</button>)--></td>
+                <td>**********</td>
+            </tr>
+            <tr>
+                <td>Uloga</td>
+                <td>{{user.RoleName | role}}</td>
+            </tr>
+            <tr *ngIf="user.RoleName === 'councilmember'">
+                <td>Član vijeća</td>
+                <td>{{user.StartDate}} - {{user.EndDate}}</td>
+            </tr>
+        </table>
+        <!--<form
+        [formGroup]="passwordForm"
+        (ngSubmit)="changePassword()"
+        autocomplete="off"
+        *ngIf="changePasswordMode">
+            <div
+            class="form-group"
+            [ngClass]="{'has-error': oldPassword.touched && oldPassword.invalid, 'has-success': oldPassword.touched && oldPassword.valid}">
+                <label class="control-label" for="oldPassword">Stara lozinka</label>
+                <span class="error help-block" *ngIf="oldPassword.touched && oldPassword.invalid">
+                    {{getWarningMessage("required")}}
+                </span>
+                <input class="form-control" formControlName="oldPassword" id="oldPassword" type="password">
+            </div>
+            <div
+            class="form-group"
+            [ngClass]="{'has-error': newPassword.touched && newPassword.invalid, 'has-success': newPassword.touched && newPassword.valid}">
+                <label class="control-label" for="newPassword">Nova lozinka (<input id="generate" type="checkbox" (change)="setGeneratedPassword()"> <label for="generate">generiraj novu lozinku</label>)</label>
+                <span class="error help-block" *ngIf="newPassword.touched && newPassword.hasError('required')">
+                    {{getWarningMessage("required")}} &nbsp;
+                </span>
+                <span class="error help-block" *ngIf="newPassword.touched && newPassword.hasError('minlength')">
+                    {{getWarningMessage("new-password-minlength")}} &nbsp;
+                </span>
+                <span class="error help-block" *ngIf="newPassword.touched && newPassword.hasError('pattern')">
+                    {{getWarningMessage("new-password-pattern")}} &nbsp;
+                </span>
+                <input
+                class="form-control"
+                formControlName="newPassword"
+                id="newPassword"
+                type="password"
+                *ngIf="!generatedPassword">
+                <input
+                class="form-control"
+                formControlName="newPassword"
+                id="newPassword"
+                type="text"
+                readonly
+                *ngIf="generatedPassword">
+            </div>
+            <div
+            class="form-group"
+            [ngClass]="{'has-error': newPassword2.touched && (newPassword2.invalid || passwordForm.hasError('newPasswordsAreNotEqual')), 'has-success': newPassword2.touched && newPassword2.valid}">
+                <label class="control-label" for="newPassword2">Ponovno upišite novu lozinku</label>
+                <span class="error help-block" *ngIf="newPassword2.touched && newPassword2.invalid">
+                    {{getWarningMessage("required")}} &nbsp;
+                </span>
+                <span class="error help-block" *ngIf="newPassword2.touched && passwordForm.hasError('newPasswordsAreNotEqual')">
+                    {{getWarningMessage("new-passwords-not-equal")}} &nbsp;
+                </span>
+                <input
+                class="form-control"
+                formControlName="newPassword2"
+                id="newPassword2"
+                type="password"
+                *ngIf="!generatedPassword">
+                <input
+                class="form-control"
+                formControlName="newPassword2"
+                id="newPassword2"
+                type="password"
+                readonly
+                *ngIf="generatedPassword">
+            </div>
+            <button class="btn btn-default" type="submit" [disabled]="passwordForm.invalid">Spremi</button>
+        </form>-->
+    </div>
+</div>
