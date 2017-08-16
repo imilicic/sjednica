@@ -77,11 +77,11 @@ export class UserCreateComponent implements OnInit {
         let startDate = null;
 
         if (this.councilMember.value) {
-            endDate = new Date(Date.UTC(this.endYear.value, this.endMonth.value - 1, this.endDay.value));
-            startDate = new Date(Date.UTC(this.startYear.value, this.startMonth.value - 1, this.startDay.value));
+            endDate = this.generateDateString(this.endYear.value, this.endMonth.value, this.endDay.value);
+            startDate = this.generateDateString(this.startYear.value, this.startMonth.value, this.startDay.value);
 
             if (this.permanentMember.value) {
-                endDate = new Date(Date.UTC(9999, 11, 31));
+                endDate = this.generateDateString(9999, 11, 31);
             }
         }
 
@@ -156,6 +156,25 @@ export class UserCreateComponent implements OnInit {
             location: 'createUser',
             code: code
         });
+    }
+
+    private generateDateString(year: number, month: number, day: number): string {
+        let monthString: string;
+        let dayString: string;
+
+        if (month < 10) {
+            monthString = '0';
+        }
+
+        monthString +=  month.toString();
+
+        if (day < 10) {
+            dayString = '0';
+        }
+
+        dayString +=  day.toString();
+
+        return year.toString() + '-' + monthString + '-' + dayString;
     }
 }
 

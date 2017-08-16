@@ -36,7 +36,7 @@ function createUser(request, response) {
     if (!request.body.FirstName || !request.body.LastName || 
         !request.body.Email || 
         !request.body.Password || !request.body.hasOwnProperty("CouncilMember") ||
-        !request.body.hasOwnProperty("EndDate") || !request.body.hasOwnProperty("StartDate")
+        !request.body.hasOwnProperty("CouncilMemberStartEnd")
     ) {
         return response.status(400).send("Nevaljan zahtjev!");
     }
@@ -45,7 +45,7 @@ function createUser(request, response) {
         return response.status(401).send("Nisi admin!");
     }
 
-    var councilperson = request.body.Councilperson;
+    var councilMember = request.body.CouncilMember;
     var email = request.body.Email;
     var endDate;
     var firstName = request.body.FirstName;
@@ -64,14 +64,15 @@ function createUser(request, response) {
         if (result.length > 0) {
             return response.status(422).send("Korisnik s ovim emailom već postoji!");
         } else {
-            if (councilperson) {
-                if(isNaN(Date.parse(request.body.EndDate)) || isNaN(Date.parse(request.body.StartDate))) {
+            if (councilMember) {
+                var CouncilMemberStartEnd = request.body.CouncilMemberStartEnd[0];
+                if(isNaN(Date.parse(CouncilMemberStartEnd.EndDate)) || isNaN(Date.parse(CouncilMemberStartEnd.StartDate))) {
                     return response.status(400).send("Nevaljan datum!");
                 }
 
                 roleId = 2;
-                endDate = request.body.EndDate.split("T")[0];
-                startDate = request.body.StartDate.split("T")[0];
+                endDate = CouncilMemberStartEnd.EndDate.split("T")[0];
+                startDate = CouncilMemberStartEnd.StartDate.split("T")[0];
             }
 
             // var salt = passwordHash.generateRandomString(16);
@@ -95,7 +96,7 @@ function createUser(request, response) {
                 }
 
                 if (result.serverStatus == 2) {
-                    if (councilperson) {
+                    if (councilMember) {
                         var queryString2 = "INSERT INTO CouncilMembers (UserId, StartDate, EndDate) VALUES (?, ?, ?)";
                         connection.query(queryString2, [result.insertId, startDate, endDate], function(error2, result2) {
                             if (error2) {
@@ -133,7 +134,7 @@ function readUser(request, response) {
                 user = user[0];
 
                 if (user.RoleName == 'councilmember') {
-                    queryString = "SELECT StartDate, EndDate FROM CouncilMembers WHERE UserId = ?";
+                    queryString = "SELECT StartDate, EndDate FROM CouncilMembers WHERE UserId = ? ORDER BY StartDate DESC";
                     connection.query(queryString, [userId], function(error, councilMemberStartEnd) {
                         if (error) {
                             throw error;

@@ -30,7 +30,10 @@
             <tr *ngIf="user.RoleName === 'councilmember'">
                 <td>Član vijeća</td>
                 <td>
-                    <p *ngFor="let date of user.CouncilMemberStartEnd">
+                    <p *ngIf="isPermanentCouncilMember()">
+                        stalan član vijeća od {{user.CouncilMemberStartEnd[0].StartDate | date: 'd. M. y.'}}
+                    </p>
+                    <p *ngFor="let date of councilMemberDates">
                         {{date.StartDate | date: 'd. M. y.'}} - {{date.EndDate | date: 'd. M. y.'}}
                     </p>
                 </td>

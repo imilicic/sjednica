@@ -17,6 +17,7 @@ import { User } from '../../shared/models/user.model';
 export class UserComponent implements OnInit {
     user: User;
     isThisCurrentUserProfile: Boolean;
+    councilMemberDates: {StartDate: string, EndDate: string}[];
     // changePasswordMode: Boolean = false;
     // generatedPassword: Boolean = false;
 
@@ -41,6 +42,21 @@ export class UserComponent implements OnInit {
     //         code: code
     //     });
     // }
+
+    isPermanentCouncilMember() {
+        if (this.user.CouncilMemberStartEnd[0].EndDate === '9999-12-31') {
+            this.councilMemberDates = [];
+
+            for (let i = 1; i < this.user.CouncilMemberStartEnd.length; i++) {
+                this.councilMemberDates.push(this.user.CouncilMemberStartEnd[i]);
+            }
+
+            return true;
+        } else {
+            this.councilMemberDates = this.user.CouncilMemberStartEnd;
+            return false;
+        }
+    }
 
     ngOnInit() {
         if (this.activatedRoute.snapshot.params['userId']) {
