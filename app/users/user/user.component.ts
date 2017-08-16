@@ -16,6 +16,7 @@ import { User } from '../../shared/models/user.model';
 })
 export class UserComponent implements OnInit {
     user: User;
+    isThisCurrentUserProfile: Boolean;
     // changePasswordMode: Boolean = false;
     // generatedPassword: Boolean = false;
 
@@ -45,9 +46,11 @@ export class UserComponent implements OnInit {
         if (this.activatedRoute.snapshot.params['userId']) {
             this.activatedRoute.data.subscribe((data: any) => {
                 this.user = data.user;
+                this.isThisCurrentUserProfile = false;
             });
         } else {
             this.user = this.authenticationService.user;
+            this.isThisCurrentUserProfile = true;
         }
         // this.newPassword = new FormControl('', [
         //     Validators.required,

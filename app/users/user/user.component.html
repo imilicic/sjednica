@@ -1,4 +1,5 @@
-<h1>Vaši korisnički podaci</h1>
+<h1 *ngIf="!isThisCurrentUserProfile">Podaci korisnika {{user.Email}}</h1>
+<h1 *ngIf="isThisCurrentUserProfile">Vaši podaci</h1>
 <div class="row">
     <div class="col-md-8">
         <table class="table table-bordered">
@@ -28,7 +29,11 @@
             </tr>
             <tr *ngIf="user.RoleName === 'councilmember'">
                 <td>Član vijeća</td>
-                <td>{{user.StartDate}} - {{user.EndDate}}</td>
+                <td>
+                    <p *ngFor="let date of user.CouncilMemberStartEnd">
+                        {{date.StartDate | date: 'd. M. y.'}} - {{date.EndDate | date: 'd. M. y.'}}
+                    </p>
+                </td>
             </tr>
         </table>
         <!--<form

@@ -1,12 +1,11 @@
 export class User {
     CouncilMember?: boolean
+    CouncilMemberStartEnd?: {StartDate: Date, EndDate: Date}[]
     Email: string
-    EndDate: Date
     FirstName: string
     LastName: string
     Password?: string
     UserId: number
     PhoneNumber?: string
     RoleName: string
-    StartDate: Date
 }

@@ -88,14 +88,16 @@ export class UserCreateComponent implements OnInit {
         let newUser: User = {
             CouncilMember: this.councilMember.value,
             Email: this.email.value,
-            EndDate: endDate,
             FirstName: this.firstName.value,
             LastName: this.lastName.value,
             Password: this.password,
             UserId: undefined,
             PhoneNumber: this.phoneNumber.value,
             RoleName: undefined,
-            StartDate: startDate
+            CouncilMemberStartEnd: [{
+                StartDate: startDate,
+                EndDate: endDate
+            }]
         };
 
         this.userService.createUser(newUser)

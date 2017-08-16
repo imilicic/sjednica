@@ -7,27 +7,23 @@ import { UserComponent } from './user/user.component';
 import { UserCreateComponent } from './user-create/user-create.component';
 import { UserUpdateComponent } from './user-update/user-update.component';
 import { UserResolverService } from './user/user-resolver.service';
-import { AuthenticationRouteActivatorService } from '../shared/services/authentication-route-activator.service';
 
 export const userRoutes: Routes = [
     {
         path: '',
         component: UsersComponent,
         canActivate: [
-            AuthenticationRouteActivatorService,
             AdminRouteActivatorService
         ]
     },
     {
         path: 'me',
-        component: UserComponent,
-        canActivate: [AuthenticationRouteActivatorService]
+        component: UserComponent
     },
     {
         path: 'create',
         component: UserCreateComponent,
         canActivate: [
-            AuthenticationRouteActivatorService,
             AdminRouteActivatorService
         ]
     },
@@ -35,7 +31,6 @@ export const userRoutes: Routes = [
         path: ':userId',
         component: UserComponent,
         canActivate: [
-            AuthenticationRouteActivatorService,
             AdminRouteActivatorService
         ],
         resolve: {

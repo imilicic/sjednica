@@ -9,7 +9,7 @@ import { AuthenticationRouteActivatorService } from './shared/services/authentic
 const appRoutes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'meetings', loadChildren: 'app/meetings/meetings.module#MeetingsModule', canActivate: [AuthenticationRouteActivatorService] },
-    { path: 'users', loadChildren: 'app/users/users.module#UsersModule' },
+    { path: 'users', loadChildren: 'app/users/users.module#UsersModule', canActivate: [AuthenticationRouteActivatorService] },
     { path: '', redirectTo: 'login', pathMatch: 'full' },
     { path: '**', component: Error404Component }
 ]

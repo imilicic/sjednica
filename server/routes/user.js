@@ -130,7 +130,25 @@ function readUser(request, response) {
             }
             
             if (user.length > 0) {
-                return response.status(201).send(user[0]);
+                user = user[0];
+
+                if (user.RoleName == 'councilmember') {
+                    queryString = "SELECT StartDate, EndDate FROM CouncilMembers WHERE UserId = ?";
+                    connection.query(queryString, [userId], function(error, councilMemberStartEnd) {
+                        if (error) {
+                            throw error;
+                        }
+
+                        if (councilMemberStartEnd.length > 0) {
+                            user.CouncilMemberStartEnd = councilMemberStartEnd;
+                            return response.status(201).send(user);
+                        } else {
+                            return response.status(422).send("Korisnik je član vijeća, ali nema datuma članstva!");
+                        }
+                    });
+                } else {
+                    return response.status(201).send(user);
+                }
             } else {
                 return response.status(422).send("Korisnik ne postoji!");
             }
