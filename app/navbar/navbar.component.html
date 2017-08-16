@@ -44,7 +44,27 @@
             </li>
           </ul>
         </li>
-        <li><a [routerLink]="['meetings']" routerLinkActive="active">Sjednice</a></li>
+        <li class="dropdown" *ngIf="authenticationService.isAdmin()">
+          <a
+            href="#"
+            class="dropdown-toggle"
+            data-toggle="dropdown"
+            role="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Sjednice <span class="caret"></span>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a [routerLink]="['meetings/create']" routerLinkActive="active">Dodaj novu</a></li>
+            <li><a
+            [routerLink]="['meetings']"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{exact: true}">
+              Pregled svih
+            </a></li>
+          </ul>
+        </li>
       </ul>
 
       <ul class="nav navbar-nav navbar-right">
@@ -67,7 +87,7 @@
           </a>
           <ul class="dropdown-menu">
             <li><a [routerLink]="['users/me']" routerLinkActive="active">Profil</a></li>
-            <li><a [routerLink]="" (click)="logout()">Odjavi se</a></li>
+            <li><a [routerLink]="" (click)="logoutUser()">Odjavi se</a></li>
           </ul>
         </li>
       </ul>

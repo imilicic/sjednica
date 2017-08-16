@@ -1,0 +1,28 @@
+<h1>{{meeting.Number}}. sjednica</h1>
+<table class="table table-bordered">
+    <tr>
+        <td>Adresa</td>
+        <td>{{meeting.Address}}</td>
+    </tr>
+    <tr>
+        <td>Grad</td>
+        <td>{{meeting.City}}</td>
+    </tr>
+    <tr>
+        <td>Datum i vrijeme</td>
+        <td>{{meeting.DateTime | date: 'd. M. y., HH:mm'}}</td>
+    </tr>
+    <tr>
+        <td>Broj u akademskoj godini</td>
+        <td>{{meeting.NumberInYear}}</td>
+    </tr>
+    <tr>
+        <td>Vrsta sjednice</td>
+        <td>{{meeting.Type | meetingType}}</td>
+    </tr>
+</table>
+
+<h3>Dnevni red</h3>
+<p *ngFor="let agendaItem of meeting.AgendaItems">
+    {{agendaItem.Number}}. {{agendaItem.Text}}
+</p>

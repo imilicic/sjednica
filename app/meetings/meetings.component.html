@@ -1,1 +1,17 @@
 <h1>Sjednice</h1>
+<table class="table table-bordered" *ngIf="meetings">
+    <tr>
+        <th>Broj sjednice</th>
+        <th>Adresa</th>
+        <th>Datum</th>
+        <th>Vrsta sjednice</th>
+    </tr>
+    <tr *ngFor="let meeting of meetings">
+        <td>
+            <a [routerLink]="[meeting.MeetingId]">{{meeting.Number}}. sjednica</a>
+        </td>
+        <td>{{meeting.Address}}</td>
+        <td>{{meeting.DateTime | date: 'd. M. y., HH:mm'}}</td>
+        <td>{{meeting.Type | meetingType}}</td>
+    </tr>
+</table>

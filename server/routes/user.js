@@ -132,7 +132,7 @@ function readUser(request, response) {
             if (user.length > 0) {
                 return response.status(201).send(user[0]);
             } else {
-                return response.status(400).send("Korisnik ne postoji!");
+                return response.status(422).send("Korisnik ne postoji!");
             }
         });
     } else {
