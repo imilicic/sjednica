@@ -1,27 +1,27 @@
 <h1>Popis svih korisnika</h1>
 <table class="table table-bordered" *ngIf="users">
     <tr>
-        <th></th>
+        <th *ngIf="authenticationService.isAdmin()"></th>
+        <th>Email</th>
         <th>Ime</th>
         <th>Prezime</th>
-        <th>Email</th>
         <th>Telefonski broj</th>
         <th>Uloga</th>
     </tr>
     <tr *ngFor="let user of users">
-        <td>
-            <a [routerLink]="user.UserId">
+        <td *ngIf="authenticationService.isAdmin()">
+            <a [routerLink]="['update', user.UserId]">
                 <span aria-hidden="true" class="glyphicon glyphicon-edit"></span>
             </a>
+        </td>
+        <td>
+            <a [routerLink]="user.UserId">{{user.Email}}</a>
         </td>
         <td>
             {{user.FirstName}}
         </td>
         <td>
             {{user.LastName}}
-        </td>
-        <td>
-            {{user.Email}}
         </td>
         <td>
             {{user.PhoneNumber}}

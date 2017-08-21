@@ -1,3 +1,12 @@
+DROP TABLE CouncilMemberships;
+DROP TABLE Users;
+DROP TABLE Roles;
+DROP TABLE AgendaDocuments;
+DROP TABLE AgendaItems;
+DROP TABLE MeetingNotifications;
+DROP TABLE Meetings;
+DROP TABLE Types;
+
 CREATE TABLE Roles (
 	RoleId INT AUTO_INCREMENT,
 	Name VARCHAR(40) NOT NULL,
@@ -6,9 +15,6 @@ CREATE TABLE Roles (
 
 INSERT INTO Roles (Name)
 VALUES ("admin");
-
-INSERT INTO Roles (Name)
-VALUES ("councilmember");
 
 INSERT INTO Roles (Name)
 VALUES ("user");
@@ -31,23 +37,20 @@ INSERT INTO Users (FirstName, LastName, Email, PhoneNumber, Password, Salt, Role
 VALUES ("Admin", "Adminić", "admin@mail.hr", NULL, "af3d7cb43b6bfdf23561d8b6fcbc9b4ff2932d7e88ef776807bd5870163f84495ca90f3ffd05b99148c5c936f36e1c38e49e84379cfa5899495db2e72bd8df04", "980b5986e28191a1", 1);
 
 INSERT INTO Users (FirstName, LastName, Email, PhoneNumber, Password, Salt, RoleId)
-VALUES ("CouncilMember", "CouncilMemberić", "councilmember@mail.hr", NULL, "af3d7cb43b6bfdf23561d8b6fcbc9b4ff2932d7e88ef776807bd5870163f84495ca90f3ffd05b99148c5c936f36e1c38e49e84379cfa5899495db2e72bd8df04", "980b5986e28191a1", 2);
-
-INSERT INTO Users (FirstName, LastName, Email, PhoneNumber, Password, Salt, RoleId)
-VALUES ("User", "Userić", "user@mail.hr", NULL, "af3d7cb43b6bfdf23561d8b6fcbc9b4ff2932d7e88ef776807bd5870163f84495ca90f3ffd05b99148c5c936f36e1c38e49e84379cfa5899495db2e72bd8df04", "980b5986e28191a1", 3);
+VALUES ("User", "Userić", "user@mail.hr", NULL, "af3d7cb43b6bfdf23561d8b6fcbc9b4ff2932d7e88ef776807bd5870163f84495ca90f3ffd05b99148c5c936f36e1c38e49e84379cfa5899495db2e72bd8df04", "980b5986e28191a1", 2);
 -- password: proba
 
-CREATE TABLE CouncilMembers (
-	CouncilMemberId INT AUTO_INCREMENT,
+CREATE TABLE CouncilMemberships (
+	CouncilMembershipId INT AUTO_INCREMENT,
 	UserId INT NOT NULL,
 	StartDate DATE NOT NULL,
 	EndDate DATE NOT NULL,
-	PRIMARY KEY (CouncilMemberId),
+	PRIMARY KEY (CouncilMembershipId),
 	FOREIGN KEY (UserId)
 		REFERENCES Users(UserId)
 );
 
-INSERT INTO CouncilMembers (UserId, StartDate, EndDate)
+INSERT INTO CouncilMemberships (UserId, StartDate, EndDate)
 VALUES (2, "2016-10-01", "2017-10-01");
 
 CREATE TABLE Types (
@@ -116,3 +119,15 @@ CREATE TABLE AgendaDocuments (
 
 INSERT INTO AgendaDocuments (Description, Url, AgendaItemId)
 VALUES ("Link na zadaću", "https://www.dropbox.com/s/br4w9t6cd8iw8u4/03_DIMBP201617_zadaca3.pdf?dl=0", 1);
+
+CREATE PROCEDURE CheckIfCouncilMember (
+	IN userId INT,
+	OUT isCouncilMember TINYINT
+)
+BEGIN
+	SELECT 1
+	INTO isCouncilMember
+	FROM HistoryCouncilMembers
+	WHERE UserId = userId
+	AND NOW() BETWEEN StartDate AND EndDate;
+END//

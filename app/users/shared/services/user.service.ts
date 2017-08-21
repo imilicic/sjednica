@@ -17,9 +17,9 @@ export class UserService {
         private authHttp: AuthHttp
     ) {}
 
-    createUser(userValues: Object): Observable<string> {
-        return this.authHttp.post('/api/users', userValues)
-        .map((response: Response) => response.text())
+    createUser(user: User): Observable<User> {
+        return this.authHttp.post('/api/users', user)
+        .map((response: Response) => <User>response.json())
         .catch(this.handleError);
     }
 
@@ -35,18 +35,11 @@ export class UserService {
         .catch(this.handleError);
     }
 
-    updateUser(userValues: any): Observable<string> {
-        return this.authHttp.put('/api/users/' + userValues.UserId, userValues)
+    updateUser(user: User): Observable<string> {
+        return this.authHttp.put('/api/users/' + user.UserId, user)
         .map((response: Response) => response.text())
         .catch(this.handleError);
     }
-
-    // updateUser(newUser: User) {
-    //     console.log(newUser);
-    //     // return this.authHttp.post('/api/update/user', newUser)
-    //     // .map((response: Response) => response.text())
-    //     // .catch(this.handleError);
-    // }
 
     private handleError (error: Response) {
         return Observable.throw(error.text());

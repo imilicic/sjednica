@@ -8,8 +8,6 @@ export class RolePipe implements PipeTransform {
         switch (value) {
             case 'admin':
                 return 'administrator';
-            case 'councilmember':
-                return 'član vijeća';
             case 'user':
                 return 'korisnik';
         }

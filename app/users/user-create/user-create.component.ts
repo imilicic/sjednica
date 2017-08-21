@@ -2,18 +2,21 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
+import { CouncilMembership } from '../../shared/models/council-membership.model';
 import { User } from '../../shared/models/user.model';
 import { PasswordService } from '../../shared/services/password.service';
 import { ResponseMessagesService } from '../../shared/services/response-messages.service';
 import { ToastrService } from '../../shared/services/toastr.service';
+import { CouncilMembershipService } from '../shared/services/council-membership.service';
 import { UserService } from '../shared/services/user.service';
+import { dateValidator } from '../shared/validators';
 
 @Component({
     styleUrls: ['./user-create.component.css'],
     templateUrl: './user-create.component.html'
 })
 export class UserCreateComponent implements OnInit {
-    councilMember: FormControl;
+    isCouncilMember: FormControl;
     email: FormControl;
     firstName: FormControl;
     lastName: FormControl;
@@ -36,11 +39,21 @@ export class UserCreateComponent implements OnInit {
         'rujan', 'listopad', 'studeni', 'prosinac'
     ];
 
-    appendDateForm() {
-        if (this.councilMember.value) {
+    addRemoveDateControls() {
+        if (this.isCouncilMember.value) {
             this.userForm.addControl('startDay', this.startDay);
             this.userForm.addControl('startMonth', this.startMonth);
             this.userForm.addControl('startYear', this.startYear);
+
+            if (this.permanentMember.value) {
+                this.endDay.setValue(31);
+                this.endMonth.setValue(12);
+                this.endYear.setValue(9999);
+            } else {
+                this.endDay.setValue(this.startDay.value);
+                this.endMonth.setValue(this.startMonth.value);
+                this.endYear.setValue(this.startYear.value + 1);
+            }
 
             this.userForm.addControl('endDay', this.endDay);
             this.userForm.addControl('endMonth', this.endMonth);
@@ -48,7 +61,7 @@ export class UserCreateComponent implements OnInit {
 
             this.userForm.addControl('permanentMember', this.permanentMember);
 
-            this.userForm.setValidators(dateValidator());
+            this.userForm.setValidators(dateValidator(true));
         } else {
             this.userForm.clearValidators();
 
@@ -61,10 +74,12 @@ export class UserCreateComponent implements OnInit {
             this.userForm.removeControl('endYear');
 
             this.userForm.removeControl('permanentMember');
+            this.permanentMember.setValue(false);
         }
     }
 
     constructor(
+        private councilMembershipService: CouncilMembershipService,
         private passwordService: PasswordService,
         private responseMessagesService: ResponseMessagesService,
         private router: Router,
@@ -72,40 +87,50 @@ export class UserCreateComponent implements OnInit {
         private userService: UserService
     ) {}
 
-    create() {
-        let endDate = null;
-        let startDate = null;
+    createCouncilMembership(userId: number) {
+        let endDate = this.generateDateString(this.endYear.value, this.endMonth.value, this.endDay.value);
+        let startDate = this.generateDateString(this.startYear.value, this.startMonth.value, this.startDay.value);
 
-        if (this.councilMember.value) {
-            endDate = this.generateDateString(this.endYear.value, this.endMonth.value, this.endDay.value);
-            startDate = this.generateDateString(this.startYear.value, this.startMonth.value, this.startDay.value);
+        let newCouncilMembership: CouncilMembership = {
+            IsCouncilMember: this.isCouncilMember.value,
+            History: [{
+                StartDate: startDate,
+                EndDate: endDate
+            }]
+        };
 
-            if (this.permanentMember.value) {
-                endDate = this.generateDateString(9999, 11, 31);
-            }
-        }
+        this.councilMembershipService.createCouncilMembership(userId, newCouncilMembership)
+        .subscribe((councilMembership: CouncilMembership) => {
+            this.toastrService.success('Korisnik je dodan u vijeće!');
+            this.router.navigate(['users']);
+        }, (error: string) => {
+            this.toastrService.error(error);
+        });
+    }
 
+    createUser() {
         let newUser: User = {
-            CouncilMember: this.councilMember.value,
             Email: this.email.value,
             FirstName: this.firstName.value,
             LastName: this.lastName.value,
             Password: this.password,
             UserId: undefined,
             PhoneNumber: this.phoneNumber.value,
-            RoleName: undefined,
-            CouncilMemberStartEnd: [{
-                StartDate: startDate,
-                EndDate: endDate
-            }]
+            RoleName: 'user'
         };
 
         this.userService.createUser(newUser)
-        .subscribe((response: string) => {
-            this.toastrService.success(response);
-            this.router.navigate(['users']);
-        },
-        (error: string) => this.toastrService.error(error));
+        .subscribe((user: User) => {
+            this.toastrService.success('Korisnik je izrađen!');
+
+            if (this.isCouncilMember.value) {
+                this.createCouncilMembership(user.UserId);
+            } else {
+                this.router.navigate(['users']);
+            }
+        }, (error: string) => {
+            this.toastrService.error(error)
+        });
     }
 
     ngOnInit() {
@@ -123,7 +148,7 @@ export class UserCreateComponent implements OnInit {
         this.password = this.passwordService.generatePassword(8, 4, 2);
         console.log(this.password);
 
-        this.councilMember = new FormControl(false);
+        this.isCouncilMember = new FormControl(false);
         this.email = new FormControl('', [
             Validators.required,
             Validators.pattern(/^[A-Za-z][A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,}$/)
@@ -133,7 +158,7 @@ export class UserCreateComponent implements OnInit {
         this.phoneNumber = new FormControl(undefined, Validators.pattern(/^[0-9]{3} [0-9]{6,10}$/));
 
         this.userForm = new FormGroup({
-            councilMember: this.councilMember,
+            isCouncilMember: this.isCouncilMember,
             email: this.email,
             firstName: this.firstName,
             lastName: this.lastName,
@@ -159,8 +184,8 @@ export class UserCreateComponent implements OnInit {
     }
 
     private generateDateString(year: number, month: number, day: number): string {
-        let monthString: string;
-        let dayString: string;
+        let monthString = '';
+        let dayString = '';
 
         if (month < 10) {
             monthString = '0';
@@ -178,37 +203,3 @@ export class UserCreateComponent implements OnInit {
     }
 }
 
-function dateValidator() {
-    return (formGroup: FormGroup) => {
-        let startDay = formGroup.controls['startDay'].value;
-        let startMonth = formGroup.controls['startMonth'].value - 1;
-        let startYear = formGroup.controls['startYear'].value;
-
-        let endDay = formGroup.controls['endDay'].value;
-        let endMonth = formGroup.controls['endMonth'].value - 1;
-        let endYear = formGroup.controls['endYear'].value;
-
-        let startDate = new Date(startYear, startMonth, startDay);
-        let endDate = new Date(endYear, endMonth, endDay);
-
-        if (startDate.getDate() !== startDay || startDate.getMonth() !== startMonth || startDate.getFullYear() !== startYear) {
-            return {
-                startDateInvalid: true
-            }
-        }
-
-        if (endDate.getDate() !== endDay || endDate.getMonth() !== endMonth || endDate.getFullYear() !== endYear) {
-            return {
-                endDateInvalid: true
-            }
-        }
-
-        if (startDate >= endDate) {
-            return {
-                startDateAfterEndDate: true
-            }
-        }
-
-        return null;
-    }
-}

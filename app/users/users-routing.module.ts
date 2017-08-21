@@ -6,7 +6,7 @@ import { AdminRouteActivatorService } from './shared/services/admin-route-activa
 import { UserComponent } from './user/user.component';
 import { UserCreateComponent } from './user-create/user-create.component';
 import { UserUpdateComponent } from './user-update/user-update.component';
-import { UserResolverService } from './user/user-resolver.service';
+import { UserResolverService } from './shared/services/user-resolver.service';
 
 export const userRoutes: Routes = [
     {
@@ -30,6 +30,16 @@ export const userRoutes: Routes = [
     {
         path: ':userId',
         component: UserComponent,
+        canActivate: [
+            AdminRouteActivatorService
+        ],
+        resolve: {
+            user: UserResolverService
+        }
+    },
+    {
+        path: 'update/:userId',
+        component: UserUpdateComponent,
         canActivate: [
             AdminRouteActivatorService
         ],

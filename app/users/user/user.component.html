@@ -27,13 +27,16 @@
                 <td>Uloga</td>
                 <td>{{user.RoleName | role}}</td>
             </tr>
-            <tr *ngIf="user.RoleName === 'councilmember'">
+            <tr *ngIf="user.HistoryCouncilMember">
                 <td>Član vijeća</td>
                 <td>
-                    <p *ngIf="isPermanentCouncilMember()">
-                        stalan član vijeća od {{user.CouncilMemberStartEnd[0].StartDate | date: 'd. M. y.'}}
+                    <p>
+                        <span *ngIf="isPermanentCouncilMember()">stalan član vijeća od</span>
+                        {{user.HistoryCouncilMember[0].StartDate | date: 'd. M. y.'}}
+                        <span *ngIf="!isPermanentCouncilMember()"> - {{user.HistoryCouncilMember[0].EndDate | date: 'd. M. y.'}}</span>
+                        <span *ngIf="user.IsCouncilMember">(trenutni član vijeća)</span>
                     </p>
-                    <p *ngFor="let date of councilMemberDates">
+                    <p *ngFor="let date of user.HistoryCouncilMember.slice(1)">
                         {{date.StartDate | date: 'd. M. y.'}} - {{date.EndDate | date: 'd. M. y.'}}
                     </p>
                 </td>

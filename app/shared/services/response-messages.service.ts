@@ -17,7 +17,8 @@ export class ResponseMessagesService {
             'invalid-phone-number': 'Neispravan format! (Primjer ispravnog broja: 032 123456)',
             'invalid-date': 'Datum nije valjan!',
             'invalid-year': 'Upišite godinu između 1900 i 9999!',
-            'start-date-before-end-date': 'Zašvršni datum mora biti nakon početnog!'
+            'start-date-before-end-date': 'Završni datum mora biti nakon početnog!',
+            'now-not-between-start-end': 'Trenutno vrijeme nije između početnog i završnog!'
         },
         'login': {
             'required': this.generalMessages.required

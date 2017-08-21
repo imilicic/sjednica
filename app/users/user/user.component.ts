@@ -1,23 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { AuthenticationService } from '../../shared/services/authentication.service';
-import { PasswordService } from '../../shared/services/password.service';
-import { ResponseMessagesService } from '../../shared/services/response-messages.service';
-import { ToastrService } from '../../shared/services/toastr.service';
-import { UserService } from '../shared/services/user.service';
 
 import { User } from '../../shared/models/user.model';
 
 @Component({
-    styleUrls: ['./user.component.css'],
     templateUrl: './user.component.html'
 })
 export class UserComponent implements OnInit {
     user: User;
     isThisCurrentUserProfile: Boolean;
-    councilMemberDates: {StartDate: string, EndDate: string}[];
+
     // changePasswordMode: Boolean = false;
     // generatedPassword: Boolean = false;
 
@@ -28,46 +22,26 @@ export class UserComponent implements OnInit {
 
     constructor(
         private activatedRoute: ActivatedRoute,
-        private authenticationService: AuthenticationService,
-        private passwordService: PasswordService,
-        private responseMessagesService: ResponseMessagesService,
-        private router: Router,
-        private toastrService: ToastrService,
-        private userService: UserService
+        private authenticationService: AuthenticationService
     ) {}
 
-    // getWarningMessage(code: string) {
-    //     return this.responseMessagesService.getMessage({
-    //         location: 'users/me',
-    //         code: code
-    //     });
-    // }
-
     isPermanentCouncilMember() {
-        if (this.user.CouncilMemberStartEnd[0].EndDate === '9999-12-31') {
-            this.councilMemberDates = [];
-
-            for (let i = 1; i < this.user.CouncilMemberStartEnd.length; i++) {
-                this.councilMemberDates.push(this.user.CouncilMemberStartEnd[i]);
-            }
-
+        if (this.user.HistoryCouncilMember[0].EndDate === '9999-12-31') {
             return true;
         } else {
-            this.councilMemberDates = this.user.CouncilMemberStartEnd;
             return false;
         }
     }
 
     ngOnInit() {
         if (this.activatedRoute.snapshot.params['userId']) {
-            this.activatedRoute.data.subscribe((data: any) => {
-                this.user = data.user;
-                this.isThisCurrentUserProfile = false;
-            });
+            this.user = this.activatedRoute.snapshot.data['user'];
+            this.isThisCurrentUserProfile = false;
         } else {
             this.user = this.authenticationService.user;
             this.isThisCurrentUserProfile = true;
         }
+
         // this.newPassword = new FormControl('', [
         //     Validators.required,
         //     Validators.minLength(8),

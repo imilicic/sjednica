@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { User } from '../../shared/models/user.model';
-import { UserService } from '../shared/services/user.service';
+import { User } from '../../../shared/models/user.model';
+import { UserService } from './user.service';
 
 @Injectable()
 export class UserResolverService implements Resolve<User> {
@@ -16,7 +16,7 @@ export class UserResolverService implements Resolve<User> {
         let user = this.userService.getUser(route.params['userId']);
         user.subscribe((_: User) => {
             return true;
-        }, (error: string) => {
+        }, (error: String) => {
             this.router.navigate(['users']);
         });
 

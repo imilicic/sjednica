@@ -1,6 +1,7 @@
+import { CouncilMembership } from './council-membership.model';
+
 export class User {
-    CouncilMember?: boolean
-    CouncilMemberStartEnd?: {StartDate: string, EndDate: string}[]
+    CouncilMemberships?: CouncilMembership
     Email: string
     FirstName: string
     LastName: string

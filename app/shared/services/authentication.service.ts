@@ -35,14 +35,14 @@ export class AuthenticationService {
             if (!this.user) {
                 this.user = this.jwtHelper.decodeToken(auth_token);
             }
-            
+
             return !this.jwtHelper.isTokenExpired(auth_token);
         }
 
         return false;
     }
 
-    loginUser(values: Object): Observable<{auth_token: string}> {
+    loginUser(values: {email: string, password: string}): Observable<{auth_token: string}> {
         let headers = new Headers({'Content-Type': 'application/json'});
         let options = new RequestOptions({headers: headers});
 

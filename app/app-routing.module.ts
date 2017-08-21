@@ -10,7 +10,7 @@ const appRoutes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'meetings', loadChildren: 'app/meetings/meetings.module#MeetingsModule', canActivate: [AuthenticationRouteActivatorService] },
     { path: 'users', loadChildren: 'app/users/users.module#UsersModule', canActivate: [AuthenticationRouteActivatorService] },
-    { path: '', redirectTo: 'login', pathMatch: 'full' },
+    { path: '', redirectTo: 'users', pathMatch: 'full' },
     { path: '**', component: Error404Component }
 ]
 

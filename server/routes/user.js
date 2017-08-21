@@ -1,10 +1,11 @@
-// userRouter.js
-
 var config = require("../config");
 var connection = require("../connection");
+var councilMembershipRouter = require("./councilMembership");
 var express = require('express');
 var jsonWebToken = require("jsonwebtoken");
 var passwordHash = require("../passwordHash");
+var validator = require("../validator");
+var userHelper = require("./user-helper");
 
 var userRouter = express.Router();
 
@@ -25,198 +26,274 @@ userRouter.use(function(request, response, next) {
     }
 });
 
-userRouter.post("/", createUser);
-userRouter.get("/", readUsers);
-userRouter.get("/:userId", readUser);
-userRouter.put("/:userId", updateUser);
+// makes list of objects [{roleId, roleName}]
+userRouter.use(function(request, response, next) {
+    var queryString = "SELECT * FROM Roles";
+    
+    connection.query(queryString, function(error, result) {
+        if (error) {
+            return response.status(500).send(error);
+        }
+
+        request.roles = result;
+        next();
+    });
+});
+
+userRouter.post("/", userHelper.isAdmin, userHelper.ifUserExists, createUser);
+userRouter.get("/", userHelper.isAdmin, readUsers);
+userRouter.get("/:userId", validateRouteParam, userHelper.isAdmin, userHelper.ifUserExists, readUser);
+userRouter.put("/:userId", validateRouteParam, userHelper.ifUserExists, updateUser);
+
+userRouter.use("/:userId/councilMemberships", validateRouteParam, userHelper.isAdmin, function(request, response, next) {
+    request.userId = request.params.userId;
+    next();
+}, councilMembershipRouter);
 
 module.exports = userRouter;
 
 function createUser(request, response) {
-    if (!request.body.FirstName || !request.body.LastName || 
-        !request.body.Email || 
-        !request.body.Password || !request.body.hasOwnProperty("CouncilMember") ||
-        !request.body.hasOwnProperty("CouncilMemberStartEnd")
-    ) {
+    if (!(request.body.email && 
+        request.body.firstName && 
+        request.body.lastName && 
+        request.body.password && 
+        request.body.roleName)) {
         return response.status(400).send("Nevaljan zahtjev!");
     }
 
-    if (request.decoded.RoleName != "admin") {
-        return response.status(401).send("Nisi admin!");
-    }
-
-    var councilMember = request.body.CouncilMember;
     var email = request.body.Email;
-    var endDate;
     var firstName = request.body.FirstName;
     var lastName = request.body.LastName;
     var password = request.body.Password;
-    var phoneNumber;
-    var roleId = 3;
-    var startDate;
+    var phoneNumber = request.body.PhoneNumber;
+    var roleId = searchRoleByName(request.roles, request.body.RoleName);
 
-    var queryString = "SELECT * FROM Users WHERE Email = ?"
-    connection.query(queryString, [email], function (error, result) {
+    var createUserValidators = ["email", "firstName", "lastName", "password"];
+
+    if (phoneNumber) {
+        createUserValidators.push("phoneNumber");
+    }
+
+    var vals = validator.appendValidators(createUserValidators, userHelper.validators).map(val => {
+        val.Value = eval(val.Name);
+        return val;
+    });
+
+    if (!validator.validateFormInput(vals)) {
+        return response.status(400).send("Nevaljan zahtjev!");
+    }
+
+    if (!roleId) {
+        return response.status(400).send("Nevaljan zahtjev!");
+    }
+
+    var passwordData = passwordHash.hashPassword(password);
+    var values;
+
+    if (request.body.PhoneNumber) {
+        phoneNumber = request.body.PhoneNumber;
+        queryString = "INSERT INTO Users (FirstName, LastName, Email, Password, Salt, PhoneNumber, RoleId) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        values = [firstName, lastName, email, passwordData.passwordHash, passwordData.salt, phoneNumber, roleId];
+    } else {
+        queryString = "INSERT INTO Users (FirstName, LastName, Email, Password, Salt, RoleId) VALUES (?, ?, ?, ?, ?, ?)";
+        values = [firstName, lastName, email, passwordData.passwordHash, passwordData.salt, roleId];
+    }
+
+    connection.query(queryString, values, function(error, result) {
         if (error) {
-            throw error;
+            return response.status(500).send(error);
         }
 
-        if (result.length > 0) {
-            return response.status(422).send("Korisnik s ovim emailom već postoji!");
-        } else {
-            if (councilMember) {
-                var CouncilMemberStartEnd = request.body.CouncilMemberStartEnd[0];
-                if(isNaN(Date.parse(CouncilMemberStartEnd.EndDate)) || isNaN(Date.parse(CouncilMemberStartEnd.StartDate))) {
-                    return response.status(400).send("Nevaljan datum!");
-                }
-
-                roleId = 2;
-                endDate = CouncilMemberStartEnd.EndDate.split("T")[0];
-                startDate = CouncilMemberStartEnd.StartDate.split("T")[0];
-            }
-
-            // var salt = passwordHash.generateRandomString(16);
-            var passwordData = passwordHash.hashPassword(password);
-
-            var queryString;
-            var values;
-
-            if (request.body.PhoneNumber) {
-                phoneNumber = request.body.PhoneNumber;
-                queryString = "INSERT INTO Users (FirstName, LastName, Email, Password, Salt, PhoneNumber, RoleId) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                values = [firstName, lastName, email, passwordData.passwordHash, passwordData.salt, phoneNumber, roleId];
-            } else {
-                queryString = "INSERT INTO Users (FirstName, LastName, Email, Password, Salt, RoleId) VALUES (?, ?, ?, ?, ?, ?)";
-                values = [firstName, lastName, email, passwordData.passwordHash, passwordData.salt, roleId];
-            }
-
-            connection.query(queryString, values, function (error, result) {
-                if (error) {
-                    throw error;
-                }
-
-                if (result.serverStatus == 2) {
-                    if (councilMember) {
-                        var queryString2 = "INSERT INTO CouncilMembers (UserId, StartDate, EndDate) VALUES (?, ?, ?)";
-                        connection.query(queryString2, [result.insertId, startDate, endDate], function(error2, result2) {
-                            if (error2) {
-                                throw error2;
-                            }
-
-                            if (result2.serverStatus == 2) {
-                                return response.status(201).send("Korisnik je izrađen.");
-                            } else {
-                                return response.status(201).send("Korisnik je izrađen, ali nije dodan u vijeće!");
-                            }
-                        });
-                    } else {
-                        return response.status(201).send("Korisnik je izrađen.");
-                    }
-                } else {
-                    return response.status(500).send("Korisnik nije izrađen.");
-                }
-            });
+        if (result.serverStatus != 2) {
+            return response.status(500).send("Korisnik nije izrađen.");
         }
+        
+        queryString = "SELECT UserId, FirstName, LastName, Email, PhoneNumber, Name AS RoleName FROM Users INNER JOIN Roles USING (RoleId) WHERE Email = ?";
+        
+        connection.query(queryString, [email], function(error, user) {
+            if (error) {
+                return response.status(500).send(error);
+            }
+
+            if (user.length === 0) {
+                return response.status(500).send("Korisnik nije izrađen.");
+            }
+
+            response.set("Location", "Location: /api/users/" + user[0].UserId);
+            return response.status(201).send(user[0]);
+        });
     });
 }
 
 function readUser(request, response) {
-    if (request.decoded.RoleName == "admin") {
-        var userId = request.params.userId;
-        var queryString = "SELECT UserId, FirstName, LastName, Email, PhoneNumber, Name AS RoleName FROM Users INNER JOIN Roles USING (RoleId) WHERE UserId = ? ";
+    var user = request.user;
+    user.RoleName = searchRoleById(request.roles, user.RoleId);
 
-        connection.query(queryString, [userId], function(error, user) {
-            if (error) {
-                throw error;
-            }
-            
-            if (user.length > 0) {
-                user = user[0];
+    delete user.Password;
+    delete user.Salt;
+    delete user.RoleId;
 
-                if (user.RoleName == 'councilmember') {
-                    queryString = "SELECT StartDate, EndDate FROM CouncilMembers WHERE UserId = ? ORDER BY StartDate DESC";
-                    connection.query(queryString, [userId], function(error, councilMemberStartEnd) {
-                        if (error) {
-                            throw error;
-                        }
-
-                        if (councilMemberStartEnd.length > 0) {
-                            user.CouncilMemberStartEnd = councilMemberStartEnd;
-                            return response.status(201).send(user);
-                        } else {
-                            return response.status(422).send("Korisnik je član vijeća, ali nema datuma članstva!");
-                        }
-                    });
-                } else {
-                    return response.status(201).send(user);
-                }
-            } else {
-                return response.status(422).send("Korisnik ne postoji!");
-            }
-        });
-    } else {
-        return response.status(401).send("Nisi admin!");
-    }
+    return response.status(200).send(user);
 }
 
 function readUsers(request, response) {
-    if (request.decoded.RoleName == "admin") {
-        var queryString = "SELECT UserId, FirstName, LastName, Email, PhoneNumber, Name AS RoleName FROM Users INNER JOIN Roles USING(RoleId)";
+    var queryString = "SELECT UserId, FirstName, LastName, Email, PhoneNumber, Name AS RoleName FROM Users INNER JOIN Roles USING(RoleId)";
+    
+    connection.query(queryString, function(error, users) {
+        if (error) {
+            return response.status(500).send(error);
+        }
+
+        return response.status(200).send({
+            users: users
+        });
+    });
+}
+
+function updateUser(request, response) {
+    var user = request.user;
+
+    if (request.decoded.RoleName === "admin") {
+        // admin is changing user data        
+        if (!(
+            request.body.Email &&
+            request.body.FirstName &&
+            request.body.LastName &&
+            request.body.hasOwnProperty("Password") &&
+            request.body.hasOwnProperty("PhoneNumber") &&
+            request.body.RoleName &&
+            request.body.UserId
+        )) {
+            return response.status(400).send("Nevaljan zahtjev!");
+        }
         
-        connection.query(queryString, function(error, users) {
+        if (request.body.UserId != user.UserId) {
+            return response.status(400).send("Nevaljan zahtjev!");
+        }
+
+        var email = request.body.Email;
+        var firstName = request.body.FirstName;
+        var lastName = request.body.LastName;
+        var password = request.body.Password;
+        var phoneNumber = request.body.PhoneNumber;
+        var roleId = searchRoleByName(request.roles, request.body.RoleName);
+        var userId = request.body.UserId;
+
+        var createUserValidators = ["email", "firstName", "lastName", "password"];
+        
+        if (phoneNumber) {
+            createUserValidators.push("phoneNumber");
+        }
+    
+        var vals = appendValidators(createUserValidators).map(val => {
+            val.Value = eval(val.Name);
+            return val;
+        });
+    
+        if (!validateFormInput(vals)) {
+            return response.status(400).send("Nevaljan zahtjev!");
+        }
+
+        if (!roleId) {
+            return response.status(400).send("Nevaljan zahtjev!");
+        }
+
+        var queryString = "UPDATE Users SET "
+        var values = [];
+
+        if (user.Email !== email) {
+            queryString += "Email = ?,";
+            values.push(email);
+            user.Email = email;
+        }
+
+        if (user.FirstName !== firstName) {
+            queryString += "FirstName = ?,";
+            values.push(firstName);
+            user.FirstName = firstName;
+        }
+        
+        if (user.LastName !== lastName) {
+            queryString += "LastName = ?,";
+            values.push(lastName);
+            user.LastName = lastName;
+        }
+        
+        if (password !== null) {
+            queryString += "Password = ?, Salt = ?,";
+            var passwordData = passwordHash.hashPassword(password);
+            values.push(passwordData.passwordHash, passwordData.salt);
+        }
+
+        if (user.PhoneNumber !== phoneNumber) {
+            queryString += "PhoneNumber = ?,";
+            values.push(phoneNumber);
+            user.PhoneNumber = phoneNumber;
+        }
+
+        if (user.RoleId !== roleId) {
+            queryString += "RoleId = ?,";
+            values.push(roleId);
+            user.RoleId = roleId;
+        }
+
+        if (values.length === 0) {
+            return response.status(400).send("Nevaljan zahtjev!");
+        }
+
+        queryString = queryString.slice(0, -1);
+        queryString += " WHERE UserId = ?"
+        values.push(userId);
+
+        connection.query(queryString, values, function(error, result) {
             if (error) {
-                throw error;
+                return response.status(500).send(error);
             }
 
-            return response.status(201).send({
-                users: users
-            });
+            if (result.serverStatus != 2) {
+                return response.status(500).send("Korisnički podaci nisu promjenjeni!");
+            } else {
+                user.RoleName = searchRoleById(request.roles, user.RoleId);
+
+                delete user.Password;
+                delete user.Salt;
+                delete user.RoleId;
+
+                return response.status(200).send(user);
+            }
+        });
+    } else if (request.decoded.UserId === user.UserId) {
+        // user is changing his data
+        if (!request.body.NewPassword || !request.body.OldPassword) {
+            return response.status(400).send("Nevaljan zahtjev!");
+        }
+
+        var newPassword = request.body.NewPassword;
+        var oldPassword = request.body.OldPassword;
+        var oldPasswordData = passwordHash.hashPassword(oldPassword, user.Salt);
+
+        if (oldPasswordData.passwordHash !== user.Password) {
+            return response.status(400).send("Stara lozinka nije točna!");
+        }
+
+        var newPasswordData = passwordHash.hashPassword(newPassword);
+        var queryString = "UPDATE Users SET Password = ?, Salt = ? WHERE UserId = ?";
+        var values = [newPasswordData.passwordHash, newPasswordData.salt, user.UserId];
+    
+        connection.query(queryString, values, function(error, result) {
+            if (error) {
+                return response.status(500).send(error);
+            }
+
+            if(result.changedRows == 1) {
+                return response.status(200).send("Lozinka je promijenjena!");
+            } else {
+                return response.status(500).send("Lozinka nije promijenjena!");
+            }
         });
     } else {
         return response.status(401).send("Nisi admin!");
     }
-}
-
-function updateUser(request, response) {
-    if (!request.body.newPassword || !request.body.oldPassword) {
-        return response.status(400).send("Nevaljan zahtjev!");
-    }
-
-    var newPassword = request.body.newPassword;
-    var oldPassword = request.body.oldPassword;
-    var user = request.decoded;
-
-    var queryString = "SELECT Password, Salt FROM Users WHERE UserId = ?";
-    connection.query(queryString, [user.PersonId], function(error, passwordData) {
-        if (error) {
-            throw error;
-        }
-
-        var salt = passwordData[0].Salt;
-        var password = passwordData[0].Password;
-
-        passwordData = passwordHash.sha512(oldPassword, salt);
-
-        if (passwordData.passwordHash != password) {
-            return response.status(401).send("Stara lozinka je kriva!");
-        } else {
-            salt = passwordHash.generateRandomString(16);
-            passwordData = passwordHash.sha512(newPassword, salt);
-
-            queryString = "UPDATE Users SET Password = ?, Salt = ? WHERE UserId = ?";
-            connection.query(queryString, [passwordData.passwordHash, salt, user.PersonId], function (error, result) {
-                if (error) {
-                    throw error;
-                }
-
-                if(result.changedRows == 1) {
-                    return response.status(201).send("Lozinka je uspješno promijenjena!");
-                } else {
-                    return response.status(500).send("Lozinka nije promijenjena!");
-                }
-            });
-        }
-    });
 }
 
 /**
@@ -224,7 +301,7 @@ function updateUser(request, response) {
  * @function
  * @param {HTTP Request Object} request - HTTP Request
  */
-var getToken = function (request) {
+var getToken = function(request) {
     if (request.headers.authorization) {
         var parts = request.headers.authorization.split(" ");
 
@@ -236,4 +313,40 @@ var getToken = function (request) {
     }
 
     return false;
+}
+
+function searchRoleById(roles, roleId) {
+    var result = roles.filter(role => {
+        if (role.RoleId == roleId) {
+            return role;
+        }
+    });
+
+    if (result.length == 0) {
+        return false;
+    } else {
+        return result[0].Name;
+    }
+}
+
+function searchRoleByName(roles, roleName) {
+    var result = roles.filter(role => {
+        if (role.Name == roleName) {
+            return role;
+        }
+    });
+
+    if (result.length == 0) {
+        return false;
+    } else {
+        return result[0].RoleId;
+    }
+}
+
+function validateRouteParam(request, response, next) {
+    if (validator.routeParametersValidator(request.params.userId)) {
+        return response.status(400).send("Nevaljan zahtjev!");
+    } else {
+        next();
+    }
 }

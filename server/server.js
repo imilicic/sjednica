@@ -18,8 +18,8 @@ app.use(bodyParser.json());
 app.use(express.static('./'));
 
 app.use("/authentication", loginRouter);
-app.use("/api/users", userRouter);
 app.use("/api/meetings", meetingRouter);
+app.use("/api/users", userRouter);
 
 app.get("*", function(request, response) {
     response.sendFile(path.join(__dirname, "../index.html"));

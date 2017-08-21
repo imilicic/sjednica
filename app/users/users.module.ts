@@ -6,10 +6,11 @@ import { RouterModule } from '@angular/router';
 import { AuthHttp, AuthConfig } from 'angular2-jwt';
 
 import { AdminRouteActivatorService } from './shared/services/admin-route-activator.service';
+import { CouncilMembershipService } from './shared/services/council-membership.service';
 import { UserService } from './shared/services/user.service';
 import { RolePipe } from './shared/role.pipe';
 import { UserComponent } from './user/user.component';
-import { UserResolverService } from './user/user-resolver.service';
+import { UserResolverService } from './shared/services/user-resolver.service';
 import { UserCreateComponent } from './user-create/user-create.component';
 import { UserUpdateComponent } from './user-update/user-update.component';
 import { PasswordService } from '../shared/services/password.service';
@@ -48,6 +49,7 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
             useFactory: authHttpServiceFactory,
             deps: [Http, RequestOptions]
         },
+        CouncilMembershipService,
         PasswordService,
         ResponseMessagesService,
         ToastrService,

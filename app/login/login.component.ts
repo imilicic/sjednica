@@ -42,8 +42,7 @@ export class LoginComponent implements OnInit {
         this.authenticationService.loginUser(this.loginForm.value)
         .subscribe((response: {auth_token: string}) => {
             this.router.navigate(['users']);
-        },
-        (error: string) => {
+        }, (error: string) => {
             this.toastrService.error(error);
             this.loginForm.reset();
         });

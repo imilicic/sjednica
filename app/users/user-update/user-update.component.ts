@@ -2,25 +2,30 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
+import { Roles } from '../../shared/models/roles.enum';
 import { User } from '../../shared/models/user.model';
-import { UserService } from '../shared/services/user.service';
 import { PasswordService } from '../../shared/services/password.service';
 import { ResponseMessagesService } from '../../shared/services/response-messages.service';
 import { ToastrService } from '../../shared/services/toastr.service';
+import { UserService } from '../shared/services/user.service';
+import { dateValidator } from '../shared/validators';
 
 @Component({
+    styleUrls: ['./user-update.component.css'],
     templateUrl: './user-update.component.html'
 })
 export class UserUpdateComponent implements OnInit {
-    user: User
+    roles = Roles;
+    user: User;
 
-    councilMember: FormControl;
     email: FormControl;
     firstName: FormControl;
+    isCouncilMember: FormControl;
     lastName: FormControl;
     password: string;
     permanentMember: FormControl;
     phoneNumber: FormControl;
+    roleName: FormControl;
     userForm: FormGroup;
 
     startDay: FormControl;
@@ -37,31 +42,23 @@ export class UserUpdateComponent implements OnInit {
         'rujan', 'listopad', 'studeni', 'prosinac'
     ];
 
-    appendDateForm() {
-        if (this.councilMember.value) {
-            this.userForm.addControl('startDay', this.startDay);
-            this.userForm.addControl('startMonth', this.startMonth);
-            this.userForm.addControl('startYear', this.startYear);
-
-            this.userForm.addControl('endDay', this.endDay);
-            this.userForm.addControl('endMonth', this.endMonth);
-            this.userForm.addControl('endYear', this.endYear);
-
-            this.userForm.addControl('permanentMember', this.permanentMember);
-
-            this.userForm.setValidators(dateValidator());
+    changeEndDate() {
+        if (this.permanentMember.value) {
+            this.endYear.setValue(9999);
+            this.endMonth.setValue(12);
+            this.endDay.setValue(31);
         } else {
-            this.userForm.clearValidators();
+            this.endYear.setValue(this.startYear.value + 1);
+            this.endMonth.setValue(this.startMonth.value);
+            this.endDay.setValue(this.startDay.value);
+        }
+    }
 
-            this.userForm.removeControl('startDay');
-            this.userForm.removeControl('startMonth');
-            this.userForm.removeControl('startYear');
-
-            this.userForm.removeControl('endDay');
-            this.userForm.removeControl('endMonth');
-            this.userForm.removeControl('endYear');
-
-            this.userForm.removeControl('permanentMember');
+    changeUserPassword(action: boolean) {
+        if (action) {
+            this.password = this.passwordService.generatePassword(8, 4, 2);
+        } else {
+            this.password = null;
         }
     }
 
@@ -74,46 +71,18 @@ export class UserUpdateComponent implements OnInit {
         private userService: UserService
     ) {}
 
-    ngOnInit() {
-        let currentDate = new Date();
-        this.startDay = new FormControl(currentDate.getDate(), Validators.required);
-        this.startMonth = new FormControl(currentDate.getMonth() + 1, Validators.required);
-        this.startYear = new FormControl(currentDate.getFullYear(), [Validators.required, Validators.min(1900), Validators.max(9999)]);
-
-        this.permanentMember = new FormControl(false);
-        let dateNextYear = new Date(currentDate.getFullYear() + 1, currentDate.getMonth(), currentDate.getDate());
-        this.endDay = new FormControl(dateNextYear.getDate(), Validators.required);
-        this.endMonth = new FormControl(dateNextYear.getMonth() + 1, Validators.required);
-        this.endYear = new FormControl(dateNextYear.getFullYear(), [Validators.required, Validators.min(1900), Validators.max(9999)]);
-
-        this.password = this.passwordService.generatePassword(8, 4, 2);
-        console.log(this.password);
-
-        this.councilMember = new FormControl(false);
-        this.email = new FormControl('', [
-            Validators.required,
-            Validators.pattern(/^[A-Za-z][A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,}$/)
-        ]);
-        this.firstName = new FormControl('', Validators.required);
-        this.lastName = new FormControl('', Validators.required);
-        this.phoneNumber = new FormControl(undefined, Validators.pattern(/^[0-9]{3} [0-9]{6,10}$/));
-
-        this.userForm = new FormGroup({
-            councilMember: this.councilMember,
-            email: this.email,
-            firstName: this.firstName,
-            lastName: this.lastName,
-            phoneNumber: this.phoneNumber
+    getWarningMessage(code: string) {
+        return this.responseMessagesService.getMessage({
+            location: 'createUser',
+            code: code
         });
+    }
 
+    ngOnInit() {
         this.activatedRoute.data.subscribe((data: any) => {
             this.user = data.user;
 
-            this.councilMember.setValue(this.user.CouncilMember);
-            this.email.setValue(this.user.Email);
-            this.firstName.setValue(this.user.FirstName);
-            this.lastName.setValue(this.user.LastName);
-            this.phoneNumber.setValue(this.user.PhoneNumber);
+            this.buildUserForm();
         }, (error: string) => {
             this.toastrService.error(error);
         });
@@ -129,79 +98,183 @@ export class UserUpdateComponent implements OnInit {
         return result;
     }
 
-    update() {
-        let endDate = null;
-        let startDate = null;
+    setDefaultDates() {
+        if (!this.isCouncilMember.value) {
+            let startEndDateParse = this.prepareStartEndDates();
 
-        if (this.councilMember.value) {
-            endDate = new Date(Date.UTC(this.endYear.value, this.endMonth.value - 1, this.endDay.value));
-            startDate = new Date(Date.UTC(this.startYear.value, this.startMonth.value - 1, this.startDay.value));
+            this.startYear.setValue(startEndDateParse.StartDate[0]);
+            this.startMonth.setValue(startEndDateParse.StartDate[1]);
+            this.startDay.setValue(startEndDateParse.StartDate[2]);
 
-            if (this.permanentMember.value) {
-                endDate = new Date(Date.UTC(9999, 11, 31));
-            }
+            this.endYear.setValue(startEndDateParse.EndDate[0]);
+            this.endMonth.setValue(startEndDateParse.EndDate[1]);
+            this.endDay.setValue(startEndDateParse.EndDate[2]);
         }
+    }
 
+    updateUser() {
+        let endDate;
+        let startDate;
         let newUser: User = {
-            CouncilMember: this.councilMember.value,
             Email: this.email.value,
-            EndDate: endDate,
             FirstName: this.firstName.value,
+            IsCouncilMember: this.isCouncilMember.value,
             LastName: this.lastName.value,
             Password: this.password,
-            UserId: undefined,
+            UserId: this.user.UserId,
             PhoneNumber: this.phoneNumber.value,
-            RoleName: undefined,
-            StartDate: startDate
+            RoleName: this.roleName.value
         };
-        
-        this.userService.updateUser(newUser);
-        // .subscribe((response: string) => {
-        //     this.toastrService.success(response);
-        //     //sthis.router.navigate(['user/', this.user.PersonId]);
-        // },
-        // (error: string) => this.toastrService.error(error));
+
+        if (this.isCouncilMember.value) {
+            endDate = this.generateDateString(this.endYear.value, this.endMonth.value, this.endDay.value);
+            startDate = this.generateDateString(this.startYear.value, this.startMonth.value, this.startDay.value);
+
+            newUser.HistoryCouncilMember = [{
+                StartDate: startDate,
+                EndDate: endDate
+            }];
+        }
+
+        this.userService.updateUser(newUser)
+        .subscribe((response: string) => {
+            this.toastrService.success(response);
+            // this.router.navigate(['user/', this.user.UserId]);
+        },
+        (error: string) => this.toastrService.error(error));
     }
 
-    getWarningMessage(code: string) {
-        return this.responseMessagesService.getMessage({
-            location: 'createUser',
-            code: code
+    userDataChanged() {
+        if (this.phoneNumber.value === '') {
+            this.phoneNumber.setValue(null);
+        }
+
+        let emailChanged = this.user.Email !== this.email.value;
+        let endDateChanged = false;
+        let firstNameChanged = this.user.FirstName !== this.firstName.value;
+        let isCouncilMemberChanged = this.user.IsCouncilMember !== this.isCouncilMember.value;
+        let lastNameChanged = this.user.LastName !== this.lastName.value;
+        let passwordChanged = this.password !== null;
+        let phoneNumberChanged = this.user.PhoneNumber !== this.phoneNumber.value;
+        let roleNameChanged = this.user.RoleName !== this.roleName.value;
+        let startDateChanged = false;
+
+        if (this.isCouncilMember.value && this.user.IsCouncilMember) {
+            let endDate = this.generateDateString(this.endYear.value, this.endMonth.value, this.endDay.value);
+            let startDate = this.generateDateString(this.startYear.value, this.startMonth.value, this.startDay.value);
+
+            endDateChanged = this.user.HistoryCouncilMember[0].EndDate !== endDate;
+            startDateChanged = this.user.HistoryCouncilMember[0].StartDate !== startDate;
+        }
+
+        return (
+            emailChanged ||
+            endDateChanged ||
+            firstNameChanged ||
+            isCouncilMemberChanged ||
+            lastNameChanged ||
+            passwordChanged ||
+            phoneNumberChanged ||
+            roleNameChanged ||
+            startDateChanged
+        );
+    }
+
+    private buildUserForm() {
+        this.email = new FormControl(this.user.Email, [
+            Validators.required,
+            Validators.pattern(/^[A-Za-z][A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\.)+[A-Za-z]{2,}$/)
+        ]);
+        this.firstName = new FormControl(this.user.FirstName, Validators.required);
+        this.isCouncilMember = new FormControl(false);
+        this.lastName = new FormControl(this.user.LastName, Validators.required);
+        this.password = null;
+        this.permanentMember = new FormControl(false);
+        this.phoneNumber = new FormControl(this.user.PhoneNumber, Validators.pattern(/^[0-9]{3} [0-9]{6,10}$/));
+        this.roleName = new FormControl(this.user.RoleName, Validators.required);
+        console.log(this.password);
+
+        if (this.user.IsCouncilMember) {
+            this.isCouncilMember.setValue(true);
+
+            if (this.user.HistoryCouncilMember[0].EndDate === '9999-12-31') {
+                this.permanentMember.setValue(true);
+            }
+        }
+
+        let startEndDateParse = this.prepareStartEndDates();
+
+        this.endYear = new FormControl(startEndDateParse.EndDate[0], [Validators.required, Validators.min(1900), Validators.max(9999)]);
+        this.endMonth = new FormControl(startEndDateParse.EndDate[1], Validators.required);
+        this.endDay = new FormControl(startEndDateParse.EndDate[2], Validators.required);
+
+        this.startYear = new FormControl(startEndDateParse.StartDate[0], [Validators.required, Validators.min(1900), Validators.max(9999)]);
+        this.startMonth = new FormControl(startEndDateParse.StartDate[1], Validators.required);
+        this.startDay = new FormControl(startEndDateParse.StartDate[2], Validators.required);
+
+        this.userForm = new FormGroup({
+            email: this.email,
+            endDay: this.endDay,
+            endMonth: this.endMonth,
+            endYear: this.endYear,
+            firstName: this.firstName,
+            isCouncilMember: this.isCouncilMember,
+            lastName: this.lastName,
+            permanentMember: this.permanentMember,
+            phoneNumber: this.phoneNumber,
+            roleName: this.roleName,
+            startDay: this.startDay,
+            startMonth: this.startMonth,
+            startYear: this.startYear
         });
+
+        this.userForm.setValidators([dateValidator(false)]);
+    }
+
+    private generateDateString(year: number, month: number, day: number): string {
+        let monthString = '';
+        let dayString = '';
+
+        if (month < 10) {
+            monthString = '0';
+        }
+
+        monthString +=  month.toString();
+
+        if (day < 10) {
+            dayString = '0';
+        }
+
+        dayString +=  day.toString();
+
+        return year.toString() + '-' + monthString + '-' + dayString;
+    }
+
+    private parseDateString(date: string): number[] {
+        let dateArray = date.split('-');
+
+        return dateArray.map((value: string) => parseInt(value, 10));
+    }
+
+    private prepareStartEndDates() {
+        let endDateParse;
+        let startDateParse;
+
+        if (this.user.IsCouncilMember) {
+            endDateParse = this.parseDateString(this.user.HistoryCouncilMember[0].EndDate);
+            startDateParse = this.parseDateString(this.user.HistoryCouncilMember[0].StartDate);
+        } else {
+            let now = new Date();
+            let nextYear = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            endDateParse = this.parseDateString(nextYear.toISOString().split('T')[0]);
+            startDateParse = this.parseDateString(now.toISOString().split('T')[0]);
+        }
+
+        return {
+            EndDate: endDateParse,
+            StartDate: startDateParse
+        };
     }
 }
 
-function dateValidator() {
-    return (formGroup: FormGroup) => {
-        let startDay = formGroup.controls['startDay'].value;
-        let startMonth = formGroup.controls['startMonth'].value - 1;
-        let startYear = formGroup.controls['startYear'].value;
-
-        let endDay = formGroup.controls['endDay'].value;
-        let endMonth = formGroup.controls['endMonth'].value - 1;
-        let endYear = formGroup.controls['endYear'].value;
-
-        let startDate = new Date(startYear, startMonth, startDay);
-        let endDate = new Date(endYear, endMonth, endDay);
-
-        if (startDate.getDate() !== startDay || startDate.getMonth() !== startMonth || startDate.getFullYear() !== startYear) {
-            return {
-                startDateInvalid: true
-            }
-        }
-
-        if (endDate.getDate() !== endDay || endDate.getMonth() !== endMonth || endDate.getFullYear() !== endYear) {
-            return {
-                endDateInvalid: true
-            }
-        }
-
-        if (startDate >= endDate) {
-            return {
-                startDateAfterEndDate: true
-            }
-        }
-
-        return null;
-    }
-}
