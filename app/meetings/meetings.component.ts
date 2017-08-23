@@ -8,7 +8,7 @@ import { ToastrService } from '../shared/services/toastr.service';
     templateUrl: './meetings.component.html'
 })
 export class MeetingsComponent implements OnInit {
-    meetings: Meeting[];
+    private meetings: Meeting[];
 
     constructor(
         private meetingService: MeetingService,

@@ -16,30 +16,41 @@ import { dateValidator } from '../shared/validators';
     templateUrl: './user-create.component.html'
 })
 export class UserCreateComponent implements OnInit {
-    isCouncilMember: FormControl;
-    email: FormControl;
-    firstName: FormControl;
-    lastName: FormControl;
-    password: string;
-    permanentMember: FormControl;
-    phoneNumber: FormControl;
-    userForm: FormGroup;
+    private email: FormControl;
+    private endDay: FormControl;
+    private endMonth: FormControl;
+    private endYear: FormControl;
+    private firstName: FormControl;
+    private isCouncilMember: FormControl;
+    private lastName: FormControl;
+    private months: string[];
+    private password: string;
+    private permanentMember: FormControl;
+    private phoneNumber: FormControl;
+    private startDay: FormControl;
+    private startMonth: FormControl;
+    private startYear: FormControl;
+    private userForm: FormGroup;
 
-    startDay: FormControl;
-    startMonth: FormControl;
-    startYear: FormControl;
+    constructor(
+        private councilMembershipService: CouncilMembershipService,
+        private passwordService: PasswordService,
+        private responseMessagesService: ResponseMessagesService,
+        private router: Router,
+        private toastrService: ToastrService,
+        private userService: UserService
+    ) {}
 
-    endDay: FormControl;
-    endMonth: FormControl;
-    endYear: FormControl;
+    ngOnInit() {
+        this.months = [
+            'siječanj', 'veljača', 'ožujak', 'travanj',
+            'svibanj', 'lipanj', 'srpanj', 'kolovoz',
+            'rujan', 'listopad', 'studeni', 'prosinac'
+        ];
+        this.buildForm();
+    }
 
-    months: string[] = [
-        'siječanj', 'veljača', 'ožujak', 'travanj',
-        'svibanj', 'lipanj', 'srpanj', 'kolovoz',
-        'rujan', 'listopad', 'studeni', 'prosinac'
-    ];
-
-    addRemoveDateControls() {
+    private addRemoveDateControls() {
         if (this.isCouncilMember.value) {
             this.userForm.addControl('startDay', this.startDay);
             this.userForm.addControl('startMonth', this.startMonth);
@@ -78,62 +89,7 @@ export class UserCreateComponent implements OnInit {
         }
     }
 
-    constructor(
-        private councilMembershipService: CouncilMembershipService,
-        private passwordService: PasswordService,
-        private responseMessagesService: ResponseMessagesService,
-        private router: Router,
-        private toastrService: ToastrService,
-        private userService: UserService
-    ) {}
-
-    createCouncilMembership(userId: number) {
-        let endDate = this.generateDateString(this.endYear.value, this.endMonth.value, this.endDay.value);
-        let startDate = this.generateDateString(this.startYear.value, this.startMonth.value, this.startDay.value);
-
-        let newCouncilMembership: CouncilMembership = {
-            IsCouncilMember: this.isCouncilMember.value,
-            History: [{
-                StartDate: startDate,
-                EndDate: endDate
-            }]
-        };
-
-        this.councilMembershipService.createCouncilMembership(userId, newCouncilMembership)
-        .subscribe((councilMembership: CouncilMembership) => {
-            this.toastrService.success('Korisnik je dodan u vijeće!');
-            this.router.navigate(['users']);
-        }, (error: string) => {
-            this.toastrService.error(error);
-        });
-    }
-
-    createUser() {
-        let newUser: User = {
-            Email: this.email.value,
-            FirstName: this.firstName.value,
-            LastName: this.lastName.value,
-            Password: this.password,
-            UserId: undefined,
-            PhoneNumber: this.phoneNumber.value,
-            RoleName: 'user'
-        };
-
-        this.userService.createUser(newUser)
-        .subscribe((user: User) => {
-            this.toastrService.success('Korisnik je izrađen!');
-
-            if (this.isCouncilMember.value) {
-                this.createCouncilMembership(user.UserId);
-            } else {
-                this.router.navigate(['users']);
-            }
-        }, (error: string) => {
-            this.toastrService.error(error)
-        });
-    }
-
-    ngOnInit() {
+    private buildForm() {
         let currentDate = new Date();
         this.startDay = new FormControl(currentDate.getDate(), Validators.required);
         this.startMonth = new FormControl(currentDate.getMonth() + 1, Validators.required);
@@ -166,20 +122,50 @@ export class UserCreateComponent implements OnInit {
         });
     }
 
-    range(n: number): number[] {
-        let result = [];
+    private createCouncilMembership(userId: number) {
+        let endDate = this.generateDateString(this.endYear.value, this.endMonth.value, this.endDay.value);
+        let startDate = this.generateDateString(this.startYear.value, this.startMonth.value, this.startDay.value);
 
-        for (let i = 1; i <= n; i++) {
-            result.push(i);
-        }
+        let newCouncilMembership: CouncilMembership = {
+            IsCouncilMember: this.isCouncilMember.value,
+            History: [{
+                CouncilMembershipId: undefined,
+                StartDate: startDate,
+                EndDate: endDate
+            }]
+        };
 
-        return result;
+        this.councilMembershipService.createCouncilMembership(userId, newCouncilMembership)
+        .subscribe((councilMembership: CouncilMembership) => {
+            this.toastrService.success('Korisnik je dodan u vijeće!');
+            this.router.navigate(['users']);
+        }, (error: string) => {
+            this.toastrService.error(error);
+        });
     }
 
-    getWarningMessage(code: string) {
-        return this.responseMessagesService.getMessage({
-            location: 'createUser',
-            code: code
+    private createUser() {
+        let newUser: User = {
+            Email: this.email.value,
+            FirstName: this.firstName.value,
+            LastName: this.lastName.value,
+            Password: this.password,
+            UserId: undefined,
+            PhoneNumber: this.phoneNumber.value,
+            RoleName: 'user'
+        };
+
+        this.userService.createUser(newUser)
+        .subscribe((user: User) => {
+            this.toastrService.success('Korisnik je izrađen!');
+
+            if (this.isCouncilMember.value) {
+                this.createCouncilMembership(user.UserId);
+            } else {
+                this.router.navigate(['users']);
+            }
+        }, (error: string) => {
+            this.toastrService.error(error)
         });
     }
 
@@ -200,6 +186,23 @@ export class UserCreateComponent implements OnInit {
         dayString +=  day.toString();
 
         return year.toString() + '-' + monthString + '-' + dayString;
+    }
+
+    private getWarningMessage(code: string) {
+        return this.responseMessagesService.getMessage({
+            location: 'users/create',
+            code: code
+        });
+    }
+
+    private range(n: number): number[] {
+        let result = [];
+
+        for (let i = 1; i <= n; i++) {
+            result.push(i);
+        }
+
+        return result;
     }
 }
 

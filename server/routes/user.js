@@ -40,12 +40,12 @@ userRouter.use(function(request, response, next) {
     });
 });
 
-userRouter.post("/", userHelper.isAdmin, userHelper.ifUserExists, createUser);
-userRouter.get("/", userHelper.isAdmin, readUsers);
-userRouter.get("/:userId", validateRouteParam, userHelper.isAdmin, userHelper.ifUserExists, readUser);
-userRouter.put("/:userId", validateRouteParam, userHelper.ifUserExists, updateUser);
+userRouter.post("/", isAdmin, ifUserExists, createUser);
+userRouter.get("/", isAdmin, readUsers);
+userRouter.get("/:userId", validateRouteParam, isAdmin, ifUserExists, readUser);
+userRouter.put("/:userId", validateRouteParam, ifUserExists, updateUser);
 
-userRouter.use("/:userId/councilMemberships", validateRouteParam, userHelper.isAdmin, function(request, response, next) {
+userRouter.use("/:userId/councilMemberships", validateRouteParam, isAdmin, function(request, response, next) {
     request.userId = request.params.userId;
     next();
 }, councilMembershipRouter);
@@ -53,11 +53,11 @@ userRouter.use("/:userId/councilMemberships", validateRouteParam, userHelper.isA
 module.exports = userRouter;
 
 function createUser(request, response) {
-    if (!(request.body.email && 
-        request.body.firstName && 
-        request.body.lastName && 
-        request.body.password && 
-        request.body.roleName)) {
+    if (!(request.body.Email && 
+        request.body.FirstName && 
+        request.body.LastName && 
+        request.body.Password && 
+        request.body.RoleName)) {
         return response.status(400).send("Nevaljan zahtjev!");
     }
 
@@ -153,7 +153,7 @@ function readUsers(request, response) {
 function updateUser(request, response) {
     var user = request.user;
 
-    if (request.decoded.RoleName === "admin") {
+    if (request.decoded.RoleName === "admin" && request.decoded.UserId !== user.UserId) {
         // admin is changing user data        
         if (!(
             request.body.Email &&
@@ -179,18 +179,22 @@ function updateUser(request, response) {
         var roleId = searchRoleByName(request.roles, request.body.RoleName);
         var userId = request.body.UserId;
 
-        var createUserValidators = ["email", "firstName", "lastName", "password"];
+        var createUserValidators = ["email", "firstName", "lastName"];
+
+        if (password) {
+            createUserValidators.push("password");
+        }
         
         if (phoneNumber) {
             createUserValidators.push("phoneNumber");
         }
     
-        var vals = appendValidators(createUserValidators).map(val => {
+        var vals = validator.appendValidators(createUserValidators, userHelper.validators).map(val => {
             val.Value = eval(val.Name);
             return val;
         });
     
-        if (!validateFormInput(vals)) {
+        if (!validator.validateFormInput(vals)) {
             return response.status(400).send("Nevaljan zahtjev!");
         }
 
@@ -238,7 +242,13 @@ function updateUser(request, response) {
         }
 
         if (values.length === 0) {
-            return response.status(400).send("Nevaljan zahtjev!");
+            user.RoleName = searchRoleById(request.roles, user.RoleId);
+            
+            delete user.Password;
+            delete user.Salt;
+            delete user.RoleId;
+
+            return response.status(200).send(user);
         }
 
         queryString = queryString.slice(0, -1);
@@ -264,7 +274,11 @@ function updateUser(request, response) {
         });
     } else if (request.decoded.UserId === user.UserId) {
         // user is changing his data
-        if (!request.body.NewPassword || !request.body.OldPassword) {
+        if (!request.body.NewPassword || !request.body.OldPassword || !request.body.UserId) {
+            return response.status(400).send("Nevaljan zahtjev!");
+        }
+
+        if (request.body.UserId != user.UserId) {
             return response.status(400).send("Nevaljan zahtjev!");
         }
 
@@ -344,9 +358,57 @@ function searchRoleByName(roles, roleName) {
 }
 
 function validateRouteParam(request, response, next) {
-    if (validator.routeParametersValidator(request.params.userId)) {
+    if (!validator.routeParametersValidator(request.params.userId)) {
         return response.status(400).send("Nevaljan zahtjev!");
     } else {
         next();
+    }
+}
+
+function isAdmin(request, response, next) {
+    if (request.decoded.RoleName != "admin") {
+        return response.status(403).send("Nisi admin!");
+    } else {
+        next();
+    }
+}
+
+function ifUserExists(request, response, next) {
+    var values = [];
+    var queryString = "";
+
+    if (request.params.userId) { // GET, PUT /api/users/:userId
+        values.push(request.params.userId);
+        queryString = "SELECT * FROM Users WHERE UserId = ?";
+
+        connection.query(queryString, values, function(error, result) {
+            if (error) {
+                return response.status(500).send(error);
+            }
+    
+            if (result.length == 0) {
+                return response.status(404).send("Korisnik ne postoji!");
+            } else {
+                request.user = result[0];
+                next();
+            }
+        });
+    } else if (request.body.Email) { // POST /api/users
+        values.push(request.body.Email);
+        queryString = "SELECT * FROM Users WHERE Email = ?";
+
+        connection.query(queryString, values, function(error, result) {
+            if (error) {
+                return response.status(500).send(error);
+            }
+    
+            if (result.length > 0) {
+                return response.status(409).send("Korisnik već postoji!");
+            } else {
+                next();
+            }
+        });
+    } else {
+        return response.status(400).send("Nevaljan zahtjev");
     }
 }

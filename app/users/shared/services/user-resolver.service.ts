@@ -14,6 +14,7 @@ export class UserResolverService implements Resolve<User> {
 
     resolve(route: ActivatedRouteSnapshot): Observable<User> {
         let user = this.userService.getUser(route.params['userId']);
+
         user.subscribe((_: User) => {
             return true;
         }, (error: String) => {

@@ -1,6 +1,6 @@
 <h1>Izrada korisnika</h1>
 <div class="col-md-8">
-    <form [formGroup]="userForm" (ngSubmit)="createUser()" autocomplete="off">
+    <form autocomplete="off" [formGroup]="userForm" (ngSubmit)="createUser()">
         <div class="form-group" [ngClass]="{'has-error': firstName.touched && firstName.invalid, 'has-success': firstName.touched && firstName.valid}">
             <label class="control-label" for="firstName">Ime</label>
             <span class="help-block error" *ngIf="firstName.touched && firstName.invalid">
@@ -38,7 +38,7 @@
         </div>
         <div class="form-group">
             <label for="isCouncilMember">Član vijeća</label>
-            <input formControlName="isCouncilMember" id="isCouncilMember" type="checkbox" (change)="addRemoveDateControls()">
+            <input (change)="addRemoveDateControls()" formControlName="isCouncilMember" id="isCouncilMember" type="checkbox">
         </div>
         <div class="form-group" [ngClass]="{'has-error': startYear.invalid || userForm.hasError('startDateInvalid') || userForm.hasError('nowNotBetweenStartEnd'), 'has-success': startYear.valid && !userForm.hasError('startDateInvalid')}" *ngIf="isCouncilMember.value">
             <fieldset>
@@ -57,13 +57,13 @@
                 <label class="control-label col-md-1" for="startDay">Dan</label>
                 <div class="col-md-3">
                     <select class="form-control" formControlName="startDay" id="startDay">
-                        <option [value]="i" *ngFor="let i of range(31)">{{i}}</option>
+                        <option *ngFor="let i of range(31)" [value]="i">{{i}}</option>
                     </select>
                 </div>
                 <label class="control-label col-md-1" for="startMonth">Mjesec</label>
                 <div class="col-md-3">
                     <select class="form-control" formControlName="startMonth" id="startMonth">
-                        <option [value]="i" *ngFor="let i of range(12)">{{months[i-1]}}</option>
+                        <option *ngFor="let i of range(12)" [value]="i">{{months[i-1]}}</option>
                     </select>
                 </div>
                 <label class="control-label col-md-1" for="startYear">Godina</label>
@@ -89,13 +89,13 @@
                 <label class="control-label col-md-1" for="endDay">Dan</label>
                 <div class="col-md-3">
                     <select class="form-control" formControlName="endDay" id="endDay">
-                        <option [value]="i" *ngFor="let i of range(31)">{{i}}</option>
+                        <option *ngFor="let i of range(31)" [value]="i">{{i}}</option>
                     </select>
                 </div>
                 <label class="control-label col-md-1" for="endMonth">Mjesec</label>
                 <div class="col-md-3">
                     <select class="form-control" formControlName="endMonth" id="endMonth">
-                        <option [value]="i" *ngFor="let i of range(12)">{{months[i-1]}}</option>
+                        <option *ngFor="let i of range(12)" [value]="i">{{months[i-1]}}</option>
                     </select>
                 </div>
                 <label class="control-label col-md-1" for="endYear">Godina</label>
@@ -104,8 +104,8 @@
                 </div>
             </fieldset>
             <label for="permanentMember">Stalan član vijeća</label>
-            <input id="permanentMember" formControlName="permanentMember" type="checkbox" (change)="addRemoveDateControls()">
+            <input (change)="addRemoveDateControls()" formControlName="permanentMember" id="permanentMember" type="checkbox">
         </div>
-        <button class="btn btn-default" type="submit" [disabled]="userForm.invalid">Izradi</button>
+        <button class="btn btn-default" [disabled]="userForm.invalid" type="submit">Izradi</button>
     </form>
 </div>

@@ -6,12 +6,16 @@ export class ResponseMessagesService {
         'required': 'Polje je obavezno!'
     }
     private responseMessages = {
-        'authenticate': {
-            'token-verification-failed': 'Dogodila se greška! Ponovno se logirajte!',
-            'no-token': 'Ponovno se logirajte!',
-            'successful': ''
+        'users/create': {
+            'required': this.generalMessages.required,
+            'invalid-email': 'Neispravan e-mail!',
+            'invalid-phone-number': 'Neispravan format! (Primjer ispravnog broja: 032 123456)',
+            'invalid-date': 'Datum nije valjan!',
+            'invalid-year': 'Upišite godinu između 1900 i 9999!',
+            'start-date-before-end-date': 'Završni datum mora biti nakon početnog!',
+            'now-not-between-start-end': 'Trenutno vrijeme nije između početnog i završnog!'
         },
-        'createUser': {
+        'users/update': {
             'required': this.generalMessages.required,
             'invalid-email': 'Neispravan e-mail!',
             'invalid-phone-number': 'Neispravan format! (Primjer ispravnog broja: 032 123456)',
@@ -23,11 +27,10 @@ export class ResponseMessagesService {
         'login': {
             'required': this.generalMessages.required
         },
-        'users/me': {
+        'users/update/me': {
             'required': this.generalMessages.required,
             'new-password-minlength': 'Barem 8 znakova!',
             'new-password-pattern': 'Barem jedno slovo i jedan broj!',
-            'new-password2-required': 'Polje je obavezno!',
             'new-passwords-not-equal': 'Lozinke nisu jednake!',
         }
     };

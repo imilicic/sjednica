@@ -20,94 +20,27 @@
                 <td>{{user.PhoneNumber}}</td>
             </tr>
             <tr>
-                <td>Lozinka <!--(<button class="btn-link" (click)="changePasswordMode=true">promijeni</button>)--></td>
+                <td>Lozinka <span *ngIf="isThisCurrentUserProfile">(<a routerLink="../update/me">Promijeni lozinku</a>)</span></td>
                 <td>**********</td>
             </tr>
             <tr>
                 <td>Uloga</td>
                 <td>{{user.RoleName | role}}</td>
             </tr>
-            <tr *ngIf="user.HistoryCouncilMember">
+            <tr *ngIf="user.CouncilMemberships.History.length > 0">
                 <td>Član vijeća</td>
                 <td>
                     <p>
                         <span *ngIf="isPermanentCouncilMember()">stalan član vijeća od</span>
-                        {{user.HistoryCouncilMember[0].StartDate | date: 'd. M. y.'}}
-                        <span *ngIf="!isPermanentCouncilMember()"> - {{user.HistoryCouncilMember[0].EndDate | date: 'd. M. y.'}}</span>
-                        <span *ngIf="user.IsCouncilMember">(trenutni član vijeća)</span>
+                        {{user.CouncilMemberships.History[0].StartDate | date: 'd. M. y.'}}
+                        <span *ngIf="!isPermanentCouncilMember()"> - {{user.CouncilMemberships.History[0].EndDate | date: 'd. M. y.'}}</span>
+                        <span *ngIf="user.CouncilMemberships.IsCouncilMember">(trenutni član vijeća)</span>
                     </p>
-                    <p *ngFor="let date of user.HistoryCouncilMember.slice(1)">
+                    <p *ngFor="let date of user.CouncilMemberships.History.slice(1)">
                         {{date.StartDate | date: 'd. M. y.'}} - {{date.EndDate | date: 'd. M. y.'}}
                     </p>
                 </td>
             </tr>
         </table>
-        <!--<form
-        [formGroup]="passwordForm"
-        (ngSubmit)="changePassword()"
-        autocomplete="off"
-        *ngIf="changePasswordMode">
-            <div
-            class="form-group"
-            [ngClass]="{'has-error': oldPassword.touched && oldPassword.invalid, 'has-success': oldPassword.touched && oldPassword.valid}">
-                <label class="control-label" for="oldPassword">Stara lozinka</label>
-                <span class="error help-block" *ngIf="oldPassword.touched && oldPassword.invalid">
-                    {{getWarningMessage("required")}}
-                </span>
-                <input class="form-control" formControlName="oldPassword" id="oldPassword" type="password">
-            </div>
-            <div
-            class="form-group"
-            [ngClass]="{'has-error': newPassword.touched && newPassword.invalid, 'has-success': newPassword.touched && newPassword.valid}">
-                <label class="control-label" for="newPassword">Nova lozinka (<input id="generate" type="checkbox" (change)="setGeneratedPassword()"> <label for="generate">generiraj novu lozinku</label>)</label>
-                <span class="error help-block" *ngIf="newPassword.touched && newPassword.hasError('required')">
-                    {{getWarningMessage("required")}} &nbsp;
-                </span>
-                <span class="error help-block" *ngIf="newPassword.touched && newPassword.hasError('minlength')">
-                    {{getWarningMessage("new-password-minlength")}} &nbsp;
-                </span>
-                <span class="error help-block" *ngIf="newPassword.touched && newPassword.hasError('pattern')">
-                    {{getWarningMessage("new-password-pattern")}} &nbsp;
-                </span>
-                <input
-                class="form-control"
-                formControlName="newPassword"
-                id="newPassword"
-                type="password"
-                *ngIf="!generatedPassword">
-                <input
-                class="form-control"
-                formControlName="newPassword"
-                id="newPassword"
-                type="text"
-                readonly
-                *ngIf="generatedPassword">
-            </div>
-            <div
-            class="form-group"
-            [ngClass]="{'has-error': newPassword2.touched && (newPassword2.invalid || passwordForm.hasError('newPasswordsAreNotEqual')), 'has-success': newPassword2.touched && newPassword2.valid}">
-                <label class="control-label" for="newPassword2">Ponovno upišite novu lozinku</label>
-                <span class="error help-block" *ngIf="newPassword2.touched && newPassword2.invalid">
-                    {{getWarningMessage("required")}} &nbsp;
-                </span>
-                <span class="error help-block" *ngIf="newPassword2.touched && passwordForm.hasError('newPasswordsAreNotEqual')">
-                    {{getWarningMessage("new-passwords-not-equal")}} &nbsp;
-                </span>
-                <input
-                class="form-control"
-                formControlName="newPassword2"
-                id="newPassword2"
-                type="password"
-                *ngIf="!generatedPassword">
-                <input
-                class="form-control"
-                formControlName="newPassword2"
-                id="newPassword2"
-                type="password"
-                readonly
-                *ngIf="generatedPassword">
-            </div>
-            <button class="btn btn-default" type="submit" [disabled]="passwordForm.invalid">Spremi</button>
-        </form>-->
     </div>
 </div>

@@ -1,6 +1,29 @@
 <h1>Uređivanje korisnikovih podataka</h1>
 <div class="col-md-8">
-    <form [formGroup]="userForm" (ngSubmit)="updateUser()" autocomplete="off">
+    <!-- form for current user, who can change password only -->
+    <form autocomplete="off" [formGroup]="userForm" *ngIf="isThisCurrentUserProfile" (ngSubmit)="updateUserByUser()">
+        <div class="form-group" [ngClass]="{'has-error': oldPassword.touched && oldPassword.invalid, 'has-success': oldPassword.touched && oldPassword.valid}">
+            <label class="control-label" for="oldPassword">Stara lozinka</label>
+            <span class="help-block error" *ngIf="oldPassword.touched && oldPassword.invalid">{{getWarningMessageCurrentUser("required")}}</span>
+            <input class="form-control" formControlName="oldPassword" id="oldPassword" type="password">
+        </div>
+        <div class="form-group" [ngClass]="{'has-error': newPassword.touched && newPassword.invalid, 'has-success': newPassword.touched && newPassword.valid}">
+            <label class="control-label" for="newPassword">Nova lozinka</label>
+            <span class="help-block error" *ngIf="newPassword.touched && newPassword.hasError('required')">{{getWarningMessageCurrentUser("required")}} &nbsp;</span>
+            <span class="help-block error" *ngIf="newPassword.touched && newPassword.hasError('minlength')">{{getWarningMessageCurrentUser("new-password-minlength")}} &nbsp;</span>
+            <span class="help-block error" *ngIf="newPassword.touched && newPassword.hasError('pattern')">{{getWarningMessageCurrentUser("new-password-pattern")}} &nbsp;</span>
+            <input class="form-control" formControlName="newPassword" id="newPassword" type="password">
+        </div>
+        <div class="form-group" [ngClass]="{'has-error': newPassword2.touched && (newPassword2.invalid || userForm.hasError('notEqual')), 'has-success': newPassword2.touched && (newPassword2.valid && !userForm.hasError('notEqual'))}">
+            <label class="control-label" for="newPassword2">Ponovno upišite novu lozinku</label>
+            <span class="help-block error" *ngIf="newPassword2.touched && newPassword2.hasError('required')">{{getWarningMessageCurrentUser("required")}}</span>
+            <span class="help-block error" *ngIf="newPassword2.touched && userForm.hasError('notEqual')">{{getWarningMessageCurrentUser("new-passwords-not-equal")}}</span>
+            <input class="form-control" formControlName="newPassword2" id="newPassword2" type="password">
+        </div>
+        <button class="btn btn-default" [disabled]="userForm.invalid" type="submit">Promijeni lozinku</button>
+    </form>
+    <!-- form for admin, who can change any user data -->
+    <form autocomplete="off" [formGroup]="userForm" *ngIf="!isThisCurrentUserProfile" (ngSubmit)="updateUserByAdmin()">
         <div class="form-group" [ngClass]="{'has-error': firstName.invalid, 'has-success': firstName.valid}">
             <label class="control-label" for="firstName">Ime</label>
             <span class="help-block error" *ngIf="firstName.invalid">{{getWarningMessage("required")}}</span>
@@ -55,13 +78,13 @@
                     <label class="control-label col-md-1" for="startDay">Dan</label>
                     <div class="col-md-3">
                         <select class="form-control" formControlName="startDay" id="startDay">
-                            <option [value]="i" *ngFor="let i of range(31)">{{i}}</option>
+                            <option *ngFor="let i of range(31)" [value]="i">{{i}}</option>
                         </select>
                     </div>
                     <label class="control-label col-md-1" for="startMonth">Mjesec</label>
                     <div class="col-md-3">
                         <select class="form-control" formControlName="startMonth" id="startMonth">
-                            <option [value]="i" *ngFor="let i of range(12)">{{months[i-1]}}</option>
+                            <option *ngFor="let i of range(12)" [value]="i">{{months[i-1]}}</option>
                         </select>
                     </div>
                     <label class="control-label col-md-1" for="startYear">Godina</label>
@@ -87,13 +110,13 @@
                     <label class="control-label col-md-1" for="endDay">Dan</label>
                     <div class="col-md-3">
                         <select class="form-control" formControlName="endDay" id="endDay">
-                            <option [value]="i" *ngFor="let i of range(31)">{{i}}</option>
+                            <option *ngFor="let i of range(31)" [value]="i">{{i}}</option>
                         </select>
                     </div>
                     <label class="control-label col-md-1" for="endMonth">Mjesec</label>
                     <div class="col-md-3">
                         <select class="form-control" formControlName="endMonth" id="endMonth">
-                            <option [value]="i" *ngFor="let i of range(12)">{{months[i-1]}}</option>
+                            <option *ngFor="let i of range(12)" [value]="i">{{months[i-1]}}</option>
                         </select>
                     </div>
                     <label class="control-label col-md-1" for="endYear">Godina</label>
@@ -102,15 +125,23 @@
                     </div>
                 </fieldset>
                 <label for="permanentMember">Stalan član vijeća</label>
-                <input formControlName="permanentMember" id="permanentMember" type="checkbox" (change)="changeEndDate()">
+                <input (change)="changeEndDate()" formControlName="permanentMember" id="permanentMember" type="checkbox">
             </div>
         </div>
-        <div class="form-group" *ngIf="user.HistoryCouncilMember.slice(1).length > 0">
+        <div class="form-group" *ngIf="(user.CouncilMemberships.IsCouncilMember && user.CouncilMemberships.History.slice(1).length > 0)
+            || (!user.CouncilMemberships.IsCouncilMember && user.CouncilMemberships.History.length > 0)">
             <label>Povijest članstva vijeća</label>
-            <p *ngFor="let date of user.HistoryCouncilMember.slice(1)">
-                {{date.StartDate | date: 'd. M. y.'}} - {{date.EndDate | date: 'd. M. y.'}}
-            </p>
+            <div *ngIf="user.CouncilMemberships.IsCouncilMember">
+                <p *ngFor="let date of user.CouncilMemberships.History.slice(1)">
+                    {{date.StartDate | date: 'd. M. y.'}} - {{date.EndDate | date: 'd. M. y.'}}
+                </p>
+            </div>
+            <div *ngIf="!user.CouncilMemberships.IsCouncilMember">
+                <p *ngFor="let date of user.CouncilMemberships.History">
+                    {{date.StartDate | date: 'd. M. y.'}} - {{date.EndDate | date: 'd. M. y.'}}
+                </p>
+            </div>
         </div>
-        <button class="btn btn-default" type="submit" [disabled]="userForm.invalid || !userDataChanged()">Spremi promjene</button>
+        <button class="btn btn-default" [disabled]="userForm.invalid || !userDataChanged()" type="submit">Spremi promjene</button>
     </form>
 </div>

@@ -1,5 +1,3 @@
-// navbar.component.ts
-
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -12,11 +10,11 @@ import { AuthenticationService } from '../shared/services/authentication.service
 })
 export class NavbarComponent {
     constructor(
-        private router: Router,
-        private authenticationService: AuthenticationService
+        private authenticationService: AuthenticationService,
+        private router: Router
     ) {}
 
-    logoutUser() {
+    private logoutUser() {
         this.authenticationService.logoutUser();
         this.router.navigate(['login']);
     }

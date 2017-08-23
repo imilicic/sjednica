@@ -42,7 +42,7 @@ export class AuthenticationService {
         return false;
     }
 
-    loginUser(values: {email: string, password: string}): Observable<{auth_token: string}> {
+    loginUser(values: {Email: string, Password: string}): Observable<{auth_token: string}> {
         let headers = new Headers({'Content-Type': 'application/json'});
         let options = new RequestOptions({headers: headers});
 

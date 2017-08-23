@@ -3,10 +3,11 @@ import { RouterModule, Routes } from '@angular/router'
 
 import { UsersComponent } from './users.component';
 import { AdminRouteActivatorService } from './shared/services/admin-route-activator.service';
+import { CouncilMembershipResolverService } from './shared/services/council-membership-resolver.service';
+import { UserResolverService } from './shared/services/user-resolver.service';
 import { UserComponent } from './user/user.component';
 import { UserCreateComponent } from './user-create/user-create.component';
 import { UserUpdateComponent } from './user-update/user-update.component';
-import { UserResolverService } from './shared/services/user-resolver.service';
 
 export const userRoutes: Routes = [
     {
@@ -34,8 +35,13 @@ export const userRoutes: Routes = [
             AdminRouteActivatorService
         ],
         resolve: {
-            user: UserResolverService
+            user: UserResolverService,
+            councilMemberships: CouncilMembershipResolverService
         }
+    },
+    {
+        path: 'update/me',
+        component: UserUpdateComponent
     },
     {
         path: 'update/:userId',
@@ -44,7 +50,8 @@ export const userRoutes: Routes = [
             AdminRouteActivatorService
         ],
         resolve: {
-            user: UserResolverService
+            user: UserResolverService,
+            councilMemberships: CouncilMembershipResolverService
         }
     }
 ]

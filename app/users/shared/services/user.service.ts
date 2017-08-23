@@ -35,13 +35,36 @@ export class UserService {
         .catch(this.handleError);
     }
 
-    updateUser(user: User): Observable<string> {
-        return this.authHttp.put('/api/users/' + user.UserId, user)
-        .map((response: Response) => response.text())
-        .catch(this.handleError);
+    updateUser(user: User): Observable<User>;
+    updateUser(password: Password): Observable<string>;
+
+    updateUser(data: any): Observable<any> {
+        let isUser: boolean = ((obj: any): obj is User => obj.Email !== undefined)(data);
+        let isPassword: boolean = ((obj: any): obj is Password => obj.NewPassword !== undefined)(data);
+
+        if (isUser) {
+            let user: User = data;
+
+            return this.authHttp.put('/api/users/' + user.UserId, user)
+            .map((response: Response) => <User>response.json())
+            .catch(this.handleError);
+        } else if (isPassword) {
+            let password: Password = data;
+
+            return this.authHttp.put('/api/users/' + password.UserId, password)
+            .map((response: Response) => response.text())
+            .catch(this.handleError);
+        }
     }
 
     private handleError (error: Response) {
+        console.error(error);
         return Observable.throw(error.text());
     }
+}
+
+class Password {
+    NewPassword: string
+    OldPassword: string
+    UserId: number
 }

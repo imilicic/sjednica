@@ -10,7 +10,7 @@ import { ToastrService } from '../shared/services/toastr.service';
     templateUrl: './users.component.html'
 })
 export class UsersComponent implements OnInit {
-    users: User[];
+    private users: User[];
 
     constructor(
         private authenticationService: AuthenticationService,

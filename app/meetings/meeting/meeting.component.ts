@@ -8,7 +8,7 @@ import { Meeting } from '../../shared/models/meeting.model';
 })
 
 export class MeetingComponent implements OnInit {
-    meeting: Meeting;
+    private meeting: Meeting;
 
     constructor(
         private activatedRoute: ActivatedRoute

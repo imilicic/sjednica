@@ -3,7 +3,7 @@ function validateFormInput(values) {
         var current = values[i];
 
         if (current.Type === "char") {
-            if (!isNaN(parseInt(current.Value))) { // value is number
+            if (/^[0-9]+$/.test(current.Value)) { // value is number
                 return false;
             }
 
@@ -21,7 +21,7 @@ function validateFormInput(values) {
         } else if (current.Type === "bool") {
             return current.Value === true || current.Value === false;
         } else if (current.Type === "int") {
-            if (isNaN(parseInt(current.Value))) { // value is char
+            if (/[^0-9]+/.test(current.Value)) { // value is char
                 return false;
             }
 
@@ -33,7 +33,7 @@ function validateFormInput(values) {
                 return false;
             }
         } else if (current.Type === "float") {
-            if (isNaN(parseInt(current.Value))) { // value is char
+            if (/[^0-9]+/.test(current.Value)) { // value is char
                 return false;
             }
 

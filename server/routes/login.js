@@ -39,26 +39,29 @@ function loginUser(request, response) {
         delete user.Password;
         delete user.Salt;
 
-        queryString = "SELECT StartDate, EndDate FROM CouncilMemberships WHERE UserId = ? ORDER BY StartDate DESC";
+        queryString = "SELECT CouncilMembershipId, StartDate, EndDate FROM CouncilMemberships WHERE UserId = ? ORDER BY StartDate DESC";
         connection.query(queryString, [user.UserId], function(error, history) {
             if (error) {
                 throw error;
             }
+
+            var councilMemberships = {
+                IsCouncilMember: false,
+                History: []
+            };
             
             if (history.length > 0) {
-                var councilMemberships = {
-                    IsCouncilMember: false
-                };
                 var now = new Date();
 
                 if (new Date(history[0].StartDate) <= now && now <= new Date(history[0].EndDate)) {
                     councilMemberships.IsCouncilMember = true;
                 }
 
-                councilMemberships.history = history;
-                user.CouncilMemberships = councilMemberships;
+                councilMemberships.History = history;
             }
-
+            
+            user.CouncilMemberships = councilMemberships;
+            
             var auth_token = jsonWebToken.sign(user, config.secret, {
                 expiresIn: "1d"
             });
