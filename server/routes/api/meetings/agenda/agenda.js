@@ -25,7 +25,16 @@ function updateAgenda(req, res) {
 }
 
 function readAgendaVotes(req, res) {
-    return res.status(501);
+    var meetingId = req.meetingId;
+    var queryString = "SELECT AgendaItemId, VoteId, Vote FROM Votes INNER JOIN AgendaItems USING (AgendaItemId) WHERE MeetingId = ?";
+
+    req.connection.query(queryString, [meetingId], function(error, result) {
+        if (error) {
+            return res.status(500).send(error);
+        }
+
+        return res.status(200).send(result);
+    });
 }
 
 function readAgendaUserVotes(req, res) {

@@ -57,7 +57,7 @@ export class MeetingComponent implements OnInit {
                     });
                 });
 
-                this.voteService.readVotes(this.meeting.MeetingId, this.authenticationService.user.UserId)
+                this.voteService.readVotesByUser(this.meeting.MeetingId, this.authenticationService.user.UserId)
                 .subscribe((response: any[]) => {
                     if (response.length > 0) {
                         response.forEach((el: any) => {

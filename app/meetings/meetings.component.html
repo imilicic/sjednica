@@ -5,6 +5,7 @@
         <th>Adresa</th>
         <th>Datum</th>
         <th>Vrsta sjednice</th>
+        <th></th>
     </tr>
     <tr *ngFor="let meeting of meetings">
         <td>
@@ -13,5 +14,6 @@
         <td>{{meeting.Address}}</td>
         <td>{{meeting.DateTime | date: 'd. M. y., HH:mm'}} <span style="color: red; font-weight: bold;" *ngIf="isToday(meeting.DateTime)">(danas)</span></td>
         <td>{{meeting.Type | meetingType}}</td>
+        <td><a [routerLink]="[meeting.MeetingId, 'votes']">Pogledaj rezultate glasanja</a></td>
     </tr>
 </table>

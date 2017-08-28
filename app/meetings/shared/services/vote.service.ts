@@ -23,8 +23,14 @@ export class VoteService {
         .catch(this.handleError);
     }
 
-    readVotes(meetingId: number, userId: number): Observable<any[]> {
+    readVotesByUser(meetingId: number, userId: number): Observable<any[]> {
         return this.authHttp.get('/api/meetings/' + meetingId + '/agenda/votes/' + userId)
+        .map((response: Response) => <any[]>response.json())
+        .catch(this.handleError);
+    }
+
+    readVotes(meetingId: number): Observable<any[]> {
+        return this.authHttp.get('/api/meetings/' + meetingId + '/agenda/votes/')
         .map((response: Response) => <any[]>response.json())
         .catch(this.handleError);
     }
