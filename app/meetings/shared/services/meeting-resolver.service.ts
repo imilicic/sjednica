@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
-import { Meeting } from '../../shared/models/meeting.model';
-import { MeetingService } from '../shared/services/meeting.service';
+import { Meeting } from '../../../shared/models/meeting.model';
+import { MeetingService } from './meeting.service';
 
 @Injectable()
 export class MeetingResolverService implements Resolve<Meeting> {

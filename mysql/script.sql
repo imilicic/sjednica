@@ -1,3 +1,5 @@
+DROP TABLE Votes;
+DROP TABLE Votings;
 DROP TABLE CouncilMemberships;
 DROP TABLE Users;
 DROP TABLE Roles;
@@ -120,14 +122,23 @@ CREATE TABLE AgendaDocuments (
 INSERT INTO AgendaDocuments (Description, Url, AgendaItemId)
 VALUES ("Link na zadaću", "https://www.dropbox.com/s/br4w9t6cd8iw8u4/03_DIMBP201617_zadaca3.pdf?dl=0", 1);
 
-CREATE PROCEDURE CheckIfCouncilMember (
-	IN userId INT,
-	OUT isCouncilMember TINYINT
-)
-BEGIN
-	SELECT 1
-	INTO isCouncilMember
-	FROM HistoryCouncilMembers
-	WHERE UserId = userId
-	AND NOW() BETWEEN StartDate AND EndDate;
-END//
+CREATE TABLE Votings (
+	AgendaItemId INT NOT NULL,
+	PRIMARY KEY (AgendaItemId),
+	FOREIGN KEY (AgendaItemId)
+		REFERENCES AgendaItems(AgendaItemId)
+);
+
+CREATE TABLE Votes (
+	VoteId INT AUTO_INCREMENT,
+	AgendaItemId INT NOT NULL,
+	UserId INT NOT NULL,
+	Vote TINYINT NOT NULL,
+	PRIMARY KEY (VoteId),
+	UNIQUE (AgendaItemId, UserId),
+	FOREIGN KEY (AgendaItemId)
+		REFERENCES AgendaItems(AgendaItemId),
+	FOREIGN KEY (UserId)
+		REFERENCES Users(UserId)
+);
+-- vote: 2 = za, 1 = suzdržan, 0 = protiv

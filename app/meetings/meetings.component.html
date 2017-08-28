@@ -11,7 +11,7 @@
             <a [routerLink]="[meeting.MeetingId]">{{meeting.Number}}. sjednica</a>
         </td>
         <td>{{meeting.Address}}</td>
-        <td>{{meeting.DateTime | date: 'd. M. y., HH:mm'}}</td>
+        <td>{{meeting.DateTime | date: 'd. M. y., HH:mm'}} <span style="color: red; font-weight: bold;" *ngIf="isToday(meeting.DateTime)">(danas)</span></td>
         <td>{{meeting.Type | meetingType}}</td>
     </tr>
 </table>

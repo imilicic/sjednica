@@ -23,4 +23,11 @@ export class MeetingsComponent implements OnInit {
             this.toastrService.error(error);
         });
     }
+
+    private isToday(dateTime: string) {
+        let date = new Date(dateTime);
+        let now = new Date();
+
+        return date.getDate() === now.getDate() &&  date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()
+    }
 }

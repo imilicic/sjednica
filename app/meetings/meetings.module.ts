@@ -3,9 +3,12 @@ import { NgModule } from '@angular/core';
 import { HttpModule, Http, RequestOptions } from '@angular/http';
 import { AuthHttp, AuthConfig } from 'angular2-jwt';
 
-import { MeetingResolverService } from './meeting/meeting-resolver.service';
 import { MeetingComponent } from './meeting/meeting.component';
+import { MeetingCreateComponent } from './meeting-create/meeting-create.component';
 import { MeetingService } from './shared/services/meeting.service';
+import { MeetingResolverService } from './shared/services/meeting-resolver.service';
+import { VoteService } from './shared/services/vote.service';
+import { VotingService } from './shared/services/voting.service';
 import { MeetingTypePipe } from './shared/meeting-type.pipe';
 import { MeetingsRoutingModule } from './meetings-routing.module';
 import { MeetingsComponent } from './meetings.component';
@@ -27,6 +30,7 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
     exports: [],
     declarations: [
         MeetingComponent,
+        MeetingCreateComponent,
         MeetingsComponent,
         MeetingTypePipe
     ],
@@ -37,7 +41,9 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
             deps: [Http, RequestOptions]
         },
         MeetingResolverService,
-        MeetingService
+        MeetingService,
+        VoteService,
+        VotingService
     ],
 })
 export class MeetingsModule { }

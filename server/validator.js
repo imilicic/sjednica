@@ -2,7 +2,7 @@ function validateFormInput(values) {
     for (var i = 0; i < values.length; i++) {
         var current = values[i];
 
-        if (current.Type === "char") {
+        if (current.Type === 'char') {
             if (/^[0-9]+$/.test(current.Value)) { // value is number
                 return false;
             }
@@ -18,9 +18,9 @@ function validateFormInput(values) {
                     return false;
                 }
             }
-        } else if (current.Type === "bool") {
+        } else if (current.Type === 'bool') {
             return current.Value === true || current.Value === false;
-        } else if (current.Type === "int") {
+        } else if (current.Type === 'int') {
             if (/[^0-9]+/.test(current.Value)) { // value is char
                 return false;
             }
@@ -32,7 +32,7 @@ function validateFormInput(values) {
             if (current.Value > current.Max || current.Value < current.Min) { // bigger or smaller than allowed
                 return false;
             }
-        } else if (current.Type === "float") {
+        } else if (current.Type === 'float') {
             if (/[^0-9]+/.test(current.Value)) { // value is char
                 return false;
             }

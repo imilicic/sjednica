@@ -1,10 +1,12 @@
+import { AgendaItem } from './agenda-item.model';
+
 export class Meeting {
-    MeetingId: number
     Address: string
+    AgendaItems: AgendaItem[]
     City: string
-    DateTime: Date
+    DateTime: string
+    MeetingId: number
     Number: number
     NumberInYear: number
     Type: string
-    AgendaItems: [{Number: number, Text: string}]
 }

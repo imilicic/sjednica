@@ -1,96 +1,75 @@
 <nav class="navbar navbar-default navbar-static-top">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button
-      aria-expanded="false"
-      class="navbar-toggle collapsed"
-      data-target="#bs-example-navbar-collapse-1"
-      data-toggle="collapse"
-      type="button"
-      >
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" [routerLink]="">Elektronske sjednice</a>
-    </div>
+	<div class="container-fluid">
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button aria-expanded="false" class="navbar-toggle collapsed" data-target="#bs-example-navbar-collapse-1" data-toggle="collapse"
+			 type="button">
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" [routerLink]="">Elektronske sjednice</a>
+		</div>
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav navbar-center" *ngIf="authenticationService.isAuthenticated()">
-        <li class="dropdown" *ngIf="authenticationService.isAdmin()">
-          <a
-          aria-expanded="false"
-          aria-haspopup="true"
-          class="dropdown-toggle"
-          data-toggle="dropdown"
-          href="#"
-          role="button"
-          >
-            Korisnici <span class="caret"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li><a [routerLink]="['users/create']" routerLinkActive="active">Dodaj novog</a></li>
-            <li>
-              <a
-                [routerLink]="['users']"
-                routerLinkActive="active"
-                [routerLinkActiveOptions]="{exact: true}"
-              >
-                Pregled svih
-              </a>
-            </li>
-          </ul>
-        </li>
-        <li class="dropdown" *ngIf="authenticationService.isAdmin()">
-          <a
-          aria-expanded="false"
-          aria-haspopup="true"
-          class="dropdown-toggle"
-          data-toggle="dropdown"
-          href="#"
-          role="button"
-          >
-            Sjednice <span class="caret"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li><a [routerLink]="['meetings/create']" routerLinkActive="active">Dodaj novu</a></li>
-            <li><a
-            [routerLink]="['meetings']"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{exact: true}">
-              Pregled svih
-            </a></li>
-          </ul>
-        </li>
-      </ul>
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav navbar-center" *ngIf="authenticationService.isAuthenticated()">
+				<li class="dropdown" *ngIf="authenticationService.isAdmin()">
+					<a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
+						Korisnici <span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu">
+						<li>
+							<a [routerLink]="['users/create']" routerLinkActive="active">
+							Dodaj novog
+							</a>
+						</li>
+						<li>
+							<a [routerLink]="['users']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+								Pregled svih
+							</a>
+						</li>
+					</ul>
+				</li>
+				<li class="dropdown">
+					<a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
+						Sjednice <span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu">
+						<li *ngIf="authenticationService.isAdmin()">
+							<a [routerLink]="['meetings/create']" routerLinkActive="active">
+								Dodaj novu
+							</a>
+						</li>
+						<li>
+							<a [routerLink]="['meetings']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+								Pregled svih
+							</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
 
-      <ul class="nav navbar-nav navbar-right">
-        <li *ngIf="!authenticationService.isAuthenticated()">
-          <a [routerLink]="['login']" routerLinkActive="active">
-            Prijavi se
-          </a>
-        </li>
-        <li class="dropdown" *ngIf="authenticationService.isAuthenticated()">
-          <a
-          aria-expanded="false"
-          aria-haspopup="true"
-          class="dropdown-toggle"
-          data-toggle="dropdown"
-          href="#"
-          role="button"
-          >
-            {{authenticationService.user.FirstName}} {{authenticationService.user.LastName}}
-            <span class="caret"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li><a [routerLink]="['users/me']" routerLinkActive="active">Profil</a></li>
-            <li><a (click)="logoutUser()" [routerLink]="">Odjavi se</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
+			<ul class="nav navbar-nav navbar-right">
+				<li *ngIf="!authenticationService.isAuthenticated()">
+					<a [routerLink]="['login']" routerLinkActive="active">
+						Prijavi se
+					</a>
+				</li>
+				<li class="dropdown" *ngIf="authenticationService.isAuthenticated()">
+					<a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
+						{{authenticationService.user.FirstName}} {{authenticationService.user.LastName}}
+						<span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu">
+						<li><a [routerLink]="['users/me']" routerLinkActive="active">Profil</a></li>
+						<li><a (click)="logoutUser()" [routerLink]="">Odjavi se</a></li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+		<!-- /.navbar-collapse -->
+	</div>
+	<!-- /.container-fluid -->
 </nav>

@@ -1,4 +1,4 @@
-var crypto = require("crypto");
+var crypto = require('crypto');
 
 /**
  * generates random string of characters i.e salt
