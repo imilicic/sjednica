@@ -25,7 +25,36 @@
 <h3>Dnevni red</h3>
 <div *ngFor="let agendaItem of meeting.AgendaItems">
     <p>{{agendaItem.Number}}. {{agendaItem.Text}}</p>
-    <div *ngIf="isToday() && votings">
+    <div class="row" *ngIf="isToday() && meeting.Type === 'non electronic'">
+        <div class="col-md-3">
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-md-4">Protiv</label>
+                    <div class="col-md-8">
+                        <input class="form-control" type="number">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-4">Suzdržan</label>
+                    <div class="col-md-8">
+                        <input class="form-control" type="number">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-4">Za</label>
+                    <div class="col-md-8">
+                        <input class="form-control" type="number">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-4 col-md-8">
+                        <button class="btn btn-default" (click)="voteCummulative(agendaItem.AgendaItemId)" type="button">Spremi</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="isToday() && meeting.Type !== 'non electronic'">
         <div *ngIf="authenticationService.isAdmin()">
             <button class="btn btn-primary" (click)="openVoting(agendaItem.AgendaItemId, agendaItem.Number)"  *ngIf="votings.indexOf(agendaItem.AgendaItemId) < 0" type="button">
                 Otvori glasanje

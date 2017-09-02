@@ -6,6 +6,7 @@ import { AuthHttp, AuthConfig } from 'angular2-jwt';
 import { MeetingComponent } from './meeting/meeting.component';
 import { MeetingCreateComponent } from './meeting-create/meeting-create.component';
 import { MeetingVotesComponent } from './meeting-votes/meeting-votes.component';
+import { CummulativeVoteService } from './shared/services/cummulative-vote.service';
 import { MeetingService } from './shared/services/meeting.service';
 import { MeetingResolverService } from './shared/services/meeting-resolver.service';
 import { VoteService } from './shared/services/vote.service';
@@ -42,6 +43,7 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
             useFactory: authHttpServiceFactory,
             deps: [Http, RequestOptions]
         },
+        CummulativeVoteService,
         MeetingResolverService,
         MeetingService,
         VoteService,

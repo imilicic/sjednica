@@ -26,6 +26,7 @@
     "core-js": "^2.4.1",
     "express": "^4.15.3",
     "express-myconnection": "^1.0.4",
+    "express-validator": "^4.0.0",
     "jsonwebtoken": "^7.4.2",
     "mysql": "^2.14.1",
     "rxjs": "5.0.1",

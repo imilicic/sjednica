@@ -8,6 +8,8 @@ DROP TABLE AgendaItems;
 DROP TABLE MeetingNotifications;
 DROP TABLE Meetings;
 DROP TABLE Types;
+DROP TABLE PresenceOfUsers;
+DROP TABLE AbsenceOfCouncilMembers;
 
 CREATE TABLE Roles (
 	RoleId INT AUTO_INCREMENT,
@@ -112,14 +114,14 @@ VALUES (1, 2, "Donošenje Odluke o održavanju izvanrednih dodatnih termina iz p
 CREATE TABLE AgendaDocuments (
 	AgendaDocumentId INT AUTO_INCREMENT,
 	Description VARCHAR(500),
-	Url VARCHAR(50) NOT NULL,
+	URL VARCHAR(50) NOT NULL,
 	AgendaItemId INT NOT NULL,
 	PRIMARY KEY (AgendaDocumentId),
 	FOREIGN KEY (AgendaItemId)
 		REFERENCES AgendaItems(AgendaItemId)
 );
 
-INSERT INTO AgendaDocuments (Description, Url, AgendaItemId)
+INSERT INTO AgendaDocuments (Description, URL, AgendaItemId)
 VALUES ("Link na zadaću", "https://www.dropbox.com/s/br4w9t6cd8iw8u4/03_DIMBP201617_zadaca3.pdf?dl=0", 1);
 
 CREATE TABLE Votings (
@@ -142,3 +144,38 @@ CREATE TABLE Votes (
 		REFERENCES Users(UserId)
 );
 -- vote: 2 = za, 1 = suzdržan, 0 = protiv
+
+CREATE TABLE CummulativeVotes (
+	AgendaItemId INT NOT NULL,
+	VotesFor INT NOT NULL,
+	VotesAgainst INT NOT NULL,
+	VotesAbstain INT NOT NULL,
+	PRIMARY KEY (AgendaItemId),
+	FOREIGN KEY (AgendaItemId)
+		REFERENCES AgendaItems(AgendaItemId)
+);
+
+CREATE TABLE PresenceOfUsers (
+	PresenceOfUserId INT AUTO_INCREMENT,
+	UserId INT NOT NULL,
+	MeetingId INT NOT NULL,
+	UNIQUE (UserId, MeetingId),
+	PRIMARY KEY (PresenceOfUserId),
+	FOREIGN KEY (UserId)
+		REFERENCES Users(UserId),
+	FOREIGN KEY (MeetingId)
+		REFERENCES Meetings(MeetingId)
+);
+
+CREATE TABLE AbsenceOfCouncilMembers (
+	AbsenceOfCouncilMemberId INT AUTO_INCREMENT,
+	CouncilMembershipId INT NOT NULL,
+	MeetingId INT NOT NULL,
+	Reason VARCHAR(500) NOT NULL,
+	UNIQUE (CouncilMembershipId, MeetingId),
+	PRIMARY KEY (AbsenceOfCouncilMemberId),
+	FOREIGN KEY (CouncilMembershipId)
+		REFERENCES CouncilMemberships(CouncilMembershipId),
+	FOREIGN KEY (MeetingId)
+		REFERENCES Meetings(MeetingId)
+);

@@ -1,213 +1,297 @@
 var express = require('express');
-var validator = require("../../../validator");
-var councilMembershipHelper = require("./councilMembership-helper");
+var {check, validationResult} = require('express-validator/check');
 
-var councilMembershipRouter = express.Router();
+var router = express.Router();
 
-councilMembershipRouter.post("/", createCouncilMembership);
-councilMembershipRouter.get("/", readCouncilMemberships);
-councilMembershipRouter.get("/:councilMembershipId", validateRouteParam, ifCouncilMembershipExists, readCouncilMembership);
-councilMembershipRouter.put("/:councilMembershipId", validateRouteParam, ifCouncilMembershipExists, updateCouncilMembership);
-councilMembershipRouter.delete("/:councilMembershipId", validateRouteParam, ifCouncilMembershipExists, deleteCouncilMembership);
+router.use('/:councilMembershipId', [
+  check('councilMembershipId')
+    .exists()
+    .withMessage('CouncilMembershipId required')
+    .isInt({ gt: 0, allow_leading_zeros: false })
+    .withMessage('Invalid CouncilMembershipId'),
+  function(req, res, next) {
+    var errors = validationResult(req);
 
-module.exports = councilMembershipRouter;
+    if (errors.isEmpty()) {
+      next();
+    } else {
+      res.status(422).send(errors.mapped());
+      return
+    }
+  },
+  function(req, res, next) {
+    findCouncilMembershipById(req, res, req.params.councilMembershipId)
+      .then((councilMembership) => {
+        if (councilMembership.length === 0) {
+          res.status(404).send('Članstvo u vijeću ne postoji!');
+          return
+        } else {
+          req.councilMembership = councilMembership[0];
+          next();
+        }
+      }, (error) => {
+        res.status(500).send(error);
+        return
+      });
+  }
+]);
+
+// Supports GET, POST
+router.route('/')
+  .get([
+    retrieveCouncilMemberships
+  ])
+  .post([
+    check('StartDate')
+      .exists()
+      .withMessage('StartDate is required'),
+    check('EndDate')
+      .exists()
+      .withMessage('EndDate is required'),
+    function(req, res, next) {
+      var errors = validationResult(req);
+
+      if (errors.isEmpty()) {
+        var isDateValid = isNaN(Date.parse(req.body.EndDate)) || 
+          isNaN(Date.parse(req.body.StartDate));
+
+        if (isDateValid) {
+          res.status(400).send('Nevaljan datum!');
+          return
+        } else {
+          next();
+        }
+      } else {
+        res.status(422).send(errors.mapped());
+        return
+      }
+    },
+    createCouncilMembership
+  ]);
+
+// Supports GET, PUT, DELETE
+router.route('/:councilMembershipId')
+  .get([
+    retrieveCouncilMembership
+  ])
+  .put([
+    check('StartDate')
+      .exists()
+      .withMessage('StartDate is required'),
+    check('EndDate')
+      .exists()
+      .withMessage('EndDate is required'),
+    function(req, res, next) {
+      var errors = validationResult(req);
+
+      if (errors.isEmpty()) {
+        var isDateValid = isNaN(Date.parse(req.body.EndDate)) || 
+          isNaN(Date.parse(req.body.StartDate));
+
+        if (isDateValid) {
+          res.status(400).send('Nevaljan datum!');
+          return;
+        } else {
+          next();
+        }
+      } else {
+        res.status(422).send(errors.mapped());
+        return;
+      }
+    },
+    function(req, res, next) {
+      if (new Date(req.councilMembership.EndDate) < new Date()) {
+        res.status(403).send('Ne može se brisati!');
+        return;
+      } else {
+        next();
+      }
+    },
+    replaceCouncilMembership
+  ])
+  .delete([
+    function(req, res, next) {
+      if (new Date(req.councilMembership.EndDate) < new Date()) {
+        res.status(403).send('Ne može se brisati!');
+        return;
+      } else {
+        next();
+      }
+    },
+    deleteCouncilMembership
+  ]);
 
 function createCouncilMembership(req, res) {
-    if (!(req.body.hasOwnProperty("IsCouncilMember") && req.body.History)) {
-        return res.status(400).send("Nevaljan zahtjev!");
+  var queryString = `
+    INSERT INTO CouncilMemberships
+    (
+      UserId,
+      StartDate,
+      EndDate
+    )
+    VALUES (?, ?, ?)
+  `;
+  var values = [
+    req.userId,
+    req.body.StartDate,
+    req.body.EndDate
+  ];
+
+  req.connection.query(queryString, values, function(error, result) {
+    if (error) {
+      res.status(500).send(error);
+      return;
     }
 
-    var isCouncilMember = req.body.IsCouncilMember;
-
-    var vals = validator.appendValidators(["isCouncilMember"], councilMembershipHelper.validators).map(val => {
-        val.Value = eval(val.Name);
-        return val;
-    });
-
-    if (!validator.validateFormInput(vals)) {
-        return res.status(400).send("Nevaljan zahtjev!");
+    if (result.serverStatus !== 2) {
+      res.status(500).send('Korisnik nije dodan u vijeće!');
+      return;
     }
 
-    if (!isCouncilMember) {
-        return res.status(400).send("Nevaljan zahtjev!");
-    }
-
-    var endDate = req.body.History[0].EndDate;
-    var startDate = req.body.History[0].StartDate;
-    var userId = req.userId;
-
-    if (isNaN(Date.parse(endDate)) || isNaN(Date.parse(startDate))) {
-        return res.status(400).send("Nevaljan datum!");
-    }
-
-    var queryString = "INSERT INTO CouncilMemberships (UserId, StartDate, EndDate) VALUES (?, ?, ?)";
-
-    req.connection.query(queryString, [userId, startDate, endDate], function(error, result) {
-        if (error) {
-            return res.status(500).send(error);
-        }
-        
-        if (result.serverStatus != 2) {
-            return res.status(500).send("Korisnik nije dodan u vijeće!");
-        }
-
-        queryString = "SELECT * FROM CouncilMemberships WHERE CouncilMembershipId = ?"
-
-        req.connection.query(queryString, [result.insertId], function(error, result) {
-            if (error) {
-                return res.status(500).send(error);
-            }
-
-            var newConcilMembership = {
-                IsCouncilMember: true,
-                History: [{
-                    CouncilMembershipId: result[0].CouncilMembershipId,
-                    StartDate: result[0].StartDate,
-                    EndDate: result[0].EndDate
-                }]
-            }
-
-            res.set("Location", "Location: /api/users/" + userId + "/councilMemberships/" + result[0].CouncilMembershipId);
-            return res.status(201).send(newConcilMembership);
-        });
-    });
-}
-
-function readCouncilMembership(req, res) {
-    return res.status(200).send(req.councilMembership);
-}
-
-function readCouncilMemberships(req, res) {
-    var userId = req.userId;
-    var queryString = "SELECT CouncilMembershipId, StartDate, EndDate FROM CouncilMemberships WHERE UserId = ? ORDER BY StartDate DESC";
-
-    req.connection.query(queryString, [userId], function(error, result) {
-        if (error) {
-            return res.status(500).send(error);
-        }
-
-        if (result.length == 0) {
-            return res.status(200).send({
-                IsCouncilMember: false,
-                History: []
-            });
-        }
-
-        var endDate = new Date(result[0].EndDate);
-        var isCouncilMember = false;
-        var now = new Date();
-        var startDate = new Date(result[0].StartDate);
-
-        if (startDate <= now && now <= endDate) {
-            isCouncilMember = true;
-        }
-
-        var newCouncilMemberships = {
-            IsCouncilMember: isCouncilMember,
-            History: result
-        };
-
-        return res.status(200).send(newCouncilMemberships);
-    });
-}
-
-function updateCouncilMembership(req, res) {
-    var councilMembership = req.councilMembership;
-
-    if (!(req.body.hasOwnProperty("IsCouncilMember") && req.body.History)) {
-        return res.status(400).send("Nevaljan zahtjev!");
-    }
-
-    if (!req.body.IsCouncilMember) {
-        return res.status(400).send("Nevaljan zahtjev!");
-    }
-
-    if (req.body.History[0].CouncilMembershipId != councilMembership.History[0].CouncilMembershipId) {
-        return res.status(400).send("Nevaljan zahtjev!");
-    }
-
-    var endDate = req.body.History[0].EndDate;
-    var startDate = req.body.History[0].StartDate;
-
-    if (isNaN(Date.parse(endDate)) || isNaN(Date.parse(startDate))) {
-        return res.status(400).send("Nevaljan datum!");
-    }
-
-    if (new Date(councilMembership.History[0].EndDate) < new Date()) {
-        return res.status(403).send("Ne može se mijenjati!");
-    }
-
-    var queryString = "UPDATE CouncilMemberships SET StartDate = ?, EndDate = ? WHERE CouncilMembershipId = ?";
-    var values = [startDate, endDate, councilMembership.History[0].CouncilMembershipId];
+    queryString = `
+      SELECT * FROM CouncilMemberships
+      WHERE CouncilMembershipId = ?
+    `;
+    values = [result.insertId];
 
     req.connection.query(queryString, values, function(error, result) {
-        if (error) {
-            return res.status(500).send(error);
-        }
+      if (error) {
+        res.status(500).send(error);
+        return;
+      }
 
-        if (result.serverStatus != 2) {
-            return res.status(500).send("Članstvo u vijeću nije promijenjeno!");
-        } else {
-            councilMembership.History[0].EndDate = endDate;
-            councilMembership.History[0].StartDate = startDate;
-            return res.status(200).send(councilMembership);
-        }
+      var location = 
+        'Location: /api/users/' + 
+        userId + 
+        '/councilMemberships/' + 
+        result[0].CouncilMembershipId;
+
+      res.set('Location', location);
+      res.status(201).send(result);
+      return;
     });
+  });
+}
+
+function retrieveCouncilMembership(req, res) {
+  res.status(200).send(req.councilMembership);
+  return;
+}
+
+function retrieveCouncilMemberships(req, res) {
+  var userId = req.userId;
+  var queryString = `
+    SELECT CouncilMembershipId, StartDate, EndDate
+    FROM CouncilMemberships
+    WHERE UserId = ?
+    ORDER BY StartDate DESC
+  `;
+
+  req.connection.query(queryString, [userId], function(error, result) {
+    if (error) {
+      res.status(500).send(error);
+      return;
+    }
+
+    if (result.length === 0) {
+      res.status(200).send({
+        IsCouncilMember: false,
+        History: []
+      });
+      return;
+    }
+
+    var endDate = new Date(result[0].EndDate);
+    var isCouncilMember = false;
+    var now = new Date();
+    var startDate = new Date(result[0].StartDate);
+
+    if (startDate <= now && now <= endDate) {
+      isCouncilMember = true;
+    }
+
+    var newCouncilMemberships = {
+      IsCouncilMember: isCouncilMember,
+      History: result
+    };
+
+    res.status(200).send(newCouncilMemberships);
+    return;
+  });
+}
+
+function replaceCouncilMembership(req, res) {
+  var councilMembership = req.councilMembership;
+
+  var queryString = `
+    UPDATE CouncilMemberships
+    SET StartDate = ?, EndDate = ?
+    WHERE CouncilMembershipId = ?
+  `;
+  var values = [
+    req.body.StartDate,
+    req.body.EndDate,
+    councilMembership.CouncilMembershipId
+  ];
+
+  req.connection.query(queryString, values, function(error, result) {
+    if (error) {
+      res.status(500).send(error);
+      return;
+    }
+
+    if (result.serverStatus !== 2) {
+      res.status(500).send('Članstvo u vijeću nije promijenjeno!');
+      return;
+    } else {
+      res.status(200).send('Članstvo u vijeću je promijenjeno!');
+      return;
+    }
+  });
 }
 
 function deleteCouncilMembership(req, res) {
-    var councilMembership = req.councilMembership;
+  var councilMembership = req.councilMembership;
+  var queryString = `
+    DELETE FROM CouncilMemberships
+    WHERE CouncilMembershipId = ?
+  `;
+  var values = [councilMembership.CouncilMembershipId];
 
-    if (new Date(councilMembership.History[0].EndDate) < new Date()) {
-        return res.status(403).send("Ne može se brisati!");
+  req.connection.query(queryString, values, function(error, result) {
+    if (error) {
+      res.status(500).send(error);
+      return;
     }
 
-    var queryString = "DELETE FROM CouncilMemberships WHERE CouncilMembershipId = ?";
-    req.connection.query(queryString, [councilMembership.History[0].CouncilMembershipId], function(error, result) {
-        if (error) {
-            return res.status(500).send(error);
-        }
-
-        if (result.serverStatus != 2) {
-            return res.status(500).send("Članstvo u vijeću nije obrisano!");
-        } else {
-            return res.status(200).send("Članstvo u vijeću obrisano!");
-        }
-    });
-}
-
-function ifCouncilMembershipExists(req, res, next) {
-    var councilMembershipId = req.params.councilMembershipId;
-    var userId = req.userId;
-    var queryString = "SELECT CouncilMembershipId, StartDate, EndDate FROM CouncilMemberships WHERE CouncilMembershipId = ? AND UserId = ?";
-
-    req.connection.query(queryString, [councilMembershipId, userId], function(error, result) {
-        if (error) {
-            return res.status(500).send(error);
-        }
-
-        if (result.length == 0) {
-            return res.status(404).send("Članstvo u vijeću ne postoji!");
-        } else {
-            req.councilMembership = {
-                IsCouncilMember: false,
-                History: result
-            };
-            var now = new Date();
-
-            if (new Date(result[0].StartDate) <= now && now <= new Date(result[0].EndDate)) {
-                req.councilMembership.IsCouncilMember = true;
-            }
-
-            next();
-        }
-    });
-}
-
-function validateRouteParam(req, res, next) {
-    if (!validator.routeParametersValidator(req.params.councilMembershipId)) {
-        return res.status(400).send("Nevaljan zahtjev!");
+    if (result.serverStatus !== 2) {
+      res.status(500).send('Članstvo u vijeću nije obrisano!');
+      return;
     } else {
-        next();
+      res.status(200).send('Članstvo u vijeću obrisano!');
+      return;
     }
+  });
 }
+
+function findCouncilMembershipById(req, res, councilMembershipId) {
+  return new Promise((resolve, reject) => {
+    var userId = req.userId;
+    var queryString = `
+      SELECT CouncilMembershipId, StartDate, EndDate
+      FROM CouncilMemberships
+      WHERE CouncilMembershipId = ? AND UserId = ?
+    `;
+    var values = [councilMembershipId, userId];
+  
+    req.connection.query(queryString, values, function(error, result) {
+      if (error) {
+        reject(error);
+      }
+
+      resolve(result);
+    });
+  });
+}
+
+module.exports = router;

@@ -144,4 +144,8 @@ export class MeetingComponent implements OnInit {
             });
         }
     }
+
+    private voteCummulative(agendaItemId: number) {
+        //
+    }
 }
