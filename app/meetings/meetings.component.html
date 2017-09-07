@@ -13,7 +13,11 @@
         </td>
         <td>{{meeting.Address}}</td>
         <td>{{meeting.DateTime | date: 'd. M. y., HH:mm'}} <span style="color: red; font-weight: bold;" *ngIf="isToday(meeting.DateTime)">(danas)</span></td>
-        <td>{{meeting.Type | meetingType}}</td>
-        <td><a [routerLink]="[meeting.MeetingId, 'votes']">Pogledaj rezultate glasanja</a></td>
+        <td>{{typeService.types[meeting.TypeId - 1]?.Name | meetingType}}</td>
+        <td>
+            <a *ngIf="isPassed(meeting.DateTime)" [routerLink]="[meeting.MeetingId, 'votes']">
+                Pogledaj rezultate glasanja
+            </a>
+        </td>
     </tr>
 </table>

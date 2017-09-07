@@ -4,9 +4,9 @@ export class Meeting {
     Address: string
     AgendaItems: AgendaItem[]
     City: string
-    DateTime: string
+    DateTime: Date
     MeetingId: number
     Number: number
     NumberInYear: number
-    Type: string
+    TypeId: number
 }

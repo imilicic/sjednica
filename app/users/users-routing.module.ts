@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router'
 
 import { UsersComponent } from './users.component';
-import { AdminRouteActivatorService } from './shared/services/admin-route-activator.service';
+import { AdminRouteActivatorService } from '../shared/services/admin-route-activator.service';
 import { CouncilMembershipResolverService } from './shared/services/council-membership-resolver.service';
 import { UserResolverService } from './shared/services/user-resolver.service';
 import { UserComponent } from './user/user.component';

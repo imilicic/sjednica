@@ -1,6 +1,58 @@
-<form>
-    <div class="form-group">
-        <label for="address">Adresa</label>
-        <input class="form-control" id="address" type="text">
-    </div>
-</form>
+<h1>Izrada sjednice</h1>
+<div class="col-md-8">
+    <form autocomplete="off" [formGroup]="meetingForm" (ngSubmit)="createMeeting()">
+        <div class="form-group">
+            <label for="address">Adresa</label>
+            <input class="form-control" formControlName="address" id="address" type="text">
+        </div>
+        <div class="form-group">
+            <label for="city">Grad</label>
+            <input class="form-control" formControlName="city" id="city" type="text">
+        </div>
+        <div class="form-group">
+            <fieldset>
+                <legend>Datum</legend>
+                <label class="control-label col-md-1" for="day">Dan</label>
+                <div class="col-md-3">
+                    <select class="form-control" formControlName="day" id="day">
+                        <option *ngFor="let i of range(31)" [value]="i">{{i}}</option>
+                    </select>
+                </div>
+                <label class="control-label col-md-1" for="month">Mjesec</label>
+                <div class="col-md-3">
+                    <select class="form-control" formControlName="month" id="month">
+                        <option *ngFor="let i of range(12)" [value]="i">{{months[i-1]}}</option>
+                    </select>
+                </div>
+                <label class="control-label col-md-1" for="year">Godina</label>
+                <div class="col-md-3">
+                    <input class="form-control" formControlName="year" id="year" type="number">
+                </div>
+            </fieldset>
+        </div>
+        <div class="form-group">
+                <fieldset>
+                    <legend>Vrijeme</legend>
+                    <label class="control-label col-md-1" for="hours">Sati</label>
+                    <div class="col-md-5">
+                        <select class="form-control" formControlName="hours" id="hours">
+                            <option *ngFor="let i of range(23)" [value]="i">{{i}}</option>
+                        </select>
+                    </div>
+                    <label class="control-label col-md-1" for="minutes">Minute</label>
+                    <div class="col-md-5">
+                        <select class="form-control" formControlName="minutes" id="minutes">
+                            <option *ngFor="let i of range(4)" [value]="(i - 1) * 15">{{(i - 1) * 15}}</option>
+                        </select>
+                    </div>
+                </fieldset>
+            </div>
+        <div class="form-group">
+            <label for="typeId">Tip sjednice</label>
+            <select class="form-control" formControlName="typeId" id="typeId">
+                <option *ngFor="let type of typeService.types" [value]="type.TypeId">{{type.Name | meetingType}}</option>
+            </select>
+        </div>
+        <button class="btn btn-default" type="submit">Dodaj</button>
+    </form>
+</div>

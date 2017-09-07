@@ -79,16 +79,16 @@ router.route('/')
     check('DateTime')
       .exists()
       .withMessage('DateTime is required'),
-    check('Number')
-      .exists()
-      .withMessage('Number is required')
-      .isInt({gt: 0})
-      .withMessage('Invalid Number'),
-    check('NumberInYear')
-      .exists()
-      .withMessage('NumberInYear is required')
-      .isInt({gt: 0})
-      .withMessage('Invalid Number'),
+    // check('Number')
+    //   .exists()
+    //   .withMessage('Number is required')
+    //   .isInt({gt: 0})
+    //   .withMessage('Invalid Number'),
+    // check('NumberInYear')
+    //   .exists()
+    //   .withMessage('NumberInYear is required')
+    //   .isInt({gt: 0})
+    //   .withMessage('Invalid Number'),
     check('TypeId')
       .exists()
       .withMessage('TypeId is required')
@@ -102,13 +102,50 @@ router.route('/')
           res.status(422).send('Nevaljan datum!');
           return;
         } else {
-          req.body.DateTime = new Date(req.body.DateTime);
-          next();
+          var now = new Date();
+          var DateTime = new Date(req.body.DateTime);
+
+          if (DateTime < now) {
+            res.status(422).send('Ne možete praviti sjednicu u prošlosti!');
+            return;
+          } else {
+            req.body.DateTime = DateTime;
+            next();
+          }
         }
       } else {
         res.status(422).send(errors.mapped());
         return;
       }
+    },
+    function(req, res, next) {
+      findMeetingNumber(req, res)
+        .then((number) => {
+          number = number[0];
+
+          if (!number) {
+            req.Number = 1;
+          } else {
+            req.Number = number.Number;
+          }
+
+          next();
+        }, (error) => {
+          res.status(500).send(error);
+        });
+    },
+    function(req, res, next) {
+      findMeetingNumberInYear(req, res)
+        .then((data) => {
+          var DateTime = new Date(data.DateTime);
+          var NumberInYear = data.NumberInYear;
+          var date = req.body.DateTime;
+
+          req.NumberInYear = 5;
+          next();
+        }, (error) => {
+          res.status(500).send(error);
+        });
     },
     createMeeting
   ]);
@@ -128,16 +165,16 @@ router.route('/:meetingId')
     check('DateTime')
       .exists()
       .withMessage('DateTime is required'),
-    check('Number')
-      .exists()
-      .withMessage('Number is required')
-      .isInt({gt: 0})
-      .withMessage('Invalid Number'),
-    check('NumberInYear')
-      .exists()
-      .withMessage('NumberInYear is required')
-      .isInt({gt: 0})
-      .withMessage('Invalid Number'),
+    // check('Number')
+    //   .exists()
+    //   .withMessage('Number is required')
+    //   .isInt({gt: 0})
+    //   .withMessage('Invalid Number'),
+    // check('NumberInYear')
+    //   .exists()
+    //   .withMessage('NumberInYear is required')
+    //   .isInt({gt: 0})
+    //   .withMessage('Invalid Number'),
     check('TypeId')
       .exists()
       .withMessage('TypeId is required')
@@ -200,8 +237,8 @@ function createMeeting(req, res) {
     req.body.Address,
     req.body.City,
     req.body.DateTime,
-    req.body.Number,
-    req.body.NumberInYear,
+    req.Number,
+    req.NumberInYear,
     req.body.TypeId
   ];
 
@@ -245,17 +282,14 @@ function replaceMeeting(req, res) {
     Address = ?,
     City = ?,
     DateTime = ?,
-    Number = ?,
-    NumberInYear = ?,
     TypeId = ?
   WHERE MeetingId = ?
 `;
+
 var values = [
   req.body.Address,
   req.body.City,
   req.body.DateTime,
-  req.body.Number,
-  req.body.NumberInYear,
   req.body.TypeId,
   req.params.meetingId
 ];
@@ -304,6 +338,40 @@ function findMeetingById(req, res, meetingId) {
         reject(error);
       }
   
+      resolve(result);
+    });
+  });
+}
+
+function findMeetingNumber(req, res) {
+  return new Promise((resolve, reject) => {
+    var queryString = `
+      SELECT max(Number) + 1 AS Number
+      FROM Meetings
+    `;
+
+    req.connection.query(queryString, function(error, result) {
+      if (error) {
+        reject(error);
+      }
+
+      resolve(result);
+    });
+  });
+}
+
+function findMeetingNumberInYear(req, res) {
+  return new Promise((resolve, reject) => {
+    var queryString = `
+      SELECT max(DateTime) AS DateTime, NumberInYear + 1 AS NumberInYear
+      FROM Meetings
+    `;
+
+    req.connection.query(queryString, function(error, result) {
+      if (error) {
+        reject(error);
+      }
+
       resolve(result);
     });
   });

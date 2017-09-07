@@ -1,11 +1,17 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { AgendaItem } from '../../shared/models/agenda-item.model';
+import { AgendaItemService } from '../shared/services/agenda-item.service';
+import { AuthenticationService } from '../../shared/services/authentication.service';
+import { CummulativeVote } from '../../shared/models/cummulative-vote.model';
+import { CummulativeVoteService } from '../shared/services/cummulative-vote.service';
+import { Meeting } from '../../shared/models/meeting.model';
 import { VoteService } from '../shared/services/vote.service';
 import { VotingService } from '../shared/services/voting.service';
-import { Meeting } from '../../shared/models/meeting.model';
-import { AuthenticationService } from '../../shared/services/authentication.service';
 import { ToastrService } from '../../shared/services/toastr.service';
+import { TypeService } from '../../shared/services/type.service';
 
 @Component({
     templateUrl: './meeting.component.html'
@@ -17,10 +23,21 @@ export class MeetingComponent implements OnInit {
     private votes: any;
     private votings: number[];
 
+    // non electronic
+    cummulativeVoteResult: CummulativeVote[];
+    voted: boolean[];
+    votesFor: FormControl[];
+    votesForm: FormGroup[];
+    votesAbstain: FormControl[];
+    votesAgainst: FormControl[];
+
     constructor(
         private activatedRoute: ActivatedRoute,
+        private agendaItemService: AgendaItemService,
         private authenticationService: AuthenticationService,
+        private cummulativeVoteService: CummulativeVoteService,
         private toastrService: ToastrService,
+        private typeService: TypeService,
         private voteService: VoteService,
         private votingService: VotingService
     ) { }
@@ -33,9 +50,74 @@ export class MeetingComponent implements OnInit {
 
     ngOnInit() {
         this.meeting = this.activatedRoute.snapshot.data['meeting'];
+        this.meeting.AgendaItems = this.activatedRoute.snapshot.data['agendaItems'];
         this.votes = [];
         this.votings = [];
 
+        switch (this.meeting.TypeId) {
+            case 1:
+                console.log(1);
+                break;
+            case 2:
+                // electronic remotely
+                console.log(2);
+                break;
+            case 3:
+                // non-electronic
+                this.buildForm();
+                break;
+        }
+    }
+
+    private buildForm() {
+        this.cummulativeVoteResult = [];
+        this.voted = [];
+        this.votesAbstain = [];
+        this.votesAgainst = [];
+        this.votesFor = [];
+        this.votesForm = [];
+
+        this.meeting.AgendaItems.forEach((agendaItem, i) => {
+            this.votesFor.push(new FormControl(0, [Validators.required, Validators.min(0)]));
+            this.votesAbstain.push(new FormControl(0, [Validators.required, Validators.min(0)]));
+            this.votesAgainst.push(new FormControl(0, [Validators.required, Validators.min(0)]));
+
+            this.votesForm.push(new FormGroup({
+                votesFor: this.votesFor[i],
+                votesAbstain: this.votesAbstain[i],
+                votesAgainst: this.votesAgainst[i]
+            }));
+
+            this.voted.push(false);
+            this.cummulativeVoteResult.push({
+                AgendaItemId: agendaItem.AgendaItemId,
+                VotesAbstain: null,
+                VotesAgainst: null,
+                VotesFor: null
+            });
+
+            this.cummulativeVoteService.retrieveCummulativeVote(this.meeting.MeetingId, agendaItem.AgendaItemId)
+            .subscribe((vote: CummulativeVote) => {
+                if (vote.VotesFor !== null) {
+                    this.voted[i] = true;
+                }
+
+                this.cummulativeVoteResult[i] = vote;
+            });
+        });
+    }
+
+    private closeVoting(agendaItemId: number, agendaItemNumber: number) {
+        this.votingService.closeVoting(this.meeting.MeetingId, agendaItemId)
+        .subscribe((response: string) => {
+            this.toastrService.success('Glasanje ' + agendaItemNumber + '. točke je zatvoreno!');
+            this.votings.splice(this.votings.indexOf(agendaItemId), 1);
+        }, (error: string) => {
+            this.toastrService.error(error);
+        })
+    }
+
+    private electronicLocal() {
         if (this.isToday()) {
             this.votingService.votings.subscribe(votings => {
                 this.votings = votings;
@@ -77,18 +159,18 @@ export class MeetingComponent implements OnInit {
         }
     }
 
-    private closeVoting(agendaItemId: number, agendaItemNumber: number) {
-        this.votingService.closeVoting(this.meeting.MeetingId, agendaItemId)
-        .subscribe((response: string) => {
-            this.toastrService.success('Glasanje ' + agendaItemNumber + '. točke je zatvoreno!');
-            this.votings.splice(this.votings.indexOf(agendaItemId), 1);
-        }, (error: string) => {
-            this.toastrService.error(error);
-        })
-    }
-
     private findVote(agendaItemId: number): number {
         return this.votes.find((el: any) => el.AgendaItemId === agendaItemId).Vote;
+    }
+
+    private isOpened() {
+        switch (this.meeting.TypeId) {
+            case 3:
+                let date = new Date(this.meeting.DateTime);
+                let now = new Date();
+
+                return now >= date;
+        }
     }
 
     private isToday() {
@@ -145,7 +227,25 @@ export class MeetingComponent implements OnInit {
         }
     }
 
-    private voteCummulative(agendaItemId: number) {
-        //
+    private voteCummulative(formId: number, agendaItemId: number) {
+        let newCummulativeVote: CummulativeVote = {
+            AgendaItemId: undefined,
+            VotesFor: this.votesFor[formId].value,
+            VotesAbstain: this.votesAbstain[formId].value,
+            VotesAgainst: this.votesAgainst[formId].value
+        };
+
+        this.cummulativeVoteService.createCummulativeVote(this.meeting.MeetingId, agendaItemId, newCummulativeVote)
+        .subscribe((vote: CummulativeVote) => {
+            this.toastrService.success('Glasovi su spremljeni!');
+
+            let foundVote = this.cummulativeVoteResult.find(el => el.AgendaItemId === vote.AgendaItemId);
+            foundVote.VotesAbstain = vote.VotesAbstain;
+            foundVote.VotesAgainst = vote.VotesAgainst;
+            foundVote.VotesFor = vote.VotesFor;
+            this.voted[formId] = true;
+        }, (error: string) => {
+            this.toastrService.error(error);
+        });
     }
 }

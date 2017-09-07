@@ -28,17 +28,16 @@ export class CouncilMembershipService {
         .catch(this.handleError);
     }
 
-    getCouncilMemberships(userId: number): Observable<CouncilMembership> {
+    getCouncilMemberships(userId: number): Observable<CouncilMembership[]> {
         return this.authHttp.get('/api/users/' + userId + '/councilMemberships')
-        .map((response: Response) => <CouncilMembership>response.json())
+        .map((response: Response) => <CouncilMembership[]>response.json())
         .catch(this.handleError);
     }
 
     updateCouncilMembership(
         userId: number,
-        councilMembershipId: number,
         councilMembership: CouncilMembership): Observable<CouncilMembership> {
-        return this.authHttp.put('/api/users/' + userId + '/councilMemberships/' + councilMembershipId, councilMembership)
+        return this.authHttp.put('/api/users/' + userId + '/councilMemberships/' + councilMembership.CouncilMembershipId, councilMembership)
         .map((response: Response) => <CouncilMembership>response.json())
         .catch(this.handleError);
     }

@@ -3,16 +3,17 @@ var router = require('express').Router();
 // Supports GET, POST
 router.route('/')
   .get(
-    isAdmin,
+    // isAdmin,
     retrievePresence
   )
   .post(
+    isAdmin,
     createPresence
   );
 
 function retrievePresence(req, res) {
   var queryString = `
-    SELECT *
+    SELECT count(*) AS Number
     FROM PresenceOfUsers
     WHERE MeetingId = ?
   `;
@@ -23,7 +24,7 @@ function retrievePresence(req, res) {
       return;
     }
 
-    res.status(200).send(result);
+    res.status(200).send(result[0]);
     return;
   });
 }
@@ -96,7 +97,7 @@ function findPresence(req, res) {
 }
 
 function isAdmin(req, res, next) {
-  if (req.decoded.RoleName === 'admin') {
+  if (req.decoded.RoleId === 1) {
     next();
   } else {
     res.status(403).send('Nisi admin!');

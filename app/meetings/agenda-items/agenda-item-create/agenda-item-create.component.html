@@ -1,0 +1,34 @@
+<h1>Dodavanje točaka dnevnog reda</h1>
+<div class="row">
+    <div class="col-md-8">
+        <form autocomplete="off" [formGroup]="agendaItemForm" (ngSubmit)="createAgendaItem()">
+            <div class="form-group">
+                <label class="control-label" for="number">Broj točke</label>
+                <!-- <input class="form-control" formControlName="number" id="number" type="number"> -->
+                <div id="number">{{number.value}}</div>
+            </div>
+            <div class="form-group">
+                <label class="control-label" for="text">Sadržaj točke</label>
+                <textarea class="form-control" formControlName="text" id="text"></textarea>
+            </div>
+            <button class="btn btn-default" [disabled]="agendaItemForm.invalid" type="submit">Dodaj</button>
+            <a class="btn btn-default" role="button" routerLink="../../">Završi</a>
+        </form>
+    </div>
+</div>
+<h1>Dnevni red</h1>
+<div class="row">
+    <div class="col-md-12" *ngIf="createdAgendaItems.length === 0">
+        Još nema dodanih točaka dnevnog reda!
+    </div>
+    <table class="col-md-12 table table-bordered" *ngIf="createdAgendaItems.length > 0">
+        <tr>
+            <th>Broj točke</th>
+            <th>Sadržaj točke</th>
+        </tr>
+        <tr *ngFor="let agendaItem of createdAgendaItems">
+            <td>{{agendaItem.Number}}</td>
+            <td>{{agendaItem.Text}}</td>
+        </tr>
+    </table>
+</div>

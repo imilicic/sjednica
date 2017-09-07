@@ -123,6 +123,15 @@ function retrieveCummulativeVote(req, res) {
       return;
     }
 
+    if (result.length === 0) {
+      result = [{
+        AgendaItemId: +req.agendaItemId,
+        VotesFor: null,
+        VotesAbstain: null,
+        VotesAgainst: null
+      }];
+    }
+
     var cummulativeVote = result[0];
 
     res.status(200).send(cummulativeVote);
@@ -274,7 +283,7 @@ function replaceCummulativeVote(req, res) {
 }
 
 function isAdmin(req, res, next) {
-  if (req.decoded.RoleName === 'admin') {
+  if (req.decoded.RoleId === 1) {
     next();
   } else {
     res.status(403).send('Nisi admin!');

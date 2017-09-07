@@ -17,6 +17,23 @@
 			<ul class="nav navbar-nav navbar-center" *ngIf="authenticationService.isAuthenticated()">
 				<li class="dropdown" *ngIf="authenticationService.isAdmin()">
 					<a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
+						Članovi vijeća <span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu">
+						<li>
+							<a [routerLink]="['council-memberships/create']" routerLinkActive="active">
+							Dodaj novog
+							</a>
+						</li>
+						<li>
+							<a [routerLink]="['council-memberships']" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+								Pregled svih
+							</a>
+						</li>
+					</ul>
+				</li>
+				<li class="dropdown" *ngIf="authenticationService.isAdmin()">
+					<a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#" role="button">
 						Korisnici <span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu">

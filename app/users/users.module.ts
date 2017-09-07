@@ -5,7 +5,6 @@ import { HttpModule, Http, RequestOptions } from '@angular/http';
 import { RouterModule } from '@angular/router';
 import { AuthHttp, AuthConfig } from 'angular2-jwt';
 
-import { AdminRouteActivatorService } from './shared/services/admin-route-activator.service';
 import { CouncilMembershipResolverService } from './shared/services/council-membership-resolver.service';
 import { CouncilMembershipService } from './shared/services/council-membership.service';
 import { UserResolverService } from './shared/services/user-resolver.service';
@@ -44,7 +43,6 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
         UsersRoutingModule
     ],
     providers: [
-        AdminRouteActivatorService,
         {
             provide: AuthHttp,
             useFactory: authHttpServiceFactory,

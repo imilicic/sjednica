@@ -1,12 +1,13 @@
 import { CouncilMembership } from './council-membership.model';
 
 export class User {
-    CouncilMemberships?: CouncilMembership
+    CouncilMemberships?: CouncilMembership[]
     Email: string
     FirstName: string
     LastName: string
-    Password?: string
-    UserId: number
+    OldPassword?: string
+    Password: string
     PhoneNumber?: string
-    RoleName: string
+    RoleId: number
+    UserId: number
 }

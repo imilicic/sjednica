@@ -1,0 +1,13 @@
+<h1>Članovi vijeća</h1>
+<table class="table table-bordered" *ngIf="users">
+    <tr>
+        <th>Email</th>
+        <th>Od</th>
+        <th>Do</th>
+    </tr>
+    <tr *ngFor="let user of users">
+        <td>{{user.Email}}</td>
+        <td>{{user.CouncilMemberships}}</td>
+        <td></td>
+    </tr>
+</table>

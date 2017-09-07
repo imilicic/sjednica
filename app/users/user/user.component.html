@@ -25,18 +25,18 @@
             </tr>
             <tr>
                 <td>Uloga</td>
-                <td>{{user.RoleName | role}}</td>
+                <td>{{roleService.roles[user.RoleId - 1]?.Name | role}}</td>
             </tr>
-            <tr *ngIf="user.CouncilMemberships.History.length > 0">
+            <tr *ngIf="user.CouncilMemberships.length > 0">
                 <td>Član vijeća</td>
                 <td>
                     <p>
                         <span *ngIf="isPermanentCouncilMember()">stalan član vijeća od</span>
-                        {{user.CouncilMemberships.History[0].StartDate | date: 'd. M. y.'}}
-                        <span *ngIf="!isPermanentCouncilMember()"> - {{user.CouncilMemberships.History[0].EndDate | date: 'd. M. y.'}}</span>
-                        <span *ngIf="user.CouncilMemberships.IsCouncilMember">(trenutni član vijeća)</span>
+                        {{user.CouncilMemberships[0].StartDate | date: 'd. M. y.'}}
+                        <span *ngIf="!isPermanentCouncilMember()"> - {{user.CouncilMemberships[0].EndDate | date: 'd. M. y.'}}</span>
+                        <span *ngIf="isCouncilMember()">(trenutni član vijeća)</span>
                     </p>
-                    <p *ngFor="let date of user.CouncilMemberships.History.slice(1)">
+                    <p *ngFor="let date of user.CouncilMemberships.slice(1)">
                         {{date.StartDate | date: 'd. M. y.'}} - {{date.EndDate | date: 'd. M. y.'}}
                     </p>
                 </td>

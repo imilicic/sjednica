@@ -32,79 +32,15 @@
             </span>
             <input class="form-control" formControlName="phoneNumber" id="phoneNumber" type="text">
         </div>
-        <div class="form-group">
-            <label for="phoneNumber">Lozinka</label>
-            <span>********</span>
+        <div class="form-group has-success">
+            <label for="password">Lozinka</label>
+            <input class="form-control" formControlName="password" id="password" type="password">
         </div>
-        <div class="form-group">
-            <label for="isCouncilMember">Član vijeća</label>
-            <input (change)="addRemoveDateControls()" formControlName="isCouncilMember" id="isCouncilMember" type="checkbox">
-        </div>
-        <div class="form-group" [ngClass]="{'has-error': startYear.invalid || userForm.hasError('startDateInvalid') || userForm.hasError('nowNotBetweenStartEnd'), 'has-success': startYear.valid && !userForm.hasError('startDateInvalid')}" *ngIf="isCouncilMember.value">
-            <fieldset>
-                <legend>
-                    Od
-                    <span class="error help-block" *ngIf="startYear.hasError('min') || startYear.hasError('max')">
-                        {{getWarningMessage("invalid-year")}}
-                    </span>
-                    <span class="error help-block" *ngIf="userForm.hasError('startDateInvalid')">
-                        {{getWarningMessage("invalid-date")}}
-                    </span>
-                    <span class="error help-block" *ngIf="userForm.hasError('nowNotBetweenStartEnd')">
-                        {{getWarningMessage("now-not-between-start-end")}}
-                    </span>
-                </legend>
-                <label class="control-label col-md-1" for="startDay">Dan</label>
-                <div class="col-md-3">
-                    <select class="form-control" formControlName="startDay" id="startDay">
-                        <option *ngFor="let i of range(31)" [value]="i">{{i}}</option>
-                    </select>
-                </div>
-                <label class="control-label col-md-1" for="startMonth">Mjesec</label>
-                <div class="col-md-3">
-                    <select class="form-control" formControlName="startMonth" id="startMonth">
-                        <option *ngFor="let i of range(12)" [value]="i">{{months[i-1]}}</option>
-                    </select>
-                </div>
-                <label class="control-label col-md-1" for="startYear">Godina</label>
-                <div class="col-md-3">
-                    <input class="form-control" formControlName="startYear" id="startYear" type="number">
-                </div>
-            </fieldset>
-        </div>
-        <div class="form-group" [ngClass]="{'has-error': endYear.invalid || userForm.hasError('endDateInvalid') || userForm.hasError('startDateAfterEndDate') || userForm.hasError('nowNotBetweenStartEnd'), 'has-success': endYear.valid && !userForm.hasError('endDateInvalid') && !userForm.hasError('startDateAfterEndDate')}" *ngIf="isCouncilMember.value">
-            <fieldset [hidden]="permanentMember.value">
-                <legend>
-                    Do
-                    <span class="error help-block" *ngIf="endYear.hasError('min') || endYear.hasError('max')">
-                        {{getWarningMessage("invalid-year")}}
-                    </span>
-                    <span class="error help-block" *ngIf="userForm.hasError('endDateInvalid')">
-                        {{getWarningMessage("invalid-date")}}
-                    </span>
-                    <span class="error help-block" *ngIf="userForm.hasError('startDateAfterEndDate')">
-                        {{getWarningMessage("start-date-before-end-date")}}
-                    </span>
-                </legend>
-                <label class="control-label col-md-1" for="endDay">Dan</label>
-                <div class="col-md-3">
-                    <select class="form-control" formControlName="endDay" id="endDay">
-                        <option *ngFor="let i of range(31)" [value]="i">{{i}}</option>
-                    </select>
-                </div>
-                <label class="control-label col-md-1" for="endMonth">Mjesec</label>
-                <div class="col-md-3">
-                    <select class="form-control" formControlName="endMonth" id="endMonth">
-                        <option *ngFor="let i of range(12)" [value]="i">{{months[i-1]}}</option>
-                    </select>
-                </div>
-                <label class="control-label col-md-1" for="endYear">Godina</label>
-                <div class="col-md-3">
-                    <input class="form-control" formControlName="endYear" id="endYear" type="number">
-                </div>
-            </fieldset>
-            <label for="permanentMember">Stalan član vijeća</label>
-            <input (change)="addRemoveDateControls()" formControlName="permanentMember" id="permanentMember" type="checkbox">
+        <div class="form-group has-success">
+            <label class="control-label" for="roleId">Uloga</label>
+            <select class="form-control" formControlName="roleId" id="roleId">
+                <option *ngFor="let role of roleService.roles" [value]="role.RoleId">{{role.Name | role}}</option>
+            </select>
         </div>
         <button class="btn btn-default" [disabled]="userForm.invalid" type="submit">Izradi</button>
     </form>

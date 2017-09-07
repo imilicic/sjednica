@@ -137,9 +137,6 @@ router.route('/:userId')
       .withMessage('LastName is required')
       .isLength({ min: 0, max: 40})
       .withMessage('LastName is too long'),
-    check('OldPassword')
-      .exists()
-      .withMessage('OldPassword is required'),
     check('Password')
       .exists()
       .withMessage('Password is required')
@@ -262,7 +259,7 @@ function createUser(req, res) {
       WHERE Email = ?
     `;
 
-    req.connection.query(queryString, [email], function(error, result) {
+    req.connection.query(queryString, [req.body.Email], function(error, result) {
       if (error) {
         res.status(500).send(error);
         return;
@@ -278,15 +275,8 @@ function createUser(req, res) {
 }
 
 function replaceUser(req, res) {
-  var email = req.body.Email;
-  var firstName = req.body.FirstName;
-  var lastName = req.body.LastName;
-  var oldPassword = req.body.OldPassword;
   var password = req.body.Password;
-  var phoneNumber = req.body.PhoneNumber;
-  var roleId = req.body.RoleId;
   var user = req.user;
-  var userId = req.params.userId;
   
   var passwordData = {
     passwordHash: user.Password,
@@ -294,24 +284,13 @@ function replaceUser(req, res) {
   };
 
   if (password !== "00000000") {
-    if (req.decoded.RoleName === 'admin') {
-      passwordData = passwordHash.hashPassword(password);
-    } else {
-      var oldPasswordData = passwordHash.hashPassword(oldPassword, user.Salt);
-  
-      if (oldPasswordData.passwordHash === user.Password) {
-        passwordData = passwordHash.hashPassword(password);
-      } else {
-        res.status(400).send('Stara lozinka je kriva!');
-        return;
-      }
-    }
+    passwordData = passwordHash.hashPassword(password);
   }
 
   var queryString;
   var values;
 
-  if (req.decoded.RoleName === 'admin') {
+  if (req.decoded.RoleId === 1) {
     queryString = `
       UPDATE Users
       SET 
@@ -332,7 +311,7 @@ function replaceUser(req, res) {
       req.body.PhoneNumber,
       req.body.RoleId,
       passwordData.salt,
-      userId
+      req.params.userId
     ];
   } else if (req.decoded.UserId === user.UserId) {
     queryString = `
@@ -344,7 +323,8 @@ function replaceUser(req, res) {
     `;
     values = [
       passwordData.passwordHash,
-      passwordData.salt, userId
+      passwordData.salt,
+      req.params.userId
     ];
   } else {
     res.status(403).send('Nisi admin!');
@@ -361,14 +341,21 @@ function replaceUser(req, res) {
       res.status(500).send('Podaci nisu promijenjeni!');
       return;
     } else {
-      res.status(200).send('Podaci su promijenjeni!');
-      return;
+      findUserById(req, res, req.params.userId)
+        .then((user) => {
+          user = user[0];
+          
+          res.status(200).send(user);
+          return;
+        }, (error) => {
+          res.status(500).send(error);
+        });
     }
   });
 }
 
 function isAdmin(req, res, next) {
-  if (req.decoded.RoleName !== 'admin') {
+  if (req.decoded.RoleId !== 1) {
     res.status(403).send('Nisi admin!');
     return;
   } else {

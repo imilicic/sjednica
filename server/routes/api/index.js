@@ -1,10 +1,8 @@
-var express = require('express');
+var router = require('express').Router();
 
-var router = express.Router();
-var meetingRouter = require('./meetings');
-var userRouter = require('./users');
-
-router.use('/meetings', meetingRouter);
-router.use('/users', userRouter);
+router.use('/meetings', require('./meetings'));
+router.use('/roles', require('./roles'));
+router.use('/types', require('./types'));
+router.use('/users', require('./users'));
 
 module.exports = router;

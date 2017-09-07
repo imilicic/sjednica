@@ -162,7 +162,7 @@ function createCouncilMembership(req, res) {
 
       var location = 
         'Location: /api/users/' + 
-        userId + 
+        req.userId + 
         '/councilMemberships/' + 
         result[0].CouncilMembershipId;
 
@@ -193,29 +193,7 @@ function retrieveCouncilMemberships(req, res) {
       return;
     }
 
-    if (result.length === 0) {
-      res.status(200).send({
-        IsCouncilMember: false,
-        History: []
-      });
-      return;
-    }
-
-    var endDate = new Date(result[0].EndDate);
-    var isCouncilMember = false;
-    var now = new Date();
-    var startDate = new Date(result[0].StartDate);
-
-    if (startDate <= now && now <= endDate) {
-      isCouncilMember = true;
-    }
-
-    var newCouncilMemberships = {
-      IsCouncilMember: isCouncilMember,
-      History: result
-    };
-
-    res.status(200).send(newCouncilMemberships);
+    res.status(200).send(result);
     return;
   });
 }

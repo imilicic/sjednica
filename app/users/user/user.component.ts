@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { AuthenticationService } from '../../shared/services/authentication.service';
+import { RoleService } from '../../shared/services/role.service';
 import { User } from '../../shared/models/user.model';
 
 @Component({
@@ -13,7 +14,8 @@ export class UserComponent implements OnInit {
 
     constructor(
         private activatedRoute: ActivatedRoute,
-        private authenticationService: AuthenticationService
+        private authenticationService: AuthenticationService,
+        private roleService: RoleService
     ) {}
 
     ngOnInit() {
@@ -27,8 +29,16 @@ export class UserComponent implements OnInit {
         }
     }
 
+    private isCouncilMember() {
+        let startDate = new Date(this.user.CouncilMemberships[0].StartDate);
+        let endDate = new Date(this.user.CouncilMemberships[0].EndDate);
+        let now = new Date();
+
+        return (startDate <= now && now <= endDate);
+    }
+
     private isPermanentCouncilMember() {
-        if (this.user.CouncilMemberships.History[0].EndDate === '9999-12-31') {
+        if (this.user.CouncilMemberships[0].EndDate === '9999-12-31') {
             return true;
         } else {
             return false;

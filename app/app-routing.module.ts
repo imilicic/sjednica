@@ -7,11 +7,31 @@ import { LoginComponent } from './login/login.component';
 import { AuthenticationRouteActivatorService } from './shared/services/authentication-route-activator.service';
 
 const appRoutes: Routes = [
-    { path: 'login', component: LoginComponent },
-    { path: 'meetings', loadChildren: 'app/meetings/meetings.module#MeetingsModule', canActivate: [AuthenticationRouteActivatorService] },
-    { path: 'users', loadChildren: 'app/users/users.module#UsersModule', canActivate: [AuthenticationRouteActivatorService] },
-    { path: '', redirectTo: 'users', pathMatch: 'full' },
-    { path: '**', component: Error404Component }
+    {
+        path: 'login',
+        component: LoginComponent
+    },
+    {
+        path: 'council-memberships',
+        loadChildren: 'app/council-memberships/council-memberships.module#CouncilMembershipsModule',
+        canActivate: [AuthenticationRouteActivatorService]
+    },
+    {
+        path: 'meetings',
+        loadChildren: 'app/meetings/meetings.module#MeetingsModule',
+        canActivate: [AuthenticationRouteActivatorService] },
+    {
+        path: 'users',
+        loadChildren: 'app/users/users.module#UsersModule',
+        canActivate: [AuthenticationRouteActivatorService] },
+    {
+        path: '',
+        redirectTo: 'users',
+        pathMatch: 'full' },
+    {
+        path: '**',
+        component: Error404Component
+    }
 ]
 
 @NgModule({

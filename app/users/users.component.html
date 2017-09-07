@@ -1,7 +1,7 @@
 <h1>Popis svih korisnika</h1>
 <table class="table table-bordered" *ngIf="users">
     <tr>
-        <th *ngIf="authenticationService.isAdmin()"></th>
+        <th></th>
         <th>Email</th>
         <th>Ime</th>
         <th>Prezime</th>
@@ -9,7 +9,7 @@
         <th>Uloga</th>
     </tr>
     <tr *ngFor="let user of users">
-        <td *ngIf="authenticationService.isAdmin()">
+        <td>
             <a [routerLink]="['update', user.UserId]">
                 <span aria-hidden="true" class="glyphicon glyphicon-edit"></span>
             </a>
@@ -27,7 +27,7 @@
             {{user.PhoneNumber}}
         </td>
         <td>
-            {{user.RoleName | role}}
+            {{roleService.roles[user.RoleId - 1]?.Name | role}}
         </td>
     </tr>
 </table>

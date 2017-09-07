@@ -3,21 +3,23 @@
 <table class="table table-bordered">
     <tr>
         <th rowspan="2">Točke</th>
-        <th colspan="3">Glasanje</th>
-        <th rowspan="2">Nije glasalo</th>
-        <th rowspan="2">Odsutnih</th>
+        <th colspan="4">Glasanje</th>
+        <th rowspan="2">Prisutnih</th>
+        <th rowspan="2">Odsutnih članova vijeća</th>
     </tr>
     <tr>
         <td>PROTIV</td>
         <td>SUZDRŽAN</td>
         <td>ZA</td>
+        <td>UKUPNO</td>
     </tr>
     <tr *ngFor="let agendaItem of meeting.AgendaItems">
         <td>Točka {{agendaItem.Number}}</td>
-        <td>{{createVotingView()[0]}}</td>
-        <td>{{createVotingView()[1]}}</td>
-        <td>{{createVotingView()[2]}}</td>
-        <td></td>
-        <td></td>
+        <td>{{viewVotes(agendaItem.AgendaItemId)?.VotesAgainst}}</td>
+        <td>{{viewVotes(agendaItem.AgendaItemId)?.VotesAbstain}}</td>
+        <td>{{viewVotes(agendaItem.AgendaItemId)?.VotesFor}}</td>
+        <td>{{totalVotes(agendaItem.AgendaItemId)}}</td>
+        <td>{{presence}}</td>
+        <td>{{absence}}</td>
     </tr>
 </table>

@@ -1,5 +1,5 @@
 export class AgendaItem {
-    AgendaItem: number
+    AgendaItemId: number
     Number: number
     Text: string
 }

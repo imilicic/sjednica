@@ -4,19 +4,21 @@ var router = require('express').Router();
 // Supports GET, POST, PUT
 router.route('/')
   .get(
-    isAdmin,
+    // isAdmin,
     retrieveAbsence
   )
   .post(
+    isAdmin,
     inputValidators(createAbsence)
   )
   .put(
+    isAdmin,
     inputValidators(replaceAbsence)
   );
 
 function retrieveAbsence(req, res) {
   var queryString = `
-    SELECT *
+    SELECT count(*) AS Number
     FROM AbsenceOfCouncilMembers
     WHERE MeetingId = ?
   `;
@@ -27,7 +29,7 @@ function retrieveAbsence(req, res) {
       return;
     }
 
-    res.status(200).send(result);
+    res.status(200).send(result[0]);
     return;
   });
 }
@@ -168,7 +170,7 @@ function findAbsence(req, res) {
 }
 
 function isAdmin(req, res, next) {
-  if (req.decoded.RoleName === 'admin') {
+  if (req.decoded.RoleId === 1) {
     next();
   } else {
     res.status(403).send('Nisi admin!');

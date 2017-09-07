@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
+import { AgendaItemService } from '../shared/services/agenda-item.service';
+import { MeetingService } from '../shared/services/meeting.service';
 import { VoteService } from '../shared/services/vote.service';
+import { AgendaItem } from '../../shared/models/agenda-item.model';
+import { CummulativeVote } from '../../shared/models/cummulative-vote.model';
 import { Meeting } from '../../shared/models/meeting.model';
 import { ToastrService } from '../../shared/services/toastr.service';
 
@@ -9,42 +13,68 @@ import { ToastrService } from '../../shared/services/toastr.service';
     templateUrl: './meeting-votes.component.html'
 })
 export class MeetingVotesComponent implements OnInit {
+    private absence: number;
     private meeting: Meeting;
-    private votes: any[];
+    private presence: number;
+    private votes: CummulativeVote[];
 
     constructor(
         private activatedRoute: ActivatedRoute,
+        private agendaItemService: AgendaItemService,
+        private meetingService: MeetingService,
         private toastrService: ToastrService,
         private voteService: VoteService
     ) {}
 
     ngOnInit() {
         this.meeting = this.activatedRoute.snapshot.data['meeting'];
+        this.meeting.AgendaItems = this.activatedRoute.snapshot.data['agendaItems'];
         this.votes = [];
 
-        this.voteService.readVotes(this.meeting.MeetingId)
-        .subscribe((response: any[]) => {
-            this.votes = response;
-        }, (error: string) => {
-            this.toastrService.error(error);
+        this.meeting.AgendaItems.forEach((agendaItem: AgendaItem) => {
+            this.voteService.retrieveCummulativeVote(this.meeting.MeetingId, agendaItem.AgendaItemId)
+            .subscribe((response: CummulativeVote) => {
+                this.votes.push(response);
+            }, (error: string) => {
+                this.toastrService.error(error);
+            });
+        });
+
+        this.meetingService.retrieveAbsence(this.meeting.MeetingId)
+        .subscribe((result: any) => {
+            this.absence = result.Number;
+        });
+
+        this.meetingService.retrievePresence(this.meeting.MeetingId)
+        .subscribe((result: any) => {
+            this.presence = result.Number;
         });
     }
 
-    private createVotingView() {
-        let votingAgainst = 0;
-        let votingAbstain = 0;
-        let votingFor = 0;
+    private totalVotes(agendaItemId: number): number {
+        let sum = 0;
+        let vote = this.viewVotes(agendaItemId);
 
-        this.votes.forEach((el: any) => {
-            if (el.Vote === 0) {
-                votingAgainst++;
-            } else if (el.Vote === 1) {
-                votingAbstain++;
-            } else if (el.Vote === 2) {
-                votingFor++;
+        if (vote) {
+            if (vote.hasOwnProperty('VotesAbstain')) {
+                sum += vote.VotesAbstain;
             }
-        });
 
-        return [votingAgainst, votingAbstain, votingFor];
+            if (vote.hasOwnProperty('VotesAgainst')) {
+                sum += vote.VotesAgainst;
+            }
+
+            if (vote.hasOwnProperty('VotesFor')) {
+                sum += vote.VotesFor;
+            }
+
+            return sum;
+        }
+
+        return NaN;
+    }
+
+    private viewVotes(agendaItemId: number): CummulativeVote {
+        return this.votes.find((vote: any) => vote.AgendaItemId === agendaItemId);
     }
 }

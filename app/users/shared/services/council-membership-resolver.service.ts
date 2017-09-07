@@ -6,16 +6,16 @@ import { CouncilMembership } from '../../../shared/models/council-membership.mod
 import { CouncilMembershipService } from './council-membership.service';
 
 @Injectable()
-export class CouncilMembershipResolverService implements Resolve<CouncilMembership> {
+export class CouncilMembershipResolverService implements Resolve<CouncilMembership[]> {
     constructor(
         private councilMembershipService: CouncilMembershipService,
         private router: Router
     ) {}
 
-    resolve(route: ActivatedRouteSnapshot): Observable<CouncilMembership> {
+    resolve(route: ActivatedRouteSnapshot): Observable<CouncilMembership[]> {
         let councilMemberships = this.councilMembershipService.getCouncilMemberships(route.params['userId']);
 
-        councilMemberships.subscribe((_: CouncilMembership) => {
+        councilMemberships.subscribe((_: CouncilMembership[]) => {
             return true;
         }, (error: string) => {
             this.router.navigate(['users']);

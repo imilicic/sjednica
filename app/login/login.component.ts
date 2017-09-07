@@ -50,11 +50,11 @@ export class LoginComponent implements OnInit {
         };
 
         this.authenticationService.loginUser(newUserLogin)
-        .subscribe((response: {auth_token: string}) => {
-            this.router.navigate(['users']);
-        }, (error: string) => {
-            this.toastrService.error(error);
-            this.loginForm.reset();
-        });
+            .subscribe((response: {auth_token: string}) => {
+                this.router.navigate(['users']);
+            }, (error: string) => {
+                this.toastrService.error(error);
+                this.loginForm.reset();
+            });
     }
 }

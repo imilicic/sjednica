@@ -185,7 +185,7 @@ function inputValidators(func) {
 }
 
 function isAdmin(req, res, next) {
-  if (req.decoded.RoleName === 'admin') {
+  if (req.decoded.RoleId === 1) {
     next();
   } else {
     res.status(403).send('Nisi admin!');

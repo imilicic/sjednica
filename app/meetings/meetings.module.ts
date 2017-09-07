@@ -1,11 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule, Http, RequestOptions } from '@angular/http';
 import { AuthHttp, AuthConfig } from 'angular2-jwt';
 
+import { AgendaItemCreateComponent } from './agenda-items/agenda-item-create/agenda-item-create.component';
 import { MeetingComponent } from './meeting/meeting.component';
 import { MeetingCreateComponent } from './meeting-create/meeting-create.component';
 import { MeetingVotesComponent } from './meeting-votes/meeting-votes.component';
+import { AgendaItemResolverService } from './shared/services/agenda-item-resolver.service';
+import { AgendaItemService } from './shared/services/agenda-item.service';
 import { CummulativeVoteService } from './shared/services/cummulative-vote.service';
 import { MeetingService } from './shared/services/meeting.service';
 import { MeetingResolverService } from './shared/services/meeting-resolver.service';
@@ -26,11 +30,14 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
 @NgModule({
     imports: [
         CommonModule,
+        FormsModule,
         HttpModule,
-        MeetingsRoutingModule
+        MeetingsRoutingModule,
+        ReactiveFormsModule
     ],
     exports: [],
     declarations: [
+        AgendaItemCreateComponent,
         MeetingComponent,
         MeetingCreateComponent,
         MeetingsComponent,
@@ -38,6 +45,8 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
         MeetingVotesComponent
     ],
     providers: [
+        AgendaItemResolverService,
+        AgendaItemService,
         {
             provide: AuthHttp,
             useFactory: authHttpServiceFactory,
