@@ -1,6 +1,6 @@
-<h1>Izrada sjednice</h1>
+<h1>Promjena {{meeting.Number}} sjednice</h1>
 <div class="col-md-8">
-    <form autocomplete="on" [formGroup]="meetingForm" (ngSubmit)="createMeeting()">
+    <form autocomplete="on" [formGroup]="meetingForm" (ngSubmit)="updateMeeting()">
         <div class="form-group">
             <label for="address">Adresa</label>
             <input class="form-control" formControlName="address" id="address" type="text">
@@ -57,6 +57,6 @@
                 <option *ngFor="let type of typeService.types" [value]="type.TypeId">{{type.Name | meetingType}}</option>
             </select>
         </div>
-        <button class="btn btn-default" [disabled]="meetingForm.invalid" type="submit">Dodaj</button>
+        <button class="btn btn-default" [disabled]="meetingForm.invalid" type="submit">Spremi</button>
     </form>
 </div>

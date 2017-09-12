@@ -1,4 +1,12 @@
 <h1>{{meeting.Number}}. sjednica</h1>
+<div *ngIf="!isPassed() && !isToday()">
+    <div>
+        (<a [routerLink]="['../update', this.meeting.MeetingId]">Promijeni podatke sjednice</a>)
+    </div>
+    <div>
+        (<a [routerLink]="['agenda-items/update']">Promijeni dnevni red</a>)
+    </div>
+</div>
 <table class="table table-bordered">
     <tr>
         <td>Adresa</td>
@@ -27,6 +35,9 @@
 </div>
 <div *ngIf="meeting.AgendaItems.length > 0">
     <h3>Dnevni red</h3>
+    <a *ngIf="meeting.TypeId === 3 && authenticationService.isAdmin() && isOpened()" routerLink="presence">
+        Dodaj prisutne korisnike
+    </a>
     <div *ngFor="let agendaItem of meeting.AgendaItems; let i = index">
         <p>{{agendaItem.Number}}. {{agendaItem.Text}}</p>
         <div class="row" *ngIf="meeting.TypeId === 3 && authenticationService.isAdmin()">
@@ -72,14 +83,48 @@
                 </table>
             </div>
         </div>
+        <div *ngIf="isOpened() && meeting.TypeId === 1">
+            <div role="group">
+                <div [ngSwitch]="findVote(agendaItem.AgendaItemId)">
+                    <span class="text-danger" *ngSwitchCase="0">
+                        Glasali ste <b>protiv</b>
+                    </span>
+                    <span class="text-warning" *ngSwitchCase="1">
+                        Glasali ste <b>suzdržan</b>
+                    </span>
+                    <span class="text-success" *ngSwitchCase="2">
+                        Glasali ste <b>za</b>
+                    </span>
+                    <span class="text-default" *ngSwitchDefault>
+                        Niste glasali
+                    </span>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-danger" (click)="vote(agendaItem.AgendaItemId, 0)" [ngClass]="{'active': findVote(agendaItem.AgendaItemId) === 0}" type="button">
+                        Protiv
+                    </button>
+                    <button class="btn btn-warning" (click)="vote(agendaItem.AgendaItemId, 1)" [ngClass]="{'active': findVote(agendaItem.AgendaItemId) === 1}" type="button">
+                        Suzdržan
+                    </button>
+                    <button class="btn btn-success" (click)="vote(agendaItem.AgendaItemId, 2)" [ngClass]="{'active': findVote(agendaItem.AgendaItemId) === 2}" type="button">
+                        Za
+                    </button>
+                </div>
+            </div>
+        </div>
         <div *ngIf="isOpened() && meeting.TypeId === 2">
             <div *ngIf="authenticationService.isAdmin()">
-                <button class="btn btn-primary" (click)="openVoting(agendaItem.AgendaItemId, agendaItem.Number)"  *ngIf="votings.indexOf(agendaItem.AgendaItemId) < 0" type="button">
-                    Otvori glasanje
-                </button>
-                <button class="btn btn-warning" (click)="closeVoting(agendaItem.AgendaItemId, agendaItem.Number)"  *ngIf="votings.indexOf(agendaItem.AgendaItemId) >= 0" type="button">
-                    Zatvori glasanje
-                </button>
+                <div>
+                    <button (click)="checkQuorum()" type="button">Provjeri kvorum</button>
+                </div>
+                <div>
+                    <button class="btn btn-primary" (click)="openVoting(agendaItem.AgendaItemId, agendaItem.Number)"  *ngIf="votings.indexOf(agendaItem.AgendaItemId) < 0" type="button">
+                        Otvori glasanje
+                    </button>
+                    <button class="btn btn-warning" (click)="closeVoting(agendaItem.AgendaItemId, agendaItem.Number)"  *ngIf="votings.indexOf(agendaItem.AgendaItemId) >= 0" type="button">
+                        Zatvori glasanje
+                    </button>
+                </div>
             </div>
             <div role="group">
                 <div [ngSwitch]="findVote(agendaItem.AgendaItemId)">

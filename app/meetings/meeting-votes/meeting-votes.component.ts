@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { AgendaItemService } from '../shared/services/agenda-item.service';
+import { AgendaItemService } from '../agenda-items/shared/services/agenda-item.service';
 import { MeetingService } from '../shared/services/meeting.service';
 import { VoteService } from '../shared/services/vote.service';
 import { AgendaItem } from '../../shared/models/agenda-item.model';
@@ -40,12 +40,12 @@ export class MeetingVotesComponent implements OnInit {
             });
         });
 
-        this.meetingService.retrieveAbsence(this.meeting.MeetingId)
+        this.meetingService.retrieveAbsenceCount(this.meeting.MeetingId)
         .subscribe((result: any) => {
             this.absence = result.Number;
         });
 
-        this.meetingService.retrievePresence(this.meeting.MeetingId)
+        this.meetingService.retrievePresenceCount(this.meeting.MeetingId)
         .subscribe((result: any) => {
             this.presence = result.Number;
         });

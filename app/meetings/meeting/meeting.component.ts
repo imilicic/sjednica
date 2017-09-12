@@ -3,11 +3,12 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { AgendaItem } from '../../shared/models/agenda-item.model';
-import { AgendaItemService } from '../shared/services/agenda-item.service';
+import { AgendaItemService } from '../agenda-items/shared/services/agenda-item.service';
 import { AuthenticationService } from '../../shared/services/authentication.service';
 import { CummulativeVote } from '../../shared/models/cummulative-vote.model';
 import { CummulativeVoteService } from '../shared/services/cummulative-vote.service';
 import { Meeting } from '../../shared/models/meeting.model';
+import { MeetingService } from '../shared/services/meeting.service';
 import { VoteService } from '../shared/services/vote.service';
 import { VotingService } from '../shared/services/voting.service';
 import { ToastrService } from '../../shared/services/toastr.service';
@@ -36,6 +37,7 @@ export class MeetingComponent implements OnInit {
         private agendaItemService: AgendaItemService,
         private authenticationService: AuthenticationService,
         private cummulativeVoteService: CummulativeVoteService,
+        private meetingService: MeetingService,
         private toastrService: ToastrService,
         private typeService: TypeService,
         private voteService: VoteService,
@@ -43,9 +45,7 @@ export class MeetingComponent implements OnInit {
     ) { }
 
     ngOnDestroy() {
-        if (!this.authenticationService.isAdmin()) {
-            clearInterval(this.interval);
-        }
+        clearInterval(this.interval);
     }
 
     ngOnInit() {
@@ -56,16 +56,18 @@ export class MeetingComponent implements OnInit {
 
         switch (this.meeting.TypeId) {
             case 1:
-                console.log(1);
-                break;
+            this.electronicRemote();
+            break;
+
             case 2:
-                // electronic remotely
-                console.log(2);
-                break;
+            // electronic locally
+            this.electronicLocal();
+            break;
+
             case 3:
-                // non-electronic
-                this.buildForm();
-                break;
+            // non-electronic
+            this.buildForm();
+            break;
         }
     }
 
@@ -107,6 +109,10 @@ export class MeetingComponent implements OnInit {
         });
     }
 
+    // private checkQuorum() {
+    //     this.meetingService.retrievePresenceCount()
+    // }
+
     private closeVoting(agendaItemId: number, agendaItemNumber: number) {
         this.votingService.closeVoting(this.meeting.MeetingId, agendaItemId)
         .subscribe((response: string) => {
@@ -118,45 +124,77 @@ export class MeetingComponent implements OnInit {
     }
 
     private electronicLocal() {
-        if (this.isToday()) {
-            this.votingService.votings.subscribe(votings => {
-                this.votings = votings;
-            })
+        if (!this.isOpened()) {
+            return;
+        }
 
+        this.meetingService.createPresenceUser(this.meeting.MeetingId).subscribe();
+
+        this.votingService.votings.subscribe(votings => {
+            this.votings = votings;
+        });
+
+        this.refreshVoting();
+
+        this.interval = setInterval(() => {
             this.refreshVoting();
+        }, 3000);
 
-            if (!this.authenticationService.isAdmin()) {
-                this.interval = setInterval(() => {
-                    console.log('interval');
-                    this.refreshVoting();
-                }, 3000);
+        this.meeting.AgendaItems.forEach((item: any) => {
+            this.votes.push({
+                AgendaItemId: item.AgendaItemId,
+                Vote: undefined,
+                VoteId: undefined
+            });
+        });
 
-                this.meeting.AgendaItems.forEach((item: any) => {
-                    this.votes.push({
-                        AgendaItemId: item.AgendaItemId,
-                        Vote: undefined,
-                        VoteId: undefined
-                    });
-                });
-
-                this.voteService.readVotesByUser(this.meeting.MeetingId, this.authenticationService.user.UserId)
-                .subscribe((response: any[]) => {
-                    if (response.length > 0) {
-                        response.forEach((el: any) => {
-                            this.votes = this.votes.map((el2: any) => {
-                                if (el.AgendaItemId === el2.AgendaItemId) {
-                                    return el;
-                                } else {
-                                    return el2;
-                                }
-                            })
-                        })
-                    }
-                }, (error: string) => {
-                    this.toastrService.error(error);
+        this.voteService.retrieveVotesByUser(this.meeting.MeetingId)
+        .subscribe((response: any[]) => {
+            if (response.length > 0) {
+                response.forEach((el: any) => {
+                    this.votes = this.votes.map((el2: any) => {
+                        if (el.AgendaItemId === el2.AgendaItemId) {
+                            return el;
+                        } else {
+                            return el2;
+                        }
+                    })
                 })
             }
+        }, (error: string) => {
+            this.toastrService.error(error);
+        });
+    }
+
+    private electronicRemote() {
+        if (!this.isToday()) {
+            return;
         }
+
+        this.meeting.AgendaItems.forEach((item: any) => {
+            this.votes.push({
+                AgendaItemId: item.AgendaItemId,
+                Vote: undefined,
+                VoteId: undefined
+            });
+        });
+
+        this.voteService.retrieveVotesByUser(this.meeting.MeetingId)
+        .subscribe((response: any[]) => {
+            if (response.length > 0) {
+                response.forEach((el: any) => {
+                    this.votes = this.votes.map((el2: any) => {
+                        if (el.AgendaItemId === el2.AgendaItemId) {
+                            return el;
+                        } else {
+                            return el2;
+                        }
+                    })
+                })
+            }
+        }, (error: string) => {
+            this.toastrService.error(error);
+        });
     }
 
     private findVote(agendaItemId: number): number {
@@ -165,25 +203,36 @@ export class MeetingComponent implements OnInit {
 
     private isOpened() {
         switch (this.meeting.TypeId) {
-            case 3:
-                let date = new Date(this.meeting.DateTime);
-                let now = new Date();
+            case 1:
+            return this.isToday();
 
-                return now >= date;
+            case 2:
+            case 3:
+            let date = new Date(this.meeting.DateTime);
+            let now = new Date();
+
+            return this.isToday() && this.isPassed();
         }
+    }
+
+    private isPassed() {
+        let date = new Date(this.meeting.DateTime);
+        let now = new Date();
+
+        return now >= date;
     }
 
     private isToday() {
         let date = new Date(this.meeting.DateTime);
         let now = new Date();
 
-        return date.getDate() === now.getDate() &&  date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()
+        return date.getDate() === now.getDate() &&  date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
     }
 
     private openVoting(agendaItemId: number, agendaItemNumber: number) {
         this.votingService.openVoting(this.meeting.MeetingId, agendaItemId)
-        .subscribe((response: number[]) => {
-            this.votings = response;
+        .subscribe((response: any) => {
+            this.votings.push(response);
             this.toastrService.success('Glasanje ' + agendaItemNumber + '. točke je otvoreno!');
         }, (error: string) => {
             this.toastrService.error(error);
@@ -191,12 +240,12 @@ export class MeetingComponent implements OnInit {
     }
 
     private refreshVoting() {
-        this.votingService.getVotings();
+        this.votingService.getVotings(this.meeting.MeetingId);
     }
 
     private vote(agendaItemId: number, vote: number) {
         if (this.findVote(agendaItemId) === undefined) {
-            this.voteService.createVote(this.meeting.MeetingId, agendaItemId, this.authenticationService.user.UserId, vote)
+            this.voteService.createVote(this.meeting.MeetingId, agendaItemId, vote)
             .subscribe((response: any) => {
                 this.toastrService.success('Glasanje je spremljeno!');
                 this.votes.forEach((voteEl: any) => {
@@ -205,14 +254,13 @@ export class MeetingComponent implements OnInit {
                         voteEl.VoteId = response.VoteId;
                     }
                 });
-                console.log(this.votes);
             }, (error: string) => {
                 this.toastrService.error(error);
             });
         } else {
             let voteId: number = this.votes.find((voteEl: any) => voteEl.AgendaItemId === agendaItemId).VoteId;
 
-            this.voteService.updateVote(this.meeting.MeetingId, agendaItemId, voteId, this.authenticationService.user.UserId, vote)
+            this.voteService.replaceVote(this.meeting.MeetingId, agendaItemId, voteId, vote)
             .subscribe((response: any) => {
                 this.toastrService.success('Glasanje je spremljeno!');
                 this.votes.forEach((voteEl: any) => {
@@ -220,7 +268,6 @@ export class MeetingComponent implements OnInit {
                         voteEl.Vote = response.Vote;
                     }
                 });
-                console.log(this.votes);
             }, (error: string) => {
                 this.toastrService.error(error);
             });

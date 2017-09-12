@@ -4,7 +4,7 @@ var router = require('express').Router();
 // Supports GET, POST, PUT
 router.route('/')
   .get(
-    // isAdmin,
+    isAdmin,
     retrieveAbsence
   )
   .post(
@@ -16,7 +16,25 @@ router.route('/')
     inputValidators(replaceAbsence)
   );
 
+// Supports POST
+router.route('/councilMemberId/:councilMemberId')
+  .post(
+    isAdmin,
+    inputValidators(createAbsence)
+  )
+
+// Supports GET
+router.route('/count')
+  .get(
+    retrieveAbsenceCount
+  )
+
 function retrieveAbsence(req, res) {
+  res.status(501);
+  return;
+}
+
+function retrieveAbsenceCount(req, res) {
   var queryString = `
     SELECT count(*) AS Number
     FROM AbsenceOfCouncilMembers
@@ -44,20 +62,30 @@ function createAbsence(req, res) {
     )
     VALUES (?, ?, ?)
   `;
-  var councilMembershipId;
+  var values;
 
-  if (req.decoded.CouncilMemberships.IsCouncilMember) {
-    var councilMembershipId = req.decoded.CouncilMemberships.History[0].CouncilMembershipId;
+  if (req.params.councilMemberId) {
+    values = [
+      req.params.councilMemberId,
+      req.meetingId,
+      req.body.Reason
+    ];
   } else {
-    res.status(400).send('Korisnik nije član vijeća!');
-    return;
-  }
+    var councilMembershipId;
 
-  var values = [
-    councilMembershipId,
-    req.meetingId,
-    req.body.Reason
-  ];
+    if (req.decoded.CouncilMemberships.IsCouncilMember) {
+      councilMembershipId = req.decoded.CouncilMemberships.History[0].CouncilMembershipId;
+    } else {
+      res.status(400).send('Korisnik nije član vijeća!');
+      return;
+    }
+  
+    values = [
+      councilMembershipId,
+      req.meetingId,
+      req.body.Reason
+    ];
+  }
 
   req.connection.query(queryString, values, function(error, result) {
     if (error) {
@@ -70,7 +98,7 @@ function createAbsence(req, res) {
       return;
     }
 
-    findAbsence(req, res)
+    findAbsence(req, res, values[0])
       .then((presence) => {
         presence = presence[0];
         var location = 
@@ -123,7 +151,7 @@ function replaceAbsence(req, res) {
       return;
     }
 
-    findAbsence(req, res)
+    findAbsence(req, res, councilMembershipId)
       .then((presence) => {
         presence = presence[0];
 
@@ -136,7 +164,7 @@ function replaceAbsence(req, res) {
   });
 }
 
-function findAbsence(req, res) {
+function findAbsence(req, res, councilMembershipId) {
   return new Promise((resolve, reject) => {
     var queryString = `
       SELECT *
@@ -145,14 +173,6 @@ function findAbsence(req, res) {
         CouncilMembershipId = ? AND
         MeetingId = ?
     `;
-    var councilMembershipId;
-    
-    if (req.decoded.CouncilMemberships.IsCouncilMember) {
-      var councilMembershipId = req.decoded.CouncilMemberships.History[0].CouncilMembershipId;
-    } else {
-      res.status(400).send('Korisnik nije član vijeća!');
-      return;
-    }
 
     var values = [
       councilMembershipId,

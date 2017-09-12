@@ -3,15 +3,103 @@ var router = require('express').Router();
 // Supports GET, POST
 router.route('/')
   .get(
-    // isAdmin,
+    isAdmin,
     retrievePresence
   )
   .post(
-    isAdmin,
+    function(req, res, next) {
+      findPresence(req, res, req.decoded.UserId).then((presence) => {
+        if (presence.length === 0) {
+          req.userId = req.decoded.UserId;
+          next();
+        } else {
+          res.status(200).send('Prisutnost je spremljena!');
+          return;
+        }
+      })
+    },
     createPresence
   );
 
+// Supports GET
+router.route('/count')
+  .get(
+    retrievePresenceCount
+  )
+
+// Supports POST, DELETE
+router.route('/userId/:userId')
+  .post(
+    isAdmin,
+    function(req, res, next) {
+      findPresence(req, res, req.params.userId).then((presence) => {
+        if (presence.length === 0) {
+          req.userId = req.params.userId;
+          next();
+        } else {
+          res.status(200).send('Prisutnost je spremljena!');
+          return;
+        }
+      })
+    },
+    createPresence
+  )
+  .delete(
+    isAdmin,
+    function(req, res, next) {
+      findPresence(req, res, req.params.userId).then((presence) => {
+        if (presence.length === 0) {
+          res.status(404).send('Prisutnost ne postoji!');
+          return;
+        } else {
+          next();
+        }
+      });
+    },
+    deletePresence
+  );
+
+function deletePresence(req, res) {
+  var queryString = `
+    DELETE FROM PresenceOfUsers
+    WHERE UserId = ? AND
+    MeetingId = ?
+  `;
+  var values = [
+    req.params.userId,
+    req.meetingId
+  ];
+
+  req.connection.query(queryString, values, function(error, result) {
+    if (error) {
+      res.status(500).send(error);
+      return;
+    }
+
+    res.status(200).send('Prisutnost obrisana!');
+    return;
+  });
+}
+
 function retrievePresence(req, res) {
+  var queryString = `
+    SELECT *
+    FROM PresenceOfUsers
+    WHERE MeetingId = ?
+  `;
+
+  req.connection.query(queryString, [req.meetingId], function(error, result) {
+    if (error) {
+      res.status(500).send(error);
+      return;
+    }
+
+    res.status(200).send(result);
+    return;
+  });
+}
+
+function retrievePresenceCount(req, res) {
   var queryString = `
     SELECT count(*) AS Number
     FROM PresenceOfUsers
@@ -39,7 +127,7 @@ function createPresence(req, res) {
     VALUES (?, ?)
   `;
   var values = [
-    req.decoded.UserId,
+    req.userId,
     req.meetingId
   ];
 
@@ -54,7 +142,7 @@ function createPresence(req, res) {
       return;
     }
 
-    findPresence(req, res)
+    findPresence(req, res, req.userId)
       .then((presence) => {
         presence = presence[0];
         var location = 
@@ -72,7 +160,7 @@ function createPresence(req, res) {
   });
 }
 
-function findPresence(req, res) {
+function findPresence(req, res, userId) {
   return new Promise((resolve, reject) => {
     var queryString = `
       SELECT *
@@ -82,7 +170,7 @@ function findPresence(req, res) {
         MeetingId = ?
     `;
     var values = [
-      req.decoded.UserId,
+      userId,
       req.meetingId
     ];
 

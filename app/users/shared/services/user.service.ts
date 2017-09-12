@@ -32,8 +32,14 @@ export class UserService {
         .catch(this.handleError);
     }
 
-    replaceUser(user: User): Observable<User> {
+    replaceUserAdmin(user: User): Observable<User> {
         return this.authHttp.put('/api/users/' + user.UserId, user)
+        .map((response: Response) => <User>response.json())
+        .catch(this.handleError);
+    }
+
+    replaceUserUser(user: User, oldPassword: string): Observable<User> {
+        return this.authHttp.put('/api/users/' + user.UserId + '?OldPassword=' + oldPassword, user)
         .map((response: Response) => <User>response.json())
         .catch(this.handleError);
     }

@@ -1,0 +1,26 @@
+<h1>Dodavanje prisutnih korisnika na {{meeting.Number}}. sjednici</h1>
+<form [formGroup]="chosenUsersForm" (ngSubmit)="createPresence()">
+    <div class="col-md-5">
+        Popis svih korisnika
+        <select class="form-control" formControlName="userControl" style="height: 500px" multiple>
+            <option *ngFor="let user of users" [value]="user.UserId">
+                {{user.FirstName}} {{user.LastName}}, {{user.Email}}
+            </option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary" (click)="appendUsers()" type="button">Dodaj</button><br>
+        <button class="btn btn-primary" (click)="appendAllUsers()" type="button">Dodaj sve</button><br>
+        <button class="btn btn-danger" (click)="deleteUsers()" type="button">Obriši</button><br>
+        <button class="btn btn-danger" (click)="deleteAllUsers()" type="button">Obriši sve</button><br>
+        <button class="btn btn-default" type="submit">Spremi</button>
+    </div>
+    <div class="col-md-5">
+        Popis prisutnih korisnika
+        <select class="form-control" formControlName="chosenUserControl" style="height: 500px" multiple>
+            <option *ngFor="let user of chosenUsers" [value]="user.UserId">
+                {{user.FirstName}} {{user.LastName}}, {{user.Email}}
+            </option>
+        </select>
+    </div>
+</form>

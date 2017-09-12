@@ -19,6 +19,7 @@ export class UserUpdateComponent implements OnInit {
     private isThisCurrentUserProfile: boolean;
     private months: string[];
     private user: User;
+    private userForm: FormGroup;
 
     // form controls for general user
     private email: FormControl;
@@ -27,7 +28,6 @@ export class UserUpdateComponent implements OnInit {
     private password: FormControl;
     private phoneNumber: FormControl;
     private roleId: FormControl;
-    private userForm: FormGroup;
 
     // form controls for current user
     private oldPassword: FormControl;
@@ -58,9 +58,13 @@ export class UserUpdateComponent implements OnInit {
             this.isThisCurrentUserProfile = false;
             this.buildGeneralUserForm();
         } else {
-            this.user = this.authenticationService.user;
-            this.isThisCurrentUserProfile = true;
-            this.buildCurrentUserForm();
+            if (this.authenticationService.isAdmin()) {
+                this.router.navigate(['users', this.authenticationService.user.UserId]);
+            } else {
+                this.user = this.authenticationService.user;
+                this.isThisCurrentUserProfile = true;
+                this.buildCurrentUserForm();
+            }
         }
     }
 
@@ -129,7 +133,7 @@ export class UserUpdateComponent implements OnInit {
         });
     }
 
-    private updateUserByAdmin() {
+    private updateUserAdmin() {
         let newUser: User = {
             Email: this.email.value,
             FirstName: this.firstName.value,
@@ -140,7 +144,7 @@ export class UserUpdateComponent implements OnInit {
             UserId: this.user.UserId
         };
 
-        this.userService.replaceUser(newUser)
+        this.userService.replaceUserAdmin(newUser)
         .subscribe((user: User) => {
             this.toastrService.success('Korisnički podaci su promjenjeni!');
             this.router.navigate(['users/', this.user.UserId]);
@@ -149,16 +153,17 @@ export class UserUpdateComponent implements OnInit {
         });
     }
 
-    private updateUserByUser() {
+    private updateUserUser() {
         let newUser = this.authenticationService.user;
         newUser.Password = this.newPassword.value;
 
-        this.userService.replaceUser(newUser)
+        this.userService.replaceUserUser(newUser, this.oldPassword.value)
         .subscribe((response: User) => {
             this.toastrService.success('Lozinka je promijenjena!');
             this.router.navigate(['users/me']);
         }, (error: string) => {
             this.toastrService.error(error);
+            this.userForm.reset();
         })
     }
 

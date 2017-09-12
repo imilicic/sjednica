@@ -5,18 +5,18 @@ import { HttpModule, Http, RequestOptions } from '@angular/http';
 import { RouterModule } from '@angular/router';
 import { AuthHttp, AuthConfig } from 'angular2-jwt';
 
+import { AdminRouteActivatorService } from './shared/services/admin-route-activator.service';
+import { AppComponent } from './app.component';
+import { AppRoutingModule } from './app-routing.module';
+import { AuthenticationRouteActivatorService } from './shared/services/authentication-route-activator.service';
+import { AuthenticationService } from './shared/services/authentication.service';
 import { Error404Component } from './errors/error-404.component';
 import { LoginComponent } from './login/login.component';
 import { NavbarComponent } from './navbar/navbar.component';
-import { AdminRouteActivatorService } from './shared/services/admin-route-activator.service';
-import { AuthenticationService } from './shared/services/authentication.service';
 import { ResponseMessagesService } from './shared/services/response-messages.service';
 import { RoleService } from './shared/services/role.service';
-import { TypeService } from './shared/services/type.service';
 import { ToastrService } from './shared/services/toastr.service';
-import { AuthenticationRouteActivatorService } from './shared/services/authentication-route-activator.service';
-import { AppComponent } from './app.component';
-import { AppRoutingModule } from './app-routing.module';
+import { TypeService } from './shared/services/type.service';
 
 export function authHttpServiceFactory(http: Http, options: RequestOptions) {
   return new AuthHttp(new AuthConfig({
@@ -51,8 +51,8 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
     AuthenticationService,
     ResponseMessagesService,
     RoleService,
-    TypeService,
-    ToastrService
+    ToastrService,
+    TypeService
   ],
   bootstrap: [ AppComponent ]
 })

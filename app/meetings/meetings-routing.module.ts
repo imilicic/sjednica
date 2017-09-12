@@ -1,24 +1,35 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { AgendaItemCreateComponent } from './agenda-items/agenda-item-create/agenda-item-create.component';
+import { AdminRouteActivatorService } from '../shared/services/admin-route-activator.service';
+import { AgendaItemResolverService } from './agenda-items/shared/services/agenda-item-resolver.service';
+import { MeetingAbsenceComponent } from './meeting-absence/meeting-absence.component';
 import { MeetingComponent } from './meeting/meeting.component';
 import { MeetingCreateComponent } from './meeting-create/meeting-create.component';
-import { MeetingsComponent } from './meetings.component';
-import { MeetingVotesComponent } from './meeting-votes/meeting-votes.component';
-import { AgendaItemResolverService } from './shared/services/agenda-item-resolver.service';
+import { MeetingPresenceComponent } from './meeting-presence/meeting-presence.component';
 import { MeetingResolverService } from './shared/services/meeting-resolver.service';
-import { AdminRouteActivatorService } from '../shared/services/admin-route-activator.service';
+import { MeetingUpdateComponent } from './meeting-update/meeting-update.component';
+import { MeetingVotesComponent } from './meeting-votes/meeting-votes.component';
+import { MeetingsComponent } from './meetings.component';
 
 const routes: Routes = [
     {
         path: '',
-        component:
-        MeetingsComponent
+        component: MeetingsComponent
     },
     {
         path: 'create',
         component: MeetingCreateComponent,
+        canActivate: [
+            AdminRouteActivatorService
+        ]
+    },
+    {
+        path: 'update/:meetingId',
+        component: MeetingUpdateComponent,
+        resolve: {
+            meeting: MeetingResolverService
+        },
         canActivate: [
             AdminRouteActivatorService
         ]
@@ -40,16 +51,35 @@ const routes: Routes = [
         }
     },
     {
-        path: ':meetingId/agenda-items/create',
-        component: AgendaItemCreateComponent,
+        path: ':meetingId/presence',
+        component: MeetingPresenceComponent,
+        canActivate: [
+            AdminRouteActivatorService
+        ],
         resolve: {
-            meeting: MeetingResolverService,
-            agendaItems: AgendaItemResolverService
+            meeting: MeetingResolverService
+        }
+    },
+    {
+        path: ':meetingId/absence',
+        component: MeetingAbsenceComponent,
+        canActivate: [
+            AdminRouteActivatorService
+        ],
+        resolve: {
+            meeting: MeetingResolverService
+        }
+    },
+    {
+        path: ':meetingId/agenda-items',
+        loadChildren: 'app/meetings/agenda-items/agenda-items.module#AgendaItemsModule',
+        resolve: {
+            meeting: MeetingResolverService
         },
         canActivate: [
             AdminRouteActivatorService
         ]
-    }
+    },
 ];
 
 @NgModule({

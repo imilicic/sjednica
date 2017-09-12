@@ -14,19 +14,18 @@ export class VoteService {
         private authHttp: AuthHttp
     ) {}
 
-    createVote(meetingId: number, agendaItemId: number, userId: number, vote: number) {
+    createVote(meetingId: number, agendaItemId: number, vote: number) {
         let newVote: any = {
-            Vote: vote,
-            UserId: userId
+            Vote: vote
         };
 
-        return this.authHttp.post('/api/meetings/' + meetingId + '/agenda/items/' + agendaItemId + '/votes', newVote)
+        return this.authHttp.post('/api/meetings/' + meetingId + '/agenda-items/' + agendaItemId + '/votes', newVote)
         .map((response: Response) => response.json())
         .catch(this.handleError);
     }
 
-    readVotesByUser(meetingId: number, userId: number): Observable<any[]> {
-        return this.authHttp.get('/api/meetings/' + meetingId + '/agenda/votes/' + userId)
+    retrieveVotesByUser(meetingId: number): Observable<any[]> {
+        return this.authHttp.get('/api/meetings/' + meetingId + '/agenda-items/votes/')
         .map((response: Response) => <any[]>response.json())
         .catch(this.handleError);
     }
@@ -59,18 +58,18 @@ export class VoteService {
         .catch(this.handleError);
     }
 
-    updateVote(meetingId: number, agendaItemId: number, voteId: number, userId: number, vote: number) {
+    replaceVote(meetingId: number, agendaItemId: number, voteId: number, vote: number) {
         let newVote: any = {
-            Vote: vote,
-            UserId: userId
+            Vote: vote
         };
 
-        return this.authHttp.put('/api/meetings/' + meetingId + '/agenda/items/' + agendaItemId + '/votes/' + voteId, newVote)
+        return this.authHttp.put('/api/meetings/' + meetingId + '/agenda-items/' + agendaItemId + '/votes/' + voteId, newVote)
         .map((response: Response) => response.json())
         .catch(this.handleError);
     }
 
     private handleError(error: Response) {
+        console.error(error);
         return Observable.throw(error.text());
     }
 }

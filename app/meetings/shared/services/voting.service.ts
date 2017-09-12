@@ -13,7 +13,7 @@ export class VotingService {
     public votings: BehaviorSubject<number[]> = new BehaviorSubject([]);
 
     closeVoting(meetingId: number, agendaItemId: number): Observable<string> {
-        return this.authHttp.delete('/api/meetings/' + meetingId + '/votings/' + agendaItemId)
+        return this.authHttp.delete('/api/meetings/' + meetingId + '/agenda-items/' + agendaItemId + '/voting')
         .map((response: Response) => response.text())
         .catch(this.handleError);
     }
@@ -22,21 +22,23 @@ export class VotingService {
         private authHttp: AuthHttp
     ) {}
 
-    getVotings() {
-        this.authHttp.get('/api/meetings/' + 1 + '/votings')
-        .map((response: Response) => <number[]>response.json())
-        .do((voting: number[]) => {
-            this.votings.next(voting);
-        }).catch(this.handleError).subscribe();
+    getVotings(meetingId: number) {
+        this.authHttp.get('/api/meetings/' + meetingId + '/agenda-items/votings')
+        .map((response: Response) => <any[]>response.json())
+        .do((voting: any[]) => {
+            this.votings.next(voting.map(el => el.AgendaItemId));
+        }).catch(this.handleError)
+        .subscribe();
     }
 
-    openVoting(meetingId: number, agendaItemId: number): Observable<number[]> {
-        return this.authHttp.post('/api/meetings/' + meetingId + '/votings', {AgendaItemId: agendaItemId})
-        .map((response: Response) => <number[]>response.json())
+    openVoting(meetingId: number, agendaItemId: number): Observable<any> {
+        return this.authHttp.post('/api/meetings/' + meetingId + '/agenda-items/' + agendaItemId + '/voting', {})
+        .map((response: Response) => response.json())
         .catch(this.handleError);
     }
 
     private handleError(error: Response) {
-        return Observable.throw(error.text);
+        console.error(error);
+        return Observable.throw(error.text());
     }
 }

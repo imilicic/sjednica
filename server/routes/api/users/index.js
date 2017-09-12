@@ -1,8 +1,7 @@
-var express = require('express');
 var {check, validationResult} = require('express-validator/check');
+var router = require('express').Router();
 
 var passwordHash = require('../../../passwordHash');
-var router = express.Router();
 
 router.use('/:userId', [
   check('userId')
@@ -113,6 +112,12 @@ router.route('/')
     createUser
   ]);
 
+// Supports GET
+router.route('/count')
+  .get(
+    retrieveUsersCount
+  )
+
 // Supports GET, PUT
 router.route('/:userId')
   .get([
@@ -137,6 +142,9 @@ router.route('/:userId')
       .withMessage('LastName is required')
       .isLength({ min: 0, max: 40})
       .withMessage('LastName is too long'),
+    check('OldPassword')
+      .exists()
+      .withMessage('OldPassword is required'),
     check('Password')
       .exists()
       .withMessage('Password is required')
@@ -196,6 +204,23 @@ function retrieveUser(req, res) {
 
   res.status(200).send(user);
   return;
+}
+
+function retrieveUsersCount(req, res) {
+  var queryString = `
+    SELECT COUNT(*) AS UsersCount
+    FROM Users
+  `;
+
+  req.connection.query(queryString, function(error, result) {
+    if (error) {
+      res.status(500).send(error);
+      return;
+    }
+
+    res.status(200).send(result);
+    return;
+  })
 }
 
 function retrieveUsers(req, res) {
@@ -275,22 +300,21 @@ function createUser(req, res) {
 }
 
 function replaceUser(req, res) {
+  var oldPassword = req.query.OldPassword;
   var password = req.body.Password;
-  var user = req.user;
-  
-  var passwordData = {
-    passwordHash: user.Password,
-    salt: user.Salt
-  };
-
-  if (password !== "00000000") {
-    passwordData = passwordHash.hashPassword(password);
-  }
-
   var queryString;
   var values;
+  
+  var passwordData = {
+    passwordHash: req.user.Password,
+    salt: req.user.Salt
+  };
 
   if (req.decoded.RoleId === 1) {
+    if (password !== "00000000") {
+      passwordData = passwordHash.hashPassword(password);
+    }
+
     queryString = `
       UPDATE Users
       SET 
@@ -313,7 +337,7 @@ function replaceUser(req, res) {
       passwordData.salt,
       req.params.userId
     ];
-  } else if (req.decoded.UserId === user.UserId) {
+  } else if (req.decoded.UserId === req.user.UserId) {
     queryString = `
       UPDATE Users
       SET
@@ -321,11 +345,19 @@ function replaceUser(req, res) {
         Salt = ?
       WHERE UserId = ?
     `;
+    passwordData = passwordHash.hashPassword(password);
     values = [
       passwordData.passwordHash,
       passwordData.salt,
       req.params.userId
     ];
+
+    var oldPasswordData = passwordHash.hashPassword(oldPassword, req.user.Salt);
+
+    if (oldPasswordData.passwordHash !== req.user.Password) {
+      res.status(422).send('Kriva stara lozinka!');
+      return;
+    }
   } else {
     res.status(403).send('Nisi admin!');
     return;

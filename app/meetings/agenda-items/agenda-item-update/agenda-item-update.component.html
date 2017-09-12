@@ -1,0 +1,16 @@
+<h1>Izmjena dnevnog reda {{meeting.Number}}. sjednice</h1>
+<div class="col-md-8">
+    <form autocomplete="off" [formGroup]="agendaItemForm" *ngFor="let agendaItemForm of agendaItemForms; let i=index" (ngSubmit)="updateAgendaItem(i)">
+        <div class="form-group">
+            <label class="control-label" for="number">Broj točke</label>
+            <!-- <input class="form-control" formControlName="number" id="number" type="number"> -->
+            <div id="number">{{meeting.AgendaItems[i].Number}}</div>
+        </div>
+        <div class="form-group">
+            <label class="control-label" for="text">Sadržaj točke</label>
+            <textarea class="form-control" formControlName="text" id="text"></textarea>
+        </div>
+        <button class="btn btn-default" [disabled]="agendaItemForm.invalid" type="submit">Spremi</button>
+    </form>
+    <a class="btn btn-default" role="button" routerLink="../../">Završi</a>
+</div>

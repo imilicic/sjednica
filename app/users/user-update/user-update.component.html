@@ -1,7 +1,7 @@
 <h1>Uređivanje korisnikovih podataka</h1>
 <div class="col-md-8">
     <!-- form for current user, who can change password only -->
-    <form autocomplete="off" [formGroup]="userForm" *ngIf="isThisCurrentUserProfile" (ngSubmit)="updateUserByUser()">
+    <form autocomplete="off" [formGroup]="userForm" *ngIf="isThisCurrentUserProfile" (ngSubmit)="updateUserUser()">
         <div class="form-group" [ngClass]="{'has-error': oldPassword.touched && oldPassword.invalid, 'has-success': oldPassword.touched && oldPassword.valid}">
             <label class="control-label" for="oldPassword">Stara lozinka</label>
             <span class="help-block error" *ngIf="oldPassword.touched && oldPassword.invalid">{{getWarningMessageCurrentUser("required")}}</span>
@@ -23,7 +23,7 @@
         <button class="btn btn-default" [disabled]="userForm.invalid" type="submit">Promijeni lozinku</button>
     </form>
     <!-- form for admin, who can change any user data -->
-    <form autocomplete="off" [formGroup]="userForm" *ngIf="!isThisCurrentUserProfile" (ngSubmit)="updateUserByAdmin()">
+    <form autocomplete="off" [formGroup]="userForm" *ngIf="!isThisCurrentUserProfile" (ngSubmit)="updateUserAdmin()">
         <div class="form-group" [ngClass]="{'has-error': firstName.invalid, 'has-success': firstName.valid}">
             <label class="control-label" for="firstName">Ime</label>
             <span class="help-block error" *ngIf="firstName.invalid">{{getWarningMessage("required")}}</span>

@@ -3,13 +3,9 @@ var express = require('express');
 
 var router = express.Router();
 
-router.use('/votings', [
-  function (req, res, next) {
-    req.agendaItemId = req.params.agendaItemId;
-    next();
-  },
-  require('./votings')
-]);
+router.use('/votes', require('./votes/votes'));
+router.use('/votings', require('./votings'));
+
 router.use('/:agendaItemId', [
   check('agendaItemId')
     .exists()

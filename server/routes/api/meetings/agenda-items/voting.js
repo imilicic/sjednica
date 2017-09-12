@@ -101,13 +101,8 @@ function deleteVoting(req, res) {
       return;
     }
 
-    if (result.serverStatus !== 2) {
-      res.status(500).send('Glasanje nije zatvoreno!');
-      return;
-    } else {
-      res.status(500).send('Glasanje je zatvoreno!');
-      return;
-    }
+    res.status(200).send('Glasanje je zatvoreno!');
+    return;
   });
 }
 

@@ -138,10 +138,16 @@ function retrieveVotes(req, res) {
   var queryString = `
     SELECT *
     FROM Votes
-    WHERE AgendaItemId = ?
+    WHERE
+      AgendaItemId = ? AND
+      UserId = ?
   `;
+  var values = [
+    req.agendaItemId,
+    req.decoded.UserId
+  ];
 
-  req.connection.query(queryString, [req.agendaItemId], function(error, result) {
+  req.connection.query(queryString, values, function(error, result) {
     if (error) {
       res.status(500).send(error);
       return;
@@ -227,17 +233,33 @@ function findVoteById(req, res, voteId) {
 }
 
 function isVotingOpened(req, res, next) {
-  findVoting(req, res).then((voting) => {
-    if (voting.length === 0) {
+  // electronic remotely
+  if (req.meeting.TypeId === 1) {
+    var date = new Date(req.meeting.DateTime);
+    var now = new Date();
+
+    if (date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === date.getFullYear()) {
+      next();
+    } else {
       res.status(403).send('Glasanje je zatvoreno!');
       return;
-    } else {
-      next();
     }
-  }, (error) => {
-    res.status(500).send(error);
+  } else if (req.meeting.TypeId === 2) { // electronic locally
+    findVoting(req, res).then((voting) => {
+      if (voting.length === 0) {
+        res.status(403).send('Glasanje je zatvoreno!');
+        return;
+      } else {
+        next();
+      }
+    }, (error) => {
+      res.status(500).send(error);
+      return;
+    });
+  } else { // non electronic
+    res.status(403).send('Sjednica nije elektronska!');
     return;
-  });
+  }
 }
 
 function findVoting(req, res) {

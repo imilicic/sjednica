@@ -6,7 +6,7 @@ import 'rxjs/add/Observable/throw';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
 
-import { AgendaItem } from '../../../shared/models/agenda-item.model';
+import { AgendaItem } from '../../../../shared/models/agenda-item.model';
 
 @Injectable()
 export class AgendaItemService {
@@ -20,6 +20,12 @@ export class AgendaItemService {
         '/agenda-items';
 
         return this.authHttp.post(url, agendaItem)
+        .map((response: Response) => <AgendaItem>response.json())
+        .catch(this.handleError);
+    }
+
+    replaceAgendaItem(meetingId: number, agendaItemId: number, agendaItem: AgendaItem) {
+        return this.authHttp.put('/api/meetings/' + meetingId + '/agenda-items/' + agendaItemId, agendaItem)
         .map((response: Response) => <AgendaItem>response.json())
         .catch(this.handleError);
     }

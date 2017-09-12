@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { AgendaItem } from '../../../shared/models/agenda-item.model';
 import { ToastrService } from '../../../shared/services/toastr.service';
-import { AgendaItemService } from '../../shared/services/agenda-item.service';
+import { AgendaItemService } from '../shared/services/agenda-item.service';
 
 @Component({
     templateUrl: './agenda-item-create.component.html'

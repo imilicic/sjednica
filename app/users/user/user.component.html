@@ -20,7 +20,16 @@
                 <td>{{user.PhoneNumber}}</td>
             </tr>
             <tr>
-                <td>Lozinka <span *ngIf="isThisCurrentUserProfile">(<a routerLink="../update/me">Promijeni lozinku</a>)</span></td>
+                <td>Lozinka
+                    <span *ngIf="isThisCurrentUserProfile">
+                        <span *ngIf="authenticationService.isAdmin()">
+                            (<a [routerLink]="['../update', user.UserId]">Promijeni lozinku</a>)
+                        </span>
+                        <span *ngIf="!authenticationService.isAdmin()">
+                            (<a routerLink="../update/me">Promijeni lozinku</a>)
+                        </span>
+                    </span>
+                </td>
                 <td>**********</td>
             </tr>
             <tr>

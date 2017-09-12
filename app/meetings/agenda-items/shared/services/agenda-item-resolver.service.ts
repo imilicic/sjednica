@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, Resolve, Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { AgendaItemService } from './agenda-item.service';
-import { AgendaItem } from '../../../shared/models/agenda-item.model';
+import { AgendaItem } from '../../../../shared/models/agenda-item.model';
 
 @Injectable()
 export class AgendaItemResolverService implements Resolve<AgendaItem[]> {

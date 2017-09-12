@@ -1,0 +1,11 @@
+<h1>Dodavanje odsutnih članova vijeća na {{meeting.Number}}. sjednici</h1>
+<form autocomplete="off" [formGroup]="reasonForm" (ngSubmit)="createAbsence()">
+    <div *ngFor="let user of absentUsers; let i=index;">
+        <div>
+            {{user.FirstName}} {{user.LastName}}, {{user.Email}}
+        </div>
+        <label for="reason">Razlog odsutnosti:</label>
+        <textarea class="form-control" [formControlName]="'reason'+i" id="reason"></textarea>
+    </div>
+    <button class="btn btn-default" [disabled]="reasonForm.invalid" type="submit">Spremi</button>
+</form>

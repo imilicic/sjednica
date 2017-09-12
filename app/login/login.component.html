@@ -10,6 +10,8 @@
       <span class="error help-block" *ngIf="password.touched && password.invalid">{{getWarningMessage("required")}}</span>
       <input class="form-control" formControlName="password" id="password" name="password" type="password" >
     </div>
-    <button class="btn btn-default" [disabled]="loginForm.invalid" type="submit">Prijavi se</button>
+    <button class="btn btn-default" [disabled]="loginForm.invalid" type="submit">
+      Prijavi se
+    </button>
   </form>
 </div>
