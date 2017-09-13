@@ -12,8 +12,8 @@ const appRoutes: Routes = [
         component: LoginComponent
     },
     {
-        path: 'council-memberships',
-        loadChildren: 'app/council-memberships/council-memberships.module#CouncilMembershipsModule',
+        path: 'council-members',
+        loadChildren: 'app/council-members/council-members.module#CouncilMembersModule',
         canActivate: [AuthenticationRouteActivatorService]
     },
     {

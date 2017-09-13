@@ -54,20 +54,22 @@ export class MeetingComponent implements OnInit {
         this.votes = [];
         this.votings = [];
 
-        switch (this.meeting.TypeId) {
-            case 1:
-            this.electronicRemote();
-            break;
+        if (this.isOpened()) {
+            switch (this.meeting.TypeId) {
+                case 1:
+                this.electronicRemote();
+                break;
 
-            case 2:
-            // electronic locally
-            this.electronicLocal();
-            break;
+                case 2:
+                // electronic locally
+                this.electronicLocal();
+                break;
 
-            case 3:
-            // non-electronic
-            this.buildForm();
-            break;
+                case 3:
+                // non-electronic
+                this.buildForm();
+                break;
+            }
         }
     }
 
@@ -124,10 +126,6 @@ export class MeetingComponent implements OnInit {
     }
 
     private electronicLocal() {
-        if (!this.isOpened()) {
-            return;
-        }
-
         this.meetingService.createPresenceUser(this.meeting.MeetingId).subscribe();
 
         this.votingService.votings.subscribe(votings => {

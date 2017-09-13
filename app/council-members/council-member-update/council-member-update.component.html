@@ -1,0 +1,78 @@
+<h1>Dodavanje člana vijeća</h1>
+<div class="col-md-8">
+    <form autocomplete="off" [formGroup]="councilMemberForm" (ngSubmit)="updateCouncilMember()">
+        <div class="form-group has-success">
+            <label class="control-label" for="user">Korisnik</label>
+            <div>
+                {{councilMember.FirstName}} {{councilMember.LastName}}, {{councilMember.Email}}
+            </div>
+        </div>
+        <div class="form-group" [ngClass]="{'has-error': startYear.invalid || councilMemberForm.hasError('startDateInvalid') || councilMemberForm.hasError('nowNotBetweenStartEnd'), 'has-success': startYear.valid && !councilMemberForm.hasError('startDateInvalid')}">
+            <fieldset>
+                <legend>
+                    Od
+                    <span class="error help-block" *ngIf="startYear.hasError('min') || startYear.hasError('max')">
+                        {{getWarningMessage("invalid-year")}}
+                    </span>
+                    <span class="error help-block" *ngIf="councilMemberForm.hasError('startDateInvalid')">
+                        {{getWarningMessage("invalid-date")}}
+                    </span>
+                    <span class="error help-block" *ngIf="councilMemberForm.hasError('nowNotBetweenStartEnd')">
+                        {{getWarningMessage("now-not-between-start-end")}}
+                    </span>
+                </legend>
+                <label class="control-label col-md-1" for="startDay">Dan</label>
+                <div class="col-md-3">
+                    <select class="form-control" formControlName="startDay" id="startDay">
+                        <option *ngFor="let i of range(31)" [value]="i">{{i}}</option>
+                    </select>
+                </div>
+                <label class="control-label col-md-1" for="startMonth">Mjesec</label>
+                <div class="col-md-3">
+                    <select class="form-control" formControlName="startMonth" id="startMonth">
+                        <option *ngFor="let i of range(12)" [value]="i">{{months[i-1]}}</option>
+                    </select>
+                </div>
+                <label class="control-label col-md-1" for="startYear">Godina</label>
+                <div class="col-md-3">
+                    <input class="form-control" formControlName="startYear" id="startYear" type="number">
+                </div>
+            </fieldset>
+        </div>
+        <div class="form-group" [ngClass]="{'has-error': endYear.invalid || councilMemberForm.hasError('endDateInvalid') || councilMemberForm.hasError('startDateAfterEndDate') || councilMemberForm.hasError('nowNotBetweenStartEnd'), 'has-success': endYear.valid && !councilMemberForm.hasError('endDateInvalid') && !councilMemberForm.hasError('startDateAfterEndDate')}">
+            <fieldset [hidden]="permanentMember.value">
+                <legend>
+                    Do
+                    <span class="error help-block" *ngIf="endYear.hasError('min') || endYear.hasError('max')">
+                        {{getWarningMessage("invalid-year")}}
+                    </span>
+                    <span class="error help-block" *ngIf="councilMemberForm.hasError('endDateInvalid')">
+                        {{getWarningMessage("invalid-date")}}
+                    </span>
+                    <span class="error help-block" *ngIf="councilMemberForm.hasError('startDateAfterEndDate')">
+                        {{getWarningMessage("start-date-before-end-date")}}
+                    </span>
+                </legend>
+                <label class="control-label col-md-1" for="endDay">Dan</label>
+                <div class="col-md-3">
+                    <select class="form-control" formControlName="endDay" id="endDay">
+                        <option *ngFor="let i of range(31)" [value]="i">{{i}}</option>
+                    </select>
+                </div>
+                <label class="control-label col-md-1" for="endMonth">Mjesec</label>
+                <div class="col-md-3">
+                    <select class="form-control" formControlName="endMonth" id="endMonth">
+                        <option *ngFor="let i of range(12)" [value]="i">{{months[i-1]}}</option>
+                    </select>
+                </div>
+                <label class="control-label col-md-1" for="endYear">Godina</label>
+                <div class="col-md-3">
+                    <input class="form-control" formControlName="endYear" id="endYear" type="number">
+                </div>
+            </fieldset>
+            <label for="permanentMember">Stalan član vijeća</label>
+            <input (change)="togglePermanentMember()" formControlName="permanentMember" id="permanentMember" type="checkbox">
+        </div>
+        <button class="btn btn-default" [disabled]="councilMemberForm.invalid" type="submit">Spremi</button>
+    </form>
+</div>

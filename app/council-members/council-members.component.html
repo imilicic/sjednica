@@ -1,0 +1,30 @@
+<h1>Članovi vijeća</h1>
+<table class="table table-bordered">
+    <tr>
+        <th></th>
+        <th>Email</th>
+        <th>Od</th>
+        <th>Do</th>
+    </tr>
+    <tr *ngFor="let councilMember of councilMembers">
+        <td>
+            <a [routerLink]="['update', councilMember.CouncilMemberId]">
+                <span aria-hidden="true" class="glyphicon glyphicon-edit"></span>
+            </a>
+        </td>
+        <td>
+            <a [routerLink]="councilMember.CouncilMemberId">
+                {{councilMember.Email}}
+            </a>
+        </td>
+        <td>{{councilMember.StartDate | date: 'd. M. yyyy.'}}</td>
+        <td>
+            <span *ngIf="councilMember.EndDate === '9999-12-31'">
+                stalan član
+            </span>
+            <span *ngIf="councilMember.EndDate !== '9999-12-31'">
+                {{councilMember.EndDate | date: 'd. M. yyyy.'}}
+            </span>
+        </td>
+    </tr>
+</table>

@@ -1,0 +1,32 @@
+<div class="col-md-8">
+    <table class="table table-bordered">
+        <tr>
+            <td>Ime</td>
+            <td>{{councilMember.FirstName}}</td>
+        </tr>
+        <tr>
+            <td>Prezime</td>
+            <td>{{councilMember.LastName}}</td>
+        </tr>
+        <tr>
+            <td>E-mail</td>
+            <td>{{councilMember.Email}}</td>
+        </tr>
+        <tr>
+            <td>Telefonski broj</td>
+            <td>{{councilMember.PhoneNumber}}</td>
+        </tr>
+        <tr>
+            <td>Član vijeća</td>
+            <td>
+                <span *ngIf="councilMember.EndDate === '9999-12-31'">
+                    stalan član od {{councilMember.StartDate | date: 'd. M. yyyy.'}}
+                </span>
+                <span *ngIf="councilMember.EndDate !== '9999-12-31'">
+                    {{councilMember.StartDate | date: 'd. M. yyyy.'}} - 
+                    {{councilMember.EndDate | date: 'd. M. yyyy.'}}
+                </span>
+            </td>
+        </tr>
+    </table>
+</div>

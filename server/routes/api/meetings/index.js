@@ -1,7 +1,5 @@
 var {check, validationResult} = require('express-validator/check');
-var express = require('express');
-
-var router = express.Router();
+var router = require('express').Router();
 
 router.use('/:meetingId', [
   check('meetingId')
