@@ -84,7 +84,7 @@ CREATE TABLE AgendaItems (
 CREATE TABLE AgendaDocuments (
 	AgendaDocumentId INT AUTO_INCREMENT,
 	Description VARCHAR(500),
-	URL VARCHAR(50) NOT NULL,
+	URL VARCHAR(200) NOT NULL,
 	AgendaItemId INT NOT NULL,
 	PRIMARY KEY (AgendaDocumentId),
 	FOREIGN KEY (AgendaItemId)

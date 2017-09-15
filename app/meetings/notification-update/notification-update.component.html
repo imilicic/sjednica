@@ -1,0 +1,11 @@
+<h1>Izmjena obavijesti</h1>
+<div class="col-md-8">
+    <form autocomplete="off" [formGroup]="notificationForm" *ngFor="let notificationForm of notificationForms; let i=index" (ngSubmit)="updateNotification(i)">
+        <div class="form-group">
+            <label class="control-label" for="text">Obavijest</label>
+            <textarea class="form-control" formControlName="text" id="text"></textarea>
+        </div>
+        <button class="btn btn-default" [disabled]="notificationForm.invalid" type="submit">Spremi</button>
+    </form>
+    <a class="btn btn-default" role="button" routerLink="../../">Završi</a>
+</div>

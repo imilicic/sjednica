@@ -1,10 +1,22 @@
 <h1>{{meeting.Number}}. sjednica</h1>
-<div *ngIf="!isPassed() && !isToday()">
+<div *ngIf="!isPassed() && !isToday() && authenticationService.isAdmin()">
     <div>
-        (<a [routerLink]="['../update', this.meeting.MeetingId]">Promijeni podatke sjednice</a>)
+        <a [routerLink]="['../update', this.meeting.MeetingId]">Promijeni podatke sjednice</a>
+    </div>
+    <div *ngIf="meeting.AgendaItems.length > 0">
+        <a [routerLink]="['agenda-items/update']">Promijeni dnevni red</a>
+    </div>
+    <div *ngIf="meeting.AgendaItems.length === 0">
+        <a routerLink="agenda-items/create">Dodaj dnevni red</a>
+    </div>
+    <div *ngIf="meeting.AgendaItems.length > 0">
+        <a routerLink="agenda-items/create">Dodaj točku dnevnog reda</a>
     </div>
     <div>
-        (<a [routerLink]="['agenda-items/update']">Promijeni dnevni red</a>)
+        <a routerLink="notifications/update">Promijeni obavijesti</a>
+    </div>
+    <div>
+        <a routerLink="notifications/create">Dodaj obavijest</a>
     </div>
 </div>
 <table class="table table-bordered">
@@ -30,16 +42,25 @@
     </tr>
 </table>
 
-<div *ngIf="meeting.AgendaItems.length === 0">
-    <a routerLink="agenda-items/create">Dodaj dnevni red</a>
-</div>
 <div *ngIf="meeting.AgendaItems.length > 0">
     <h3>Dnevni red</h3>
     <a *ngIf="meeting.TypeId === 3 && authenticationService.isAdmin() && isOpened()" routerLink="presence">
         Dodaj prisutne korisnike
     </a>
     <div *ngFor="let agendaItem of meeting.AgendaItems; let i = index">
-        <p>{{agendaItem.Number}}. {{agendaItem.Text}}</p>
+        <div>
+            {{agendaItem.Number}}. {{agendaItem.Text}}
+            <span *ngIf="authenticationService.isAdmin()">
+                (<a [routerLink]="['agenda-items', agendaItem.AgendaItemId, 'documents', 'create']">Dodaj dokument</a>
+                <span *ngIf="agendaItem.Documents.length > 0">
+                    / <a [routerLink]="['agenda-items', agendaItem.AgendaItemId, 'documents', 'update']">Uredi dokumente</a></span>)
+            </span>
+            <ul *ngIf="agendaItem.Documents.length > 0">
+                <li *ngFor="let document of agendaItem.Documents">
+                    {{document.Description}}, (<a [attr.href]="document.URL">link</a>)
+                </li>
+            </ul>
+        </div>
         <div class="row" *ngIf="meeting.TypeId === 3 && authenticationService.isAdmin()">
             <div class="col-md-3" *ngIf="isOpened()">
                 <form autocomplete="off" class="form-horizontal" [formGroup]="votesForm[i]" *ngIf="!voted[i]" (ngSubmit)="voteCummulative(i, agendaItem.AgendaItemId)">
@@ -160,4 +181,12 @@
             </div>
         </div>
     </div>
+</div>
+<div *ngIf="notifications.length > 0">
+    <h3>Obavijesti uz sjednicu</h3>
+    <ul>
+        <li *ngFor="let notification of notifications">
+            {{notification.Text}}
+        </li>
+    </ul>
 </div>

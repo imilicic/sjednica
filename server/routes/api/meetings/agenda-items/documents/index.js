@@ -39,7 +39,10 @@ router.route('/:documentId')
 
 function retrieveDocuments(req, res) {
   var queryString = `
-    SELECT *
+    SELECT
+      AgendaDocumentId AS DocumentId,
+      Description,
+      URL
     FROM AgendaDocuments
     WHERE AgendaItemId = ?
   `;
@@ -147,7 +150,10 @@ function replaceDocument(req, res) {
 function findDocumentById(req, res, documentId) {
   return new Promise((resolve, reject) => {
     var queryString = `
-      SELECT *
+      SELECT
+        AgendaDocumentId AS DocumentId,
+        Description,
+        URL
       FROM AgendaDocuments
       WHERE
         AgendaDocumentId = ? AND
@@ -181,7 +187,7 @@ function inputValidators(func) {
       .withMessage('URL is required')
       .isURL()
       .withMessage('Invalid URL')
-      .isLength({ min: 0, max: 50})
+      .isLength({ min: 0, max: 200})
       .withMessage('URL is too long'),
     function(req, res, next) {
       var errors = validationResult(req);

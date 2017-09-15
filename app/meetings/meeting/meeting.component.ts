@@ -7,6 +7,7 @@ import { AgendaItemService } from '../agenda-items/shared/services/agenda-item.s
 import { AuthenticationService } from '../../shared/services/authentication.service';
 import { CummulativeVote } from '../../shared/models/cummulative-vote.model';
 import { CummulativeVoteService } from '../shared/services/cummulative-vote.service';
+import { DocumentService } from '../agenda-items/shared/services/document.service';
 import { Meeting } from '../../shared/models/meeting.model';
 import { MeetingService } from '../shared/services/meeting.service';
 import { VoteService } from '../shared/services/vote.service';
@@ -19,8 +20,10 @@ import { TypeService } from '../../shared/services/type.service';
 })
 
 export class MeetingComponent implements OnInit {
+    private documents: any[];
     private interval: any;
     private meeting: Meeting;
+    private notifications: any[];
     private votes: any;
     private votings: number[];
 
@@ -37,6 +40,7 @@ export class MeetingComponent implements OnInit {
         private agendaItemService: AgendaItemService,
         private authenticationService: AuthenticationService,
         private cummulativeVoteService: CummulativeVoteService,
+        private documentService: DocumentService,
         private meetingService: MeetingService,
         private toastrService: ToastrService,
         private typeService: TypeService,
@@ -51,6 +55,17 @@ export class MeetingComponent implements OnInit {
     ngOnInit() {
         this.meeting = this.activatedRoute.snapshot.data['meeting'];
         this.meeting.AgendaItems = this.activatedRoute.snapshot.data['agendaItems'];
+        this.notifications = this.activatedRoute.snapshot.data['notifications'];
+
+        this.meeting.AgendaItems.forEach((agendaItem: AgendaItem) => {
+            this.meeting.AgendaItems.find(item => item.AgendaItemId === agendaItem.AgendaItemId).Documents = [];
+
+            this.documentService.retrieveDocuments(this.meeting.MeetingId, agendaItem.AgendaItemId)
+            .subscribe((documents: any[]) => {
+                this.meeting.AgendaItems.find(item => item.AgendaItemId === agendaItem.AgendaItemId).Documents  = documents;
+            });
+        });
+
         this.votes = [];
         this.votings = [];
 

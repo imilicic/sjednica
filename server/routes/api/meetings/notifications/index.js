@@ -39,7 +39,9 @@ router.route('/:notificationId')
 
 function retrieveNotifications(req, res) {
   var queryString = `
-    SELECT *
+    SELECT
+      MeetingNotificationId AS NotificationId,
+      Text
     FROM MeetingNotifications
     WHERE MeetingId = ?
   `;
@@ -143,7 +145,9 @@ function replaceNotification(req, res) {
 function findNotificationById(req, res, notificationId) {
   return new Promise((resolve, reject) => {
     var queryString = `
-      SELECT *
+      SELECT
+        MeetingNotificationId AS NotificationId,
+        Text
       FROM MeetingNotifications
       WHERE
         MeetingNotificationId = ? AND
@@ -169,7 +173,9 @@ function inputValidators(func) {
     isAdmin,
     check('Text')
       .exists()
-      .withMessage('Text is required'),
+      .withMessage('Text is required')
+      .isLength({ min: 0, max: 500 })
+      .withMessage('Text is too long'),
     function(req, res, next) {
       var errors = validationResult(req);
   

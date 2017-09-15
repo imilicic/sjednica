@@ -9,6 +9,10 @@ import { AgendaItemResolverService } from './shared/services/agenda-item-resolve
 import { AgendaItemService } from './shared/services/agenda-item.service';
 import { AgendaItemUpdateComponent } from './agenda-item-update/agenda-item-update.component';
 import { AgendaItemsRoutingModule } from './agenda-items-routing.module';
+import { DocumentCreateComponent } from './document-create/document-create.component';
+import { DocumentResolverService } from './shared/services/document-resolver.service';
+import { DocumentService } from './shared/services/document.service';
+import { DocumentUpdateComponent } from './document-update/document-update.component';
 
 export function authHttpServiceFactory(http: Http, options: RequestOptions) {
     return new AuthHttp(new AuthConfig({
@@ -29,7 +33,9 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
     exports: [],
     declarations: [
         AgendaItemCreateComponent,
-        AgendaItemUpdateComponent
+        AgendaItemUpdateComponent,
+        DocumentCreateComponent,
+        DocumentUpdateComponent
     ],
     providers: [
         AgendaItemResolverService,
@@ -39,6 +45,8 @@ export function authHttpServiceFactory(http: Http, options: RequestOptions) {
             useFactory: authHttpServiceFactory,
             deps: [Http, RequestOptions]
         },
+        DocumentResolverService,
+        DocumentService
     ]
 })
 export class AgendaItemsModule { }

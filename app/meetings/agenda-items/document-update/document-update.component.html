@@ -1,0 +1,13 @@
+<h1>Izmjena dokumenata točke dnevnog reda</h1>
+<form [formGroup]="documentForm" *ngFor="let documentForm of documentForms; let i=index" (ngSubmit)="replaceDocument(i)">
+    <div class="form-group">
+        <label for="description">Opis</label>
+        <textarea class="form-control" formControlName="description" id="description"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="URL">URL</label>
+        <input class="form-control" formControlName="URL" id="URL" type="text">
+    </div>
+    <button class="btn btn-default" [disabled]="documentForm.invalid" type="submit">Spremi</button>
+</form>
+<a class="btn btn-default" role="button" routerLink="../../../../">Završi</a>

@@ -70,10 +70,14 @@ router.route('/')
   .post([
     check('Address')
       .exists()
-      .withMessage('Address is required'),
+      .withMessage('Address is required')
+      .isLength({ min: 0, max: 40 })
+      .withMessage('Address is too long'),
     check('City')
       .exists()
-      .withMessage('City is required'),
+      .withMessage('City is required')
+      .isLength({ min: 0, max: 40 })
+      .withMessage('City is too long'),
     check('DateTime')
       .exists()
       .withMessage('DateTime is required'),
@@ -143,10 +147,14 @@ router.route('/:meetingId')
   .put([
     check('Address')
       .exists()
-      .withMessage('Address is required'),
+      .withMessage('Address is required')
+      .isLength({ min: 0, max: 40 })
+      .withMessage('Address is too long'),
     check('City')
       .exists()
-      .withMessage('City is required'),
+      .withMessage('City is required')
+      .isLength({ min: 0, max: 40 })
+      .withMessage('City is too long'),
     check('DateTime')
       .exists()
       .withMessage('DateTime is required'),

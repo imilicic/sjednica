@@ -11,6 +11,9 @@ import { MeetingResolverService } from './shared/services/meeting-resolver.servi
 import { MeetingUpdateComponent } from './meeting-update/meeting-update.component';
 import { MeetingVotesComponent } from './meeting-votes/meeting-votes.component';
 import { MeetingsComponent } from './meetings.component';
+import { NotificationCreateComponent } from './notification-create/notification-create.component';
+import { NotificationResolverService } from './shared/services/notification-resolver.service';
+import { NotificationUpdateComponent } from './notification-update/notification-update.component';
 
 const routes: Routes = [
     {
@@ -39,7 +42,19 @@ const routes: Routes = [
         component: MeetingComponent,
         resolve: {
             meeting: MeetingResolverService,
-            agendaItems: AgendaItemResolverService
+            agendaItems: AgendaItemResolverService,
+            notifications: NotificationResolverService
+        }
+    },
+    {
+        path: ':meetingId/notifications/create',
+        component: NotificationCreateComponent
+    },
+    {
+        path: ':meetingId/notifications/update',
+        component: NotificationUpdateComponent,
+        resolve: {
+            notifications: NotificationResolverService
         }
     },
     {

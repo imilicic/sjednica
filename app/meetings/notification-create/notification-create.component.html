@@ -1,0 +1,8 @@
+<h1>Dodavanje obavijesti</h1>
+<form autocomplete="off" [formGroup]="notificationForm" (ngSubmit)="createNotification()">
+    <div class="form-group">
+        <label for="text">Tekst</label>
+        <textarea class="form-control" formControlName="text" id="text"></textarea>
+    </div>
+    <button class="btn btn-default" [disabled]="notificationForm.invalid" type="submit">Dodaj</button>
+</form>
