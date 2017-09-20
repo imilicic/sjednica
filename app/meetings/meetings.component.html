@@ -9,7 +9,39 @@
     </tr>
     <tr *ngFor="let meeting of meetings">
         <td>
-            <a [routerLink]="[meeting.MeetingId]">{{meeting.Number}}. sjednica</a>
+            <span *ngIf="!authenticationService.isAdmin()">
+                <a [routerLink]="[meeting.MeetingId]">
+                    {{meeting.Number}}. sjednica
+                </a>
+            </span>
+            <span *ngIf="authenticationService.isAdmin()">
+                <span *ngIf="meeting.TypeId === 1">
+                    <a [routerLink]="[meeting.MeetingId]">
+                        {{meeting.Number}}. sjednica
+                    </a>
+                </span>
+                <span *ngIf="meeting.TypeId !== 1">
+                    <span *ngIf="isToday(meeting.DateTime) && isPassed(meeting.DateTime)">
+                        <span *ngIf="ifPresenceAdded(meeting.MeetingId) !== undefined">
+                            <span *ngIf="ifPresenceAdded(meeting.MeetingId)">
+                                <a [routerLink]="[meeting.MeetingId]">
+                                    {{meeting.Number}}. sjednica
+                                </a>
+                            </span>
+                            <span *ngIf="!ifPresenceAdded(meeting.MeetingId)">
+                                <a [routerLink]="[meeting.MeetingId, 'presence']">
+                                    {{meeting.Number}}. sjednica
+                                </a>
+                            </span>
+                        </span>
+                    </span>
+                    <span *ngIf="!isToday(meeting.DateTime) || !isPassed(meeting.DateTime)">
+                        <a [routerLink]="[meeting.MeetingId]">
+                            {{meeting.Number}}. sjednica
+                        </a>
+                    </span>
+                </span>
+            </span>
         </td>
         <td>{{meeting.Address}}</td>
         <td>{{meeting.DateTime | date: 'd. M. y., HH:mm'}} <span style="color: red; font-weight: bold;" *ngIf="isToday(meeting.DateTime)">(danas)</span></td>

@@ -116,7 +116,8 @@ function retrieveCouncilMembers(req, res) {
       RoleId,
       StartDate,
       EndDate,
-      CouncilMembershipId AS CouncilMemberId
+      CouncilMembershipId AS CouncilMemberId,
+      UserId
     FROM Users
     INNER JOIN CouncilMemberships
     USING (UserId)
@@ -173,7 +174,8 @@ function findCouncilMemberById(req, res, councilMemberId) {
         RoleId,
         StartDate,
         EndDate,
-        CouncilMembershipId AS CouncilMemberId
+        CouncilMembershipId AS CouncilMemberId,
+        UserId
       FROM Users
       INNER JOIN CouncilMemberships
       USING (UserId)

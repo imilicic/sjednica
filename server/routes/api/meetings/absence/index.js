@@ -22,6 +22,10 @@ router.route('/councilMemberId/:councilMemberId')
     isAdmin,
     inputValidators(createAbsence)
   )
+  .put(
+    isAdmin,
+    inputValidators(replaceAbsence)
+  );
 
 // Supports GET
 router.route('/count')
@@ -30,8 +34,23 @@ router.route('/count')
   )
 
 function retrieveAbsence(req, res) {
-  res.status(501);
-  return;
+  var queryString = `
+    SELECT
+      CouncilMembershipId AS CouncilMemberId,
+      Reason
+    FROM AbsenceOfCouncilMembers
+    WHERE MeetingId = ?
+  `;
+
+  req.connection.query(queryString, [req.meetingId], function(error, result) {
+    if (error) {
+      res.status(500).send(error);
+      return;
+    }
+
+    res.status(200).send(result);
+    return;
+  });
 }
 
 function retrieveAbsenceCount(req, res) {
@@ -125,20 +144,31 @@ function replaceAbsence(req, res) {
       MeetingId = ? AND
       CouncilMembershipId = ?
   `;
-  var councilMembershipId;
+  var councilMemberId;
+  var values;
 
-  if (req.decoded.CouncilMemberships.IsCouncilMember) {
-    var councilMembershipId = req.decoded.CouncilMemberships.History[0].CouncilMembershipId;
+  if (req.params.councilMemberId) {
+    councilMemberId = req.params.councilMemberId;
+
+    values = [
+      req.body.Reason,
+      req.meetingId,
+      req.params.councilMemberId
+    ];
   } else {
-    res.status(400).send('Korisnik nije član vijeća!');
-    return;
+    if (req.decoded.CouncilMemberships.IsCouncilMember) {
+      councilMemberId = req.decoded.CouncilMemberships.History[0].CouncilMembershipId;
+    } else {
+      res.status(400).send('Korisnik nije član vijeća!');
+      return;
+    }
+  
+    values = [
+      req.body.Reason,
+      req.meetingId,
+      councilMemberId
+    ];
   }
-
-  var values = [
-    req.body.Reason,
-    req.meetingId,
-    councilMembershipId
-  ];
 
   req.connection.query(queryString, values, function(error, result) {
     if (error) {
@@ -151,11 +181,11 @@ function replaceAbsence(req, res) {
       return;
     }
 
-    findAbsence(req, res, councilMembershipId)
-      .then((presence) => {
-        presence = presence[0];
+    findAbsence(req, res, councilMemberId)
+      .then((absence) => {
+        absence = absence[0];
 
-        res.status(200).send(presence)
+        res.status(200).send(absence)
         return;
       }, (error) => {
         res.status(500).send(error);

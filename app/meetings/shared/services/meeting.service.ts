@@ -63,6 +63,12 @@ export class MeetingService {
         .catch(this.handleError);
     }
 
+    retrieveAbsence(meetingId: number): Observable<any[]> {
+        return this.authHttp.get('/api/meetings/' + meetingId + '/absence')
+        .map((response: Response) => response.json())
+        .catch(this.handleError);
+    }
+
     retrieveAbsenceCount(meetingId: number): Observable<any> {
         return this.authHttp.get('/api/meetings/' + meetingId + '/absence/count')
         .map((response: Response) => response.json())
@@ -90,6 +96,12 @@ export class MeetingService {
     retrieveUsers(): Observable<User[]> {
         return this.authHttp.get('/api/users')
         .map((response: Response) => <User[]>response.json())
+        .catch(this.handleError);
+    }
+
+    replaceAbsence(meetingId: number, councilMemberId: number, reason: any): Observable<any> {
+        return this.authHttp.put('/api/meetings/' + meetingId + '/absence/councilMemberId/' + councilMemberId, reason)
+        .map((response: Response) => response.json())
         .catch(this.handleError);
     }
 

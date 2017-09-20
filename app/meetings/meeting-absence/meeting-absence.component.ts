@@ -12,7 +12,8 @@ import { User } from '../../shared/models/user.model';
 })
 
 export class MeetingAbsenceComponent implements OnInit {
-    private absentUsers: User[];
+    private absentUsers: any[];
+    private absentUsersDb: any[];
     private meeting: Meeting;
     private reasonForm: FormGroup;
     private reasons: FormControl[];
@@ -27,30 +28,47 @@ export class MeetingAbsenceComponent implements OnInit {
 
     ngOnInit() {
         this.absentUsers = [];
+        this.absentUsersDb = [];
         this.meeting = this.activatedRoute.snapshot.data['meeting'];
         this.reasonForm = new FormGroup({});
         this.reasons = [];
         this.users = [];
+        let responseCame = false;
 
         this.meetingService.retrieveCouncilMembers()
         .subscribe((users: User[]) => {
             this.users = users;
         });
 
-        this.meetingService.retrievePresence(this.meeting.MeetingId)
+        this.meetingService.retrieveAbsence(this.meeting.MeetingId)
         .subscribe((response: any[]) => {
-            let i = 0;
+            this.absentUsersDb = response;
 
-            this.users.forEach((user: User) => {
-                if (!response.find(presence => presence.UserId === user.UserId)) {
-                    this.absentUsers.push(user);
-                    this.reasons.push(new FormControl('', Validators.required));
-                    this.reasonForm.addControl('reason' + i, this.reasons[i]);
-                    i++;
+            this.meetingService.retrievePresence(this.meeting.MeetingId)
+            .subscribe((response2: any[]) => {
+                let i = 0;
+
+                this.users.forEach((user: any) => {
+                    if (!response2.find(presence => presence.UserId === user.UserId)) {
+                        this.absentUsers.push(user);
+                        let foundAbsentUser = this.absentUsersDb.find(absentUser => absentUser.CouncilMemberId === user.CouncilMemberId);
+
+                        if (foundAbsentUser) {
+                            this.reasons.push(new FormControl(foundAbsentUser.Reason, Validators.required));
+                        } else {
+                            this.reasons.push(new FormControl('', Validators.required));
+                        }
+
+                        this.reasonForm.addControl('reason' + i, this.reasons[i]);
+                        i++;
+                    }
+                });
+
+                if (this.absentUsers.length === 0) {
+                    this.router.navigate(['meetings', this.meeting.MeetingId]);
                 }
             });
         });
-
     }
 
     private createAbsence() {
@@ -62,17 +80,31 @@ export class MeetingAbsenceComponent implements OnInit {
             };
             done.push(false);
 
-            this.meetingService.createAbsenceAdmin(this.meeting.MeetingId, user.CouncilMemberships[0].CouncilMembershipId, reason)
-            .subscribe((response: any) => {
-                done[i] = true;
+            if (this.absentUsersDb.find(absentUser => absentUser.CouncilMemberId === user.CouncilMemberId)) {
+                this.meetingService.replaceAbsence(this.meeting.MeetingId, user.CouncilMemberId, reason)
+                .subscribe((response: any) => {
+                    done[i] = true;
 
-                if (done.every(el => el)) {
-                    this.toastrService.success('Spremljeno!');
-                    this.router.navigate(['meetings', this.meeting.MeetingId]);
-                }
-            }, (error: string) => {
-                this.toastrService.error(error);
-            });
+                    if (done.every(el => el)) {
+                        this.toastrService.success('Spremljeno!');
+                        this.router.navigate(['meetings', this.meeting.MeetingId]);
+                    }
+                }, (error: string) => {
+                    this.toastrService.error(error);
+                });
+            } else {
+                this.meetingService.createAbsenceAdmin(this.meeting.MeetingId, user.CouncilMemberId, reason)
+                .subscribe((response: any) => {
+                    done[i] = true;
+
+                    if (done.every(el => el)) {
+                        this.toastrService.success('Spremljeno!');
+                        this.router.navigate(['meetings', this.meeting.MeetingId]);
+                    }
+                }, (error: string) => {
+                    this.toastrService.error(error);
+                });
+            }
         });
     }
 }

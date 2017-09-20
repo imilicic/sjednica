@@ -141,8 +141,6 @@ export class MeetingComponent implements OnInit {
     }
 
     private electronicLocal() {
-        this.meetingService.createPresenceUser(this.meeting.MeetingId).subscribe();
-
         this.votingService.votings.subscribe(votings => {
             this.votings = votings;
         });
@@ -183,6 +181,8 @@ export class MeetingComponent implements OnInit {
         if (!this.isToday()) {
             return;
         }
+
+        this.meetingService.createPresenceUser(this.meeting.MeetingId).subscribe();
 
         this.meeting.AgendaItems.forEach((item: any) => {
             this.votes.push({

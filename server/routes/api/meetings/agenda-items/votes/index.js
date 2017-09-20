@@ -56,6 +56,24 @@ router.route('/')
         return;
       }
     },
+    function(req, res, next) {
+      if (req.meeting.TypeId === 2) {
+        findPresentUserById(req, res, req.meetingId, req.decoded.UserId)
+        .then(presence => {
+          if (presence.length === 0) {
+            res.status(404).send('Ne možete glasati!');
+            return;
+          } else {
+            next();
+          }
+        }, error => {
+          res.status(500).send(error);
+          return;
+        });
+      } else {
+        next();
+      }
+    },
     createVote
   ]);
 
@@ -271,6 +289,30 @@ function findVoting(req, res) {
     `;
 
     req.connection.query(queryString, [req.agendaItemId], function(error, result) {
+      if (error) {
+        reject(error);
+      }
+
+      resolve(result);
+    });
+  });
+}
+
+function findPresentUserById(req, res, meetingId, userId) {
+  return new Promise((resolve, reject) => {
+    var queryString = `
+      SELECT *
+      FROM PresenceOfUsers
+      WHERE
+        UserId = ? AND
+        MeetingId = ?
+    `;
+    var values = [
+      userId,
+      meetingId
+    ];
+
+    req.connection.query(queryString, values, function(error, result) {
       if (error) {
         reject(error);
       }

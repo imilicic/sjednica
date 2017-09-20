@@ -17,6 +17,7 @@ export class MeetingPresenceComponent implements OnInit {
     private chosenUsersForm: FormGroup;
     private createdUsers: any[];
     private meeting: Meeting;
+    private minimumNumberOfUsers: number;
     private userControl: FormControl;
     private users: User[];
 
@@ -36,6 +37,11 @@ export class MeetingPresenceComponent implements OnInit {
         this.meetingService.retrieveUsers()
         .subscribe((users: User[]) => {
             this.users = users;
+
+            let totalNumberOfUsers = this.users.length;
+
+            this.minimumNumberOfUsers = Math.floor(totalNumberOfUsers / 2) + 1;
+
             this.users.forEach((user: User) => {
                 this.createdUsers.push({
                     UserId: user.UserId,
@@ -114,6 +120,12 @@ export class MeetingPresenceComponent implements OnInit {
         this.chosenUserControl.value.forEach((userId: number) => {
             this.moveUserById(this.chosenUsers, this.users, userId);
         });
+    }
+
+    private isQuorumMet() {
+        let currentNumber = this.chosenUsers.length;
+
+        return currentNumber >= this.minimumNumberOfUsers;
     }
 
     private moveUserById(from: User[], to: User[], userId: number) {

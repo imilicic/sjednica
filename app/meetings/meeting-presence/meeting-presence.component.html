@@ -1,4 +1,6 @@
 <h1>Dodavanje prisutnih korisnika na {{meeting.Number}}. sjednici</h1>
+<h5 class="text-danger" *ngIf="!isQuorumMet()">Kvorum nije zadovoljen!</h5>
+<h5 class="text-success" *ngIf="isQuorumMet()">Kvorum je zadovoljen!</h5>
 <form [formGroup]="chosenUsersForm" (ngSubmit)="createPresence()">
     <div class="col-md-5">
         Popis svih korisnika
@@ -13,10 +15,10 @@
         <button class="btn btn-primary" (click)="appendAllUsers()" type="button">Dodaj sve</button><br>
         <button class="btn btn-danger" (click)="deleteUsers()" type="button">Obriši</button><br>
         <button class="btn btn-danger" (click)="deleteAllUsers()" type="button">Obriši sve</button><br>
-        <button class="btn btn-default" type="submit">Spremi</button>
+        <button class="btn btn-default" [disabled]="!isQuorumMet()" type="submit">Spremi</button>
     </div>
     <div class="col-md-5">
-        Popis prisutnih korisnika
+        Popis prisutnih korisnika ({{chosenUsers.length}})
         <select class="form-control" formControlName="chosenUserControl" style="height: 500px" multiple>
             <option *ngFor="let user of chosenUsers" [value]="user.UserId">
                 {{user.FirstName}} {{user.LastName}}, {{user.Email}}
