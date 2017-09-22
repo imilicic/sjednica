@@ -138,6 +138,7 @@ export class UserUpdateComponent implements OnInit {
             Email: this.email.value,
             FirstName: this.firstName.value,
             LastName: this.lastName.value,
+            OldPassword: null,
             Password: this.password.value,
             PhoneNumber: this.phoneNumber.value,
             RoleId: +this.roleId.value,

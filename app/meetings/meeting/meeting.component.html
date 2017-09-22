@@ -12,7 +12,7 @@
     <div *ngIf="meeting.AgendaItems.length > 0">
         <a routerLink="agenda-items/create">Dodaj točku dnevnog reda</a>
     </div>
-    <div>
+    <div *ngIf="notifications.length > 0">
         <a routerLink="notifications/update">Promijeni obavijesti</a>
     </div>
     <div>
@@ -137,17 +137,12 @@
         </div>
         <div *ngIf="isOpened() && meeting.TypeId === 2">
             <div *ngIf="authenticationService.isAdmin()">
-                <div>
-                    <button (click)="checkQuorum()" type="button">Provjeri kvorum</button>
-                </div>
-                <div>
-                    <button class="btn btn-primary" (click)="openVoting(agendaItem.AgendaItemId, agendaItem.Number)"  *ngIf="votings.indexOf(agendaItem.AgendaItemId) < 0" type="button">
-                        Otvori glasanje
-                    </button>
-                    <button class="btn btn-warning" (click)="closeVoting(agendaItem.AgendaItemId, agendaItem.Number)"  *ngIf="votings.indexOf(agendaItem.AgendaItemId) >= 0" type="button">
-                        Zatvori glasanje
-                    </button>
-                </div>
+                <button class="btn btn-primary" (click)="openVoting(agendaItem.AgendaItemId, agendaItem.Number)"  *ngIf="votings.indexOf(agendaItem.AgendaItemId) < 0" type="button">
+                    Otvori glasanje
+                </button>
+                <button class="btn btn-warning" (click)="closeVoting(agendaItem.AgendaItemId, agendaItem.Number)"  *ngIf="votings.indexOf(agendaItem.AgendaItemId) >= 0" type="button">
+                    Zatvori glasanje
+                </button>
             </div>
             <div role="group">
                 <div [ngSwitch]="findVote(agendaItem.AgendaItemId)">

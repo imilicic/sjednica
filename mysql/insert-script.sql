@@ -1,4 +1,4 @@
-INSERT INTO Roles (Name)
+﻿INSERT INTO Roles (Name)
 VALUES ("admin");
 
 INSERT INTO Roles (Name)
@@ -182,3 +182,13 @@ VALUES (4, 3, 1);
 
 INSERT INTO Votes (AgendaItemId, UserId, Vote)
 VALUES (4, 6, 1);
+
+-- sjednice u budućnosti
+INSERT INTO Meetings (Address, City, DateTime, Number, NumberInYear, TypeId)
+VALUES ("Trg Ljudevita Gaja 6", "Osijek", "2017-09-22 12:00", 3, 1, 1);
+
+INSERT INTO Meetings (Address, City, DateTime, Number, NumberInYear, TypeId)
+VALUES ("Trg Ljudevita Gaja 6", "Osijek", "2017-09-22 12:15", 3, 2, 1);
+
+INSERT INTO Meetings (Address, City, DateTime, Number, NumberInYear, TypeId)
+VALUES ("Trg Ljudevita Gaja 6", "Osijek", "2017-09-22 12:30", 3, 3, 1);
