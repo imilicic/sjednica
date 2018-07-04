@@ -1,10 +1,10 @@
 module.exports = {
     secret: 'secret',
     connectionObject: {
-        host: 'sql8.freemysqlhosting.net',
-        user: 'sql8180238',
-        password: '5BMhK82XVH',
-        database: 'sql8180238',
+        host: 'sql7.freemysqlhosting.net',
+        user: 'sql7246002',
+        password: 'mKEKphYQJh',
+        database: 'sql7246002',
         typeCast: function(field, next) {
             if (field.type === 'DATE') {
                 return field.string();
