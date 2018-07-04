@@ -20,8 +20,14 @@ CREATE TABLE Roles (
 
 CREATE TABLE Users (
 	UserId INT AUTO_INCREMENT,
-	FirstName VARCHAR(40) NOT NULL,
-	LastName VARCHAR(40) NOT NULL,
+	FirstName VARCHAR(40)
+		CHARACTER SET utf8
+		COLLATE utf8_unicode_ci
+		NOT NULL,
+	LastName VARCHAR(40)
+		CHARACTER SET utf8
+		COLLATE utf8_unicode_ci
+		NOT NULL,
 	Email VARCHAR(40) NOT NULL,
 	PhoneNumber VARCHAR(40),
 	Password VARCHAR(255) NOT NULL,
@@ -45,14 +51,23 @@ CREATE TABLE CouncilMemberships (
 
 CREATE TABLE Types (
 	TypeId INT AUTO_INCREMENT,
-	Name VARCHAR(40) NOT NULL,
+	Name VARCHAR(40)
+		CHARACTER SET utf8
+		COLLATE utf8_unicode_ci
+		NOT NULL,
 	PRIMARY KEY (TypeId)
 );
 
 CREATE TABLE Meetings (
 	MeetingId INT AUTO_INCREMENT,
-	Address VARCHAR(40) NOT NULL,
-	City VARCHAR(40) NOT NULL,
+	Address VARCHAR(40)
+		CHARACTER SET utf8
+		COLLATE utf8_unicode_ci
+		NOT NULL,
+	City VARCHAR(40)
+		CHARACTER SET utf8
+		COLLATE utf8_unicode_ci
+		NOT NULL,
 	DateTime DATETIME NOT NULL,
 	Number INT NOT NULL,
 	NumberInYear INT NOT NULL,
@@ -75,7 +90,10 @@ CREATE TABLE AgendaItems (
 	AgendaItemId INT AUTO_INCREMENT,
 	MeetingId INT NOT NULL,
 	Number INT NOT NULL,
-	Text VARCHAR(500) NOT NULL,
+	Text VARCHAR(500)
+		CHARACTER SET utf8
+		COLLATE utf8_unicode_ci
+		NOT NULL,
 	PRIMARY KEY (AgendaItemId),
 	FOREIGN KEY (MeetingId)
 		REFERENCES Meetings(MeetingId)
@@ -83,7 +101,9 @@ CREATE TABLE AgendaItems (
 
 CREATE TABLE AgendaDocuments (
 	AgendaDocumentId INT AUTO_INCREMENT,
-	Description VARCHAR(500),
+	Description VARCHAR(500)
+		CHARACTER SET utf8
+		COLLATE utf8_unicode_ci,
 	URL VARCHAR(200) NOT NULL,
 	AgendaItemId INT NOT NULL,
 	PRIMARY KEY (AgendaDocumentId),
@@ -137,7 +157,10 @@ CREATE TABLE AbsenceOfCouncilMembers (
 	AbsenceOfCouncilMemberId INT AUTO_INCREMENT,
 	CouncilMembershipId INT NOT NULL,
 	MeetingId INT NOT NULL,
-	Reason VARCHAR(500) NOT NULL,
+	Reason VARCHAR(500)
+		CHARACTER SET utf8
+		COLLATE utf8_unicode_ci
+		NOT NULL,
 	UNIQUE (CouncilMembershipId, MeetingId),
 	PRIMARY KEY (AbsenceOfCouncilMemberId),
 	FOREIGN KEY (CouncilMembershipId)
